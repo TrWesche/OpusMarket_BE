@@ -1,0 +1,27 @@
+{
+  "name": "opusmarket-backend",
+  "version": "1.0.0",
+  "description": "Core database and api service for the opusmarket webapp.",
+  "main": "app.js",
+  "scripts": {
+    "test": "jest test"
+  },
+  "keywords": [
+    "opusmarket",
+    "backend",
+    "api"
+  ],
+  "author": "Trenton Wesche",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.0.0",
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "jsonschema": "^1.4.0",
+    "jsonwebtoken": "^8.5.1",
+    "morgan": "^1.10.0",
+    "pg": "^8.4.2"
+  }
+}
