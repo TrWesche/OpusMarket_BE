@@ -1,10 +1,9 @@
 CREATE TABLE "users" (
   "id" SERIAL PRIMARY KEY,
-  "username" text NOT NULL,
+  "email" text NOT NULL,
   "password" text NOT NULL,
   "first_name" text NOT NULL,
   "last_name" text NOT NULL,
-  "email" text NOT NULL
 );
 
 CREATE TABLE "orders" (
@@ -17,10 +16,9 @@ CREATE TABLE "orders" (
 
 CREATE TABLE "merchants" (
   "id" SERIAL PRIMARY KEY,
-  "login_name" text NOT NULL,
+  "email" text NOT NULL,
   "password" text NOT NULL,
-  "display_name" text NOT NULL,
-  "email" text NOT NULL
+  "display_name" text NOT NULL
 );
 
 CREATE TABLE "products" (
@@ -94,12 +92,14 @@ CREATE TABLE "product_images" (
   "id" SERIAL PRIMARY KEY,
   "product_id" int NOT NULL REFERENCES "products" ("id") ON DELETE CASCADE,
   "url" text NOT NULL,
-  "alt_text" text
+  "alt_text" text,
+  "order" int
 );
 
-CREATE TABLE "product_categories" (
+CREATE TABLE "product_meta" (
   "id" SERIAL PRIMARY KEY,
   "product_id" int NOT NULL REFERENCES "products" ("id") ON DELETE CASCADE,
+  "type" text NOT NULL,
   "title" text NOT NULL,
   "description" text NOT NULL
 );
@@ -114,7 +114,8 @@ CREATE TABLE "product_coupons" (
   "id" SERIAL PRIMARY KEY,
   "product_id" int NOT NULL REFERENCES "products" ("id") ON DELETE CASCADE,
   "code" text NOT NULL,
-  "pct_discount" decimal NOT NULL
+  "pct_discount" decimal NOT NULL,
+  "active" boolean DEFAULT FALSE
 );
 
 CREATE TABLE "product_modifiers" (
@@ -123,3 +124,12 @@ CREATE TABLE "product_modifiers" (
   "name" text NOT NULL,
   "description" text NOT NULL
 );
+
+CREATE TABLE "product_reviews" (
+  "id" SERIAL PRIMARY KEY,
+  "product_id" int NOT NULL REFERENCES "products" ("id") ON DELETE CASCADE,
+  "user_id" int NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
+  "rating" int NOT NULL,
+  "title" text,
+  "body" text
+)
