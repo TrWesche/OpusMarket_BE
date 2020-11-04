@@ -1,3 +1,5 @@
+SET TIME ZONE 'UTC';
+
 CREATE TABLE "users" (
   "id" SERIAL PRIMARY KEY,
   "email" text NOT NULL,
@@ -9,7 +11,7 @@ CREATE TABLE "users" (
 CREATE TABLE "orders" (
   "id" SERIAL PRIMARY KEY,
   "user_id" int NOT NULL REFERENCES "users" ("id"),
-  "status" text NOT NULL,
+  "status" text NOT NULL DEFAULT "created",
   "payment_id" text,
   "order_dt" TIMESTAMP WITH TIME ZONE
 );
@@ -26,10 +28,11 @@ CREATE TABLE "products" (
   "merchant_id" int NOT NULL REFERENCES "merchants" ("id") ON DELETE CASCADE,
   "name" text NOT NULL,
   "description" text NOT NULL,
-  "base_price" decimal NOT NULL
+  "base_price" decimal NOT NULL,
+  "avg_rating" decimal DEFAULT 0
 );
 
-CREATE TABLE "events" (
+CREATE TABLE "gatherings" (
   "id" SERIAL PRIMARY KEY,
   "title" text NOT NULL,
   "description" text NOT NULL,
@@ -41,7 +44,8 @@ CREATE TABLE "events" (
 CREATE TABLE "orders_products" (
   "id" SERIAL PRIMARY KEY,
   "order_id" int NOT NULL REFERENCES "orders" ("id"),
-  "product_id" int NOT NULL REFERENCES "products" ("id")
+  "product_id" int NOT NULL REFERENCES "products" ("id"),
+  "status" text NOT NULL DEFAULT "added"
 );
 
 CREATE TABLE "merchant_about" (
@@ -74,15 +78,15 @@ CREATE TABLE "bio_images" (
 );
 
 
-CREATE TABLE "event_merchants" (
+CREATE TABLE "gathering_merchants" (
   "id" SERIAL PRIMARY KEY,
-  "event_id" int NOT NULL REFERENCES "events" ("id") ON DELETE CASCADE,
+  "gathering_id" int NOT NULL REFERENCES "gatherings" ("id") ON DELETE CASCADE,
   "merchant_id" int NOT NULL REFERENCES "merchants" ("id") ON DELETE CASCADE
 );
 
-CREATE TABLE "event_images" (
+CREATE TABLE "gathering_images" (
   "id" SERIAL PRIMARY KEY,
-  "event_id" int NOT NULL REFERENCES "events" ("id") ON DELETE CASCADE,
+  "gathering_id" int NOT NULL REFERENCES "gatherings" ("id") ON DELETE CASCADE,
   "url" text NOT NULL,
   "alt_text" text
 );
@@ -99,7 +103,6 @@ CREATE TABLE "product_images" (
 CREATE TABLE "product_meta" (
   "id" SERIAL PRIMARY KEY,
   "product_id" int NOT NULL REFERENCES "products" ("id") ON DELETE CASCADE,
-  "type" text NOT NULL,
   "title" text NOT NULL,
   "description" text NOT NULL
 );
@@ -107,7 +110,8 @@ CREATE TABLE "product_meta" (
 CREATE TABLE "product_promotions" (
   "id" SERIAL PRIMARY KEY,
   "product_id" int NOT NULL REFERENCES "products" ("id") ON DELETE CASCADE,
-  "promotion_price" decimal NOT NULL
+  "promotion_price" decimal NOT NULL,
+  "active" boolean DEFAULT FALSE
 );
 
 CREATE TABLE "product_coupons" (
@@ -131,5 +135,6 @@ CREATE TABLE "product_reviews" (
   "user_id" int NOT NULL REFERENCES "users" ("id") ON DELETE CASCADE,
   "rating" int NOT NULL,
   "title" text,
-  "body" text
+  "body" text,
+  "review_dt" TIMESTAMP WITH TIME ZONE
 )

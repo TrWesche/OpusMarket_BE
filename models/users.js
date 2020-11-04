@@ -1,7 +1,7 @@
 const db = require("../db");
 const bcrypt = require('bcrypt');
-const { BCRYPT_WORK_FACTOR } = require("../config")
-
+const { BCRYPT_WORK_FACTOR } = require("../config");
+const partialUpdate = require("../helpers/partialUpdate");
 
 /** Standard User Creation & Authentication */
 
