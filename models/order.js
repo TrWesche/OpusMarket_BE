@@ -1,6 +1,6 @@
 const db = require("../db");
 const partialUpdate = require("../helpers/partialUpdate");
-const { DateTime } = require('luxon')
+const { DateTime } = require('luxon');
 
 /** Order Management Class */
 

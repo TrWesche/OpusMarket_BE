@@ -5,13 +5,13 @@ CREATE TABLE "users" (
   "email" text NOT NULL,
   "password" text NOT NULL,
   "first_name" text NOT NULL,
-  "last_name" text NOT NULL,
+  "last_name" text NOT NULL
 );
 
 CREATE TABLE "orders" (
   "id" SERIAL PRIMARY KEY,
   "user_id" int NOT NULL REFERENCES "users" ("id"),
-  "status" text NOT NULL DEFAULT "created",
+  "status" text DEFAULT 'created',
   "payment_id" text,
   "order_dt" TIMESTAMP WITH TIME ZONE
 );
@@ -45,7 +45,7 @@ CREATE TABLE "orders_products" (
   "id" SERIAL PRIMARY KEY,
   "order_id" int NOT NULL REFERENCES "orders" ("id"),
   "product_id" int NOT NULL REFERENCES "products" ("id"),
-  "status" text NOT NULL DEFAULT "added"
+  "status" text DEFAULT 'added'
 );
 
 CREATE TABLE "merchant_about" (
@@ -137,4 +137,4 @@ CREATE TABLE "product_reviews" (
   "title" text,
   "body" text,
   "review_dt" TIMESTAMP WITH TIME ZONE
-)
+);

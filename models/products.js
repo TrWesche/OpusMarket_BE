@@ -1,5 +1,6 @@
 const db = require("../db");
 const partialUpdate = require("../helpers/partialUpdate");
+const { DateTime } = require('luxon');
 
 /** Product Management Class */
 
@@ -120,17 +121,20 @@ class Product {
     /** Creates a review for a product.  Returns review data. */
 
     static async create_product_review(id, user_id, data) {
+        const current_dt = DateTime.utc();
+
         const result = await db.query(
             `INSERT INTO product_reviews
-                (product_id, user_id, rating, title, body)
+                (product_id, user_id, rating, title, body, review_dt)
             VALUES ($1, $2, $3, $4, $5)
-            RETURNING id, product_id, user_id, rating, title, body`,
+            RETURNING id, product_id, user_id, rating, title, body, review_dt`,
             [
                 id,
                 user_id,
                 data.rating,
                 data.title,
-                data.body
+                data.body,
+                current_dt
             ]
         )
 
