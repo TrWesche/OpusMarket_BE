@@ -4,6 +4,8 @@ require("dotenv").config();
 
 const SECRET_KEY = process.env.SECRET_KEY || "test";
 
+const COOKIE_SIG = process.env.COOKIE_SIG || "test";
+
 const PORT = +process.env.PORT || 3000;
 
 const BCRYPT_WORK_FACTOR = 12;
@@ -24,6 +26,7 @@ if (process.env.NODE_ENV === "test") {
 
 module.exports = {
   SECRET_KEY,
+  COOKIE_SIG,
   PORT,
   DB_URI,
   BCRYPT_WORK_FACTOR

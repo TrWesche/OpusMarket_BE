@@ -12,8 +12,10 @@ class Merchant {
     static async authenticate(data) {
       // try to find the merchant first
       const result = await db.query(
-          `SELECT email, 
-                  password
+          `SELECT id, 
+                  email, 
+                  password,
+                  display_name
             FROM merchants 
             WHERE email = $1`,
             [data.email]
@@ -25,6 +27,8 @@ class Merchant {
         // compare hashed password to a new hash from password
         const isValid = await bcrypt.compare(data.password, merchant.password);
         if (isValid) {
+          delete merchant.password;
+          delete merchant.email;
           return merchant;
         }
       }
@@ -57,7 +61,7 @@ class Merchant {
           `INSERT INTO merchants 
               (email, password, display_name) 
             VALUES ($1, $2, $3) 
-            RETURNING email, password, display_name`,
+            RETURNING id, display_name`,
           [
             data.email,
             hashedPassword,
@@ -67,6 +71,29 @@ class Merchant {
       return result.rows[0];
     }
    
+    /** Get merchant data by id
+     * 
+     */
+    static async get(id) {
+      const result = await db.query(`
+        SELECT email, display_name
+        FROM merchants
+        WHERE id = $1
+        `,
+      [id]);
+
+      const merchant = result.rows[0];
+
+      if (!user) {
+        const error = new Error(`Unable to find information on merchant with id: ${id}`);
+        error.status = 404;
+        throw error;
+      }
+
+      return merchant;
+    }
+
+
     /** Update merchant data with `data`.
      *
      * This is a "partial update" --- it's fine if data doesn't contain
@@ -105,7 +132,7 @@ class Merchant {
   
     /** Delete target merchant from database; returns undefined. */
   
-    static async remove(id) {
+    static async delete(id) {
         let result = await db.query(
                 `DELETE FROM merchants 
                   WHERE id = $1

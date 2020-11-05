@@ -7,22 +7,25 @@ const cookieParser = require("cookie-parser");
 const ExpressError = require("./helpers/expressError");
 const app = express();
 
-const { authenticateJWT } = require("./middleware/auth")
+const { COOKIE_SIG } = require("./config");
+const { authenticateJWT } = require("./middleware/auth");
 
 app.use(express.json());
-app.use(cookieParser());
+app.use(cookieParser(COOKIE_SIG));
 app.use(authenticateJWT);
 
 // add logging system
 app.use(morgan("tiny"));
 
 /** Routes */
+const regRoutes = require("./routes/register");
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/users");
 const productRoutes = require("./routes/products");
 const merchantRoutes = require("./routes/merchants");
 const eventRoutes = require("./routes/events");
 
+app.use("/api/reg", regRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);

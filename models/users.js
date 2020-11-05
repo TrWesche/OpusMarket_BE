@@ -12,8 +12,10 @@ class User {
     static async authenticate(data) {
       // try to find the user first
       const result = await db.query(
-          `SELECT email, 
-                  password
+          `SELECT id, 
+                  email, 
+                  password,
+                  last_name
             FROM users 
             WHERE email = $1`,
             [data.email]
@@ -25,6 +27,8 @@ class User {
         // compare hashed password to a new hash from password
         const isValid = await bcrypt.compare(data.password, user.password);
         if (isValid) {
+          delete user.password;
+          delete user.email;
           return user;
         }
       }
@@ -54,20 +58,43 @@ class User {
       const hashedPassword = await bcrypt.hash(data.password, BCRYPT_WORK_FACTOR);
   
       const result = await db.query(
-          `INSERT INTO users 
-              (email, password, first_name, last_name) 
-            VALUES ($1, $2, $3, $4) 
-            RETURNING email, password, first_name, last_name`,
-          [
-            data.email,
-            hashedPassword,
-            data.first_name,
-            data.last_name
-          ]);
-  
+        `INSERT INTO users 
+            (email, password, first_name, last_name) 
+          VALUES ($1, $2, $3, $4) 
+          RETURNING id, last_name`,
+        [
+          data.email,
+          hashedPassword,
+          data.first_name,
+          data.last_name
+      ]);
+
       return result.rows[0];
     }
    
+    /** Get user data by id
+     * 
+     */
+    static async get(id) {
+      const result = await db.query(`
+        SELECT email, first_name, last_name
+        FROM users
+        WHERE id = $1
+        `,
+      [id]);
+
+      const user = result.rows[0];
+
+      if (!user) {
+        const error = new Error(`Unable to find information on user with id: ${id}`);
+        error.status = 404;
+        throw error;
+      }
+
+      return user;
+    }
+
+
     /** Update user data with `data`.
      *
      * This is a "partial update" --- it's fine if data doesn't contain
@@ -106,7 +133,7 @@ class User {
   
     /** Delete target user from database; returns undefined. */
   
-    static async remove(id) {
+    static async delete(id) {
         let result = await db.query(
                 `DELETE FROM users 
                   WHERE id = $1
