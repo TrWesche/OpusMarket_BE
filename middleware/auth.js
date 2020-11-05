@@ -44,11 +44,42 @@ function ensureCorrectUser(req, res, next) {
   }
 }
 
+/** Middleware: Requires user type & correct user id. */
+
+function ensureIsUser(req, res, next) {
+  try {
+    if (req.user.type === "user") {
+      return next();
+    }
+
+    return next({ status: 401, message: "Unauthorized" });
+  } catch (err) {
+    // errors would happen here if we made a request and req.user is undefined
+    return next({ status: 401, message: "Unauthorized" });
+  }
+}
+
+
 /** Middleware: Requires merchant type & correct merchant id. */
 
 function ensureCorrectMerchant(req, res, next) {
   try {
     if (req.user.id === req.params.id && req.user.type === "merchant") {
+      return next();
+    }
+
+    return next({ status: 401, message: "Unauthorized" });
+  } catch (err) {
+    // errors would happen here if we made a request and req.user is undefined
+    return next({ status: 401, message: "Unauthorized" });
+  }
+}
+
+/** Middleware: Requires merchant type & correct merchant id. */
+
+function ensureIsMerchant(req, res, next) {
+  try {
+    if (req.user.type === "merchant") {
       return next();
     }
 
@@ -77,6 +108,8 @@ module.exports = {
   authenticateJWT,
   ensureLoggedIn,
   ensureCorrectUser,
+  ensureIsUser,
   ensureCorrectMerchant,
+  ensureIsMerchant,
   ensureIsAdmin
 };

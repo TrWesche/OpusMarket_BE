@@ -29,7 +29,11 @@ CREATE TABLE "products" (
   "name" text NOT NULL,
   "description" text NOT NULL,
   "base_price" decimal NOT NULL,
-  "avg_rating" decimal DEFAULT 0
+  "avg_rating" decimal DEFAULT 0,
+  "qty_ratings" int DEFAULT 0,
+  "qty_views" int DEFAULT 0,
+  "qty_purchases" int DEFAULT 0,
+  "qty_returns" int DEFAULT 0
 );
 
 CREATE TABLE "gatherings" (

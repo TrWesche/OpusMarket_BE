@@ -13,7 +13,10 @@ class Product {
           `INSERT INTO products 
               (merchant_id, name, description, base_price) 
             VALUES ($1, $2, $3, $4) 
-            RETURNING id, merchant_id, name, description, base_price`,
+            RETURNING id, merchant_id, name, 
+                description, base_price, avg_rating, 
+                qty_ratings, qty_views, qty_purchases, 
+                qty_returns`,
           [
             data.merchant_id,
             data.name,
@@ -49,9 +52,9 @@ class Product {
     static async create_product_meta(id, data) {
         const result = await db.query(
             `INSERT INTO product_meta
-                (product_id, type, title, description)
+                (product_id, title, description)
             VALUES ($1, $2, $3, $4)
-            RETURNING id, type, product_id, title, description`,
+            RETURNING id, product_id, title, description`,
             [
                 id,
                 data.type,
@@ -159,6 +162,27 @@ class Product {
             throw error;
         }
 
+        return product;
+    }
+
+
+    /** Retreive data on a single product */
+
+    static async retrieve_product_details(id) {
+        const productRes = await db.query(
+        `SELECT merchant_id, name, description, base_price, avg_rating
+            FROM products
+            WHERE id = $1`,
+        [id]);
+
+        const product = productRes.rows[0];
+
+        if (!product) {
+            const error = new Error(`Unable to find product with id, ${id}`);
+            error.status = 404;
+            throw error;
+        }
+
         // TODO: Implement these parallel calls with a Promise wrapper
 
         const product_imagesRes = await db.query(
@@ -219,15 +243,17 @@ class Product {
                 products.avg_rating AS avg_rating,
             FROM product_meta
             RIGHT JOIN products
-            ON prod_id = products.id`;
+            ON prod_id = products.id
+            LEFT JOIN product_images
+            ON prod_id = product_images.product_id`;
 
         let orExpressions = [];
         let andExpressions = [];
         let queryValues = [];
 
         // Collect product name search values
-        if (data.search) {
-            for (const searchVal of data.search) {
+        if (data.s) {
+            for (const searchVal of data.s) {
                 queryValues.push(searchVal);
                 orExpressions.push(`name ILIKE $${queryValues.length}`);
             }
@@ -238,8 +264,8 @@ class Product {
         }
 
         // Collect meta tag search values
-        if (data.meta_tags) {
-            for (const metaTag of data.meta_tags) {
+        if (data.t) {
+            for (const metaTag of data.t) {
                 queryValues.push(metaTag);
                 orExpressions.push(`meta_title ILIKE $${queryValues.length}`);
             }
@@ -250,8 +276,8 @@ class Product {
         }
         
         // Add rating filter value
-        if (data.rating) {
-            queryValues.push(data.rating)
+        if (data.r) {
+            queryValues.push(data.r)
             orExpressions.push(`avg_rating >= ${queryValues.length}`)
 
             const resQuery = `(${orExpressions.join(" OR ")})`;
