@@ -29,6 +29,7 @@ class User {
         if (isValid) {
           delete user.password;
           delete user.email;
+          user.type = "user";
           return user;
         }
       }
@@ -105,6 +106,7 @@ class User {
      */
   
     static async update(id, data) {
+      // TODO: Cannot Update ID
       if (data.password) {
         data.password = await bcrypt.hash(data.password, BCRYPT_WORK_FACTOR);
       }

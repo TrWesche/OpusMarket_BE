@@ -29,6 +29,7 @@ class Merchant {
         if (isValid) {
           delete merchant.password;
           delete merchant.email;
+          merchant.type = "merchant";
           return merchant;
         }
       }

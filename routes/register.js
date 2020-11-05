@@ -7,6 +7,13 @@ const Merchant = require("../models/merchants");
 
 const router = new express.Router()
 
+// ╔═══╗╔═══╗╔═══╗╔═══╗╔════╗╔═══╗
+// ║╔═╗║║╔═╗║║╔══╝║╔═╗║║╔╗╔╗║║╔══╝
+// ║║ ╚╝║╚═╝║║╚══╗║║ ║║╚╝║║╚╝║╚══╗
+// ║║ ╔╗║╔╗╔╝║╔══╝║╚═╝║  ║║  ║╔══╝
+// ║╚═╝║║║║╚╗║╚══╗║╔═╗║ ╔╝╚╗ ║╚══╗
+// ╚═══╝╚╝╚═╝╚═══╝╚╝ ╚╝ ╚══╝ ╚═══╝
+
 /** POST /user - Full Route: api/auth/user - auth/user: {email, password} => {token}
  *
  **/
