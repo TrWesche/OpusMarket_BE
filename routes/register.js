@@ -2,10 +2,10 @@ const express = require("express");
 const ExpressError = require("../helpers/expressError");
 const jwt = require("jsonwebtoken");
 const { SECRET_KEY } = require("../config");
-const User = require("../models/users");
-const Merchant = require("../models/merchants");
+const User = require("../models/user");
+const Merchant = require("../models/merchant");
 
-const router = new express.Router()
+const regRouter = new express.Router()
 
 // ╔═══╗╔═══╗╔═══╗╔═══╗╔════╗╔═══╗
 // ║╔═╗║║╔═╗║║╔══╝║╔═╗║║╔╗╔╗║║╔══╝
@@ -17,7 +17,7 @@ const router = new express.Router()
 /** POST /user - Full Route: api/auth/user - auth/user: {email, password} => {token}
  *
  **/
-router.post("/user", async (req, res, next) => {
+regRouter.post("/user", async (req, res, next) => {
     // TODO: Should use Schemas to Verify Registration Data
     try {
         // Validate username & password provided in request
@@ -42,7 +42,7 @@ router.post("/user", async (req, res, next) => {
 /** POST /merchant - Full Route: api/auth/merchant - auth/merchant: {email, password} => {token}
  *
  **/
-router.post("/merchant", async (req, res, next) => {
+regRouter.post("/merchant", async (req, res, next) => {
     // TODO: Should use Schemas to Verify Registration Data
     try {
         // Validate username & password provided in request
@@ -63,4 +63,4 @@ router.post("/merchant", async (req, res, next) => {
     }
 })
 
-module.exports = router;
+module.exports = regRouter;

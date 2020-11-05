@@ -1,10 +1,10 @@
 const express = require("express");
 const ExpressError = require("../helpers/expressError");
-const Merchant = require("../models/merchants");
+const Merchant = require("../models/merchant");
 const { ensureCorrectMerchant } = require("../middleware/auth");
 const {DateTime} = require("luxon");
 
-const router = new express.Router();
+const merchantRouter = new express.Router();
 
 // ╔═══╗╔═══╗╔═══╗╔═══╗
 // ║╔═╗║║╔══╝║╔═╗║╚╗╔╗║
@@ -13,7 +13,7 @@ const router = new express.Router();
 // ║║║╚╗║╚══╗║╔═╗║╔╝╚╝║
 // ╚╝╚═╝╚═══╝╚╝ ╚╝╚═══╝   
 
-router.get("/:id", ensureCorrectMerchant, async (req, res, next) => {
+merchantRouter.get("/:id", ensureCorrectMerchant, async (req, res, next) => {
     try {
         const result = await Merchant.get(req.params.id);
 
@@ -34,7 +34,7 @@ router.get("/:id", ensureCorrectMerchant, async (req, res, next) => {
 // ║╚═╝║║║   ╔╝╚╝║║╔═╗║ ╔╝╚╗ ║╚══╗
 // ╚═══╝╚╝   ╚═══╝╚╝ ╚╝ ╚══╝ ╚═══╝
 
-router.patch("/:id/update", ensureCorrectMerchant, async (req, res, next) => {
+merchantRouter.patch("/:id/update", ensureCorrectMerchant, async (req, res, next) => {
     try {
         // Get old user data
         const oldData = await Merchant.get(req.params.id);
@@ -80,7 +80,7 @@ router.patch("/:id/update", ensureCorrectMerchant, async (req, res, next) => {
 // ╔╝╚╝║║╚══╗║╚═╝║║╚══╗ ╔╝╚╗ ║╚══╗
 // ╚═══╝╚═══╝╚═══╝╚═══╝ ╚══╝ ╚═══╝
 
-router.delete("/:id/delete", ensureCorrectMerchant, async (req, res, next) => {
+merchantRouter.delete("/:id/delete", ensureCorrectMerchant, async (req, res, next) => {
     try {
         const result = await Merchant.delete(req.params.id);
 
@@ -103,7 +103,9 @@ router.delete("/:id/delete", ensureCorrectMerchant, async (req, res, next) => {
 // ║╚═╝║║╚═╝║║╚╩═║║╚═╝║║╚═╝║ ╔╝╚╗ 
 // ╚═══╝╚═══╝╚═══╝╚═══╝╚═══╝ ╚══╝ 
                                
-router.get("/logout", async (req, res, next) => {
+merchantRouter.get("/logout", async (req, res, next) => {
     res.cookie("session-token", "", {expires: new DateTime.utc()})
     return res.json({"message": "Logout successful."})
 })
+
+module.exports = merchantRouter;

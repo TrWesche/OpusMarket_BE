@@ -18,18 +18,18 @@ app.use(authenticateJWT);
 app.use(morgan("tiny"));
 
 /** Routes */
-const regRoutes = require("./routes/register");
-const authRoutes = require("./routes/auth");
-const userRoutes = require("./routes/users");
+const regRouter = require("./routes/register");
+const authRouter = require("./routes/auth");
+const userRouter = require("./routes/users");
 const productRoutes = require("./routes/products");
-const merchantRoutes = require("./routes/merchants");
+const merchantRouter = require("./routes/merchants");
 const eventRoutes = require("./routes/events");
 
-app.use("/api/reg", regRoutes);
-app.use("/api/auth", authRoutes);
-app.use("/api/users", userRoutes);
+app.use("/api/reg", regRouter);
+app.use("/api/auth", authRouter);
+app.use("/api/users", userRouter);
 app.use("/api/products", productRoutes);
-app.use("/api/merchants", merchantRoutes);
+app.use("/api/merchants", merchantRouter);
 app.use("/api/events", eventRoutes);
 
 

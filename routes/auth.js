@@ -2,15 +2,15 @@ const express = require("express");
 const ExpressError = require("../helpers/expressError");
 const jwt = require("jsonwebtoken");
 const { SECRET_KEY } = require("../config");
-const User = require("../models/users");
-const Merchant = require("../models/merchants");
+const User = require("../models/user");
+const Merchant = require("../models/merchant");
 
-const router = new express.Router()
+const authRouter = new express.Router()
 
 /** POST /user - Full Route: api/auth/user - auth/user: {email, password} => {token}
  *
  **/
-router.post("/user", async (req, res, next) => {
+authRouter.post("/user", async (req, res, next) => {
     try {
         // Validate username & password provided in request
         const {email, password} = req.body;
@@ -37,7 +37,7 @@ router.post("/user", async (req, res, next) => {
 /** POST /merchant - Full Route: api/auth/merchant - auth/merchant: {email, password} => {token}
  *
  **/
-router.post("/merchant", async (req, res, next) => {
+authRouter.post("/merchant", async (req, res, next) => {
     try {
         // Validate username & password provided in request
         const {email, password} = req.body;
@@ -60,4 +60,4 @@ router.post("/merchant", async (req, res, next) => {
     }
 })
 
-module.exports = router;
+module.exports = authRouter;

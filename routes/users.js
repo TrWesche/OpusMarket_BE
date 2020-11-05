@@ -1,10 +1,10 @@
 const express = require("express");
 const ExpressError = require("../helpers/expressError");
-const User = require("../models/users");
+const User = require("../models/user");
 const { ensureCorrectUser } = require("../middleware/auth");
 const {DateTime} = require("luxon");
 
-const router = new express.Router();
+const userRouter = new express.Router();
 
 // ╔═══╗╔═══╗╔═══╗╔═══╗
 // ║╔═╗║║╔══╝║╔═╗║╚╗╔╗║
@@ -13,7 +13,7 @@ const router = new express.Router();
 // ║║║╚╗║╚══╗║╔═╗║╔╝╚╝║
 // ╚╝╚═╝╚═══╝╚╝ ╚╝╚═══╝   
 
-router.get("/:id", ensureCorrectUser, async (req, res, next) => {
+userRouter.get("/:id", ensureCorrectUser, async (req, res, next) => {
     try {
         const result = await User.get(req.params.id);
 
@@ -34,7 +34,7 @@ router.get("/:id", ensureCorrectUser, async (req, res, next) => {
 // ║╚═╝║║║   ╔╝╚╝║║╔═╗║ ╔╝╚╗ ║╚══╗
 // ╚═══╝╚╝   ╚═══╝╚╝ ╚╝ ╚══╝ ╚═══╝
 
-router.patch("/:id/update", ensureCorrectUser, async (req, res, next) => {
+userRouter.patch("/:id/update", ensureCorrectUser, async (req, res, next) => {
     try {
         // Get old user data
         const oldData = await User.get(req.params.id);
@@ -80,7 +80,7 @@ router.patch("/:id/update", ensureCorrectUser, async (req, res, next) => {
 // ╔╝╚╝║║╚══╗║╚═╝║║╚══╗ ╔╝╚╗ ║╚══╗
 // ╚═══╝╚═══╝╚═══╝╚═══╝ ╚══╝ ╚═══╝
 
-router.delete("/:id/delete", ensureCorrectUser, async (req, res, next) => {
+userRouter.delete("/:id/delete", ensureCorrectUser, async (req, res, next) => {
     try {
         const result = await User.delete(req.params.id);
 
@@ -103,7 +103,9 @@ router.delete("/:id/delete", ensureCorrectUser, async (req, res, next) => {
 // ║╚═╝║║╚═╝║║╚╩═║║╚═╝║║╚═╝║ ╔╝╚╗ 
 // ╚═══╝╚═══╝╚═══╝╚═══╝╚═══╝ ╚══╝ 
                                
-router.get("/logout", async (req, res, next) => {
+userRouter.get("/logout", async (req, res, next) => {
     res.cookie("session-token", "", {expires: new DateTime.utc()})
     return res.json({"message": "Logout successful."})
 })
+
+module.exports = userRouter;
