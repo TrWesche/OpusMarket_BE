@@ -5,6 +5,12 @@ const { DateTime } = require('luxon');
 /** Product Management Class */
 
 class Product {
+    // ╔═══╗╔═══╗╔═══╗╔═══╗╔════╗╔═══╗
+    // ║╔═╗║║╔═╗║║╔══╝║╔═╗║║╔╗╔╗║║╔══╝
+    // ║║ ╚╝║╚═╝║║╚══╗║║ ║║╚╝║║╚╝║╚══╗
+    // ║║ ╔╗║╔╗╔╝║╔══╝║╚═╝║  ║║  ║╔══╝
+    // ║╚═╝║║║║╚╗║╚══╗║╔═╗║ ╔╝╚╗ ║╚══╗
+    // ╚═══╝╚╝╚═╝╚═══╝╚╝ ╚╝ ╚══╝ ╚═══╝
 
     /** Create product with data. Returns new product data. */
   
@@ -144,6 +150,12 @@ class Product {
         return result.rows[0]
     }
 
+    // ╔═══╗╔═══╗╔═══╗╔═══╗
+    // ║╔═╗║║╔══╝║╔═╗║╚╗╔╗║
+    // ║╚═╝║║╚══╗║║ ║║ ║║║║
+    // ║╔╗╔╝║╔══╝║╚═╝║ ║║║║
+    // ║║║╚╗║╚══╗║╔═╗║╔╝╚╝║
+    // ╚╝╚═╝╚═══╝╚╝ ╚╝╚═══╝   
 
     /** Retreive data on a single product */
 
@@ -296,6 +308,293 @@ class Product {
         return companiesRes.rows;
     }  
 
+    /** Retrieve single product image  */
+
+    static async retrieve_single_product_image(id) {
+        const result = await db.query(`
+            SELECT 
+                product_images.id AS id, 
+                product_images.product_id AS product_id, 
+                product_images.url AS url, 
+                product_images.alt_text AS alt_text, 
+                product_images.order AS order,
+                products.merchant_id AS merchant_id
+            FROM product_images
+            RIGHT JOIN products
+            ON product_id = products.id
+            WHERE id = $1`,
+        [id]);
+        
+        const image = result.rows[0];
+
+        if (!image) {
+            const error = new Error(`Unable to find image with id, ${id}`);
+            error.status = 404;
+            throw error;
+        }
+
+        return image;
+    }
+
+    /** Retrieve product images */
+    static async retrieve_product_images(prod_id) {
+        const result = await db.query(`
+            SELECT 
+                product_images.id AS id, 
+                product_images.product_id AS product_id, 
+                product_images.url AS url, 
+                product_images.alt_text AS alt_text, 
+                product_images.order AS order,
+                products.merchant_id AS merchant_id
+            FROM product_images
+            RIGHT JOIN products
+            ON product_id = products.id
+            WHERE product_id = $1`,
+        [prod_id]);
+        
+        return result.rows;
+    }
+
+
+    /** Retrieve single product meta  */
+
+    static async retrieve_single_product_meta(id) {
+        const result = await db.query(`
+            SELECT 
+                product_meta.id AS id, 
+                product_meta.product_id AS product_id, 
+                product_meta.title AS title, 
+                product_meta.description AS description,
+                products.merchant_id AS merchant_id
+            FROM product_meta
+            RIGHT JOIN products
+            ON product_id = products.id
+            WHERE id = $1`,
+        [id]);
+        
+        const meta = result.rows[0];
+
+        if (!meta) {
+            const error = new Error(`Unable to find meta with id, ${id}`);
+            error.status = 404;
+            throw error;
+        }
+
+        return meta;
+    }
+
+    /** Retreive product metas */
+
+    static async retrieve_product_metas(prod_id) {
+        const result = await db.query(`
+            SELECT 
+                product_meta.id AS id, 
+                product_meta.product_id AS product_id, 
+                product_meta.title AS title, 
+                product_meta.description AS description,
+                products.merchant_id AS merchant_id
+            FROM product_meta
+            RIGHT JOIN products
+            ON product_id = products.id
+            WHERE product_id = $1`
+        [prod_id]);
+
+        return result.rows;
+    }
+
+
+    /** Retrieve product promotion */
+    static async retrieve_product_promotion(id) {
+        const result = await db.query(`
+            SELECT 
+                product_promotions.id AS id, 
+                product_promotions.product_id AS product_id, 
+                product_promotions.promotion_price AS promotion_price, 
+                product_promotions.active AS active,
+                products.merchant_id AS merchant_id
+            FROM product_promotions
+            RIGHT JOIN products
+            ON product_id = products.id
+            WHERE id = $1`,
+        [id]);
+        
+        const promotion = result.rows[0];
+
+        if (!promotion) {
+            const error = new Error(`Unable to find promotion with id, ${id}`);
+            error.status = 404;
+            throw error;
+        }
+
+        return promotion;
+    }
+
+    /** Retreive single product coupon */
+    static async retrieve_single_product_coupon(id) {
+        const result = await db.query(`
+            SELECT 
+                product_coupons.id AS id, 
+                product_coupons.product_id AS product_id, 
+                product_coupons.code AS code, 
+                product_coupons.pct_discount AS pct_discount, 
+                product_coupons.active AS active,
+                products.merchant_id AS merchant_id
+            FROM product_coupons
+            RIGHT JOIN products
+            ON product_id = products.id
+            WHERE id = $1`,
+        [id]);
+
+        const coupon = result.rows[0];
+
+        if (!coupon) {
+            const error = new Error(`Unable to find coupon with id, ${id}`);
+            error.status = 404;
+            throw error;
+        }
+
+        return coupon;
+    }
+
+    /** Retrieve product coupons */
+    static async retrieve_product_coupons(prod_id) {
+        const result = await db.query(`
+            SELECT 
+                product_coupons.id AS id, 
+                product_coupons.product_id AS product_id, 
+                product_coupons.code AS code, 
+                product_coupons.pct_discount AS pct_discount, 
+                product_coupons.active AS active,
+                products.merchant_id AS merchant_id
+            FROM product_coupons
+            RIGHT JOIN products
+            ON product_id = products.id
+            WHERE product_id = $1`,
+        [prod_id]);
+
+        return result.rows;
+    }
+
+
+    /** Retrieve single modifier */
+    static async retrieve_single_product_modifier(id) {
+        const result = await db.query(`
+            SELECT 
+                product_modifiers.id AS id, 
+                product_modifiers.product_id AS product_id, 
+                product_modifiers.name AS name, 
+                product_modifiers.description AS description,
+                products.merchant_id AS merchant_id
+            FROM product_modifiers
+            RIGHT JOIN products
+            ON product_id = products.id
+            WHERE id = $1`,
+        [id]);
+
+        const modifier = result.rows[0];
+
+        if (!modifier) {
+            const error = new Error(`Unable to find coupon with id, ${id}`);
+            error.status = 404;
+            throw error;
+        }
+
+        return modifier;
+    }
+
+    /** Retrieve product modifiers */
+    static async retrieve_product_modifiers(prod_id) {
+        const result = await db.query(`
+            SELECT 
+                product_modifiers.id AS id, 
+                product_modifiers.product_id AS product_id, 
+                product_modifiers.name AS name, 
+                product_modifiers.description AS description,
+                products.merchant_id AS merchant_id
+            FROM product_modifiers
+            RIGHT JOIN products
+            ON product_id = products.id
+            WHERE product_id = $1`,
+        [prod_id]);
+
+        return result.rows;
+    }
+
+    /** Retrieve single review */
+    static async retrieve_single_product_review(id) {
+        const result = await db.query(`
+            SELECT 
+                product_reviews.id AS id, 
+                product_reviews.product_id AS product_id, 
+                product_reviews.user_id AS user_id, 
+                product_reviews.rating AS rating, 
+                product_reviews.title AS title, 
+                product_reviews.body AS body, 
+                product_reviews.review_dt AS review_dt,
+                products.merchant_id AS merchant_id
+            FROM product_reviews
+            RIGHT JOIN products
+            ON product_id = products.id
+            WHERE id = $1`,
+        [id]);
+
+        const review = result.rows[0];
+
+        if (!review) {
+            const error = new Error(`Unable to find review with id, ${id}`);
+            error.status = 404;
+            throw error;
+        }
+
+        return review;
+    }
+
+    /** Retrieve product reviews */
+    static async retrieve_product_reviews(prod_id) {
+        const result = await db.query(`
+            SELECT 
+                product_reviews.id AS id, 
+                product_reviews.product_id AS product_id, 
+                product_reviews.user_id AS user_id, 
+                product_reviews.rating AS rating, 
+                product_reviews.title AS title, 
+                product_reviews.body AS body, 
+                product_reviews.review_dt AS review_dt,
+                products.merchant_id AS merchant_id
+            FROM product_reviews
+            RIGHT JOIN products
+            WHERE product_id = $1`,
+        [prod_id]);
+
+        return result.rows;
+    }
+
+    /** Retreive user reviews */
+    static async retrieve_user_reviews(user_id) {
+        const result = await db.query(`
+            SELECT 
+                product_reviews.id AS id, 
+                product_reviews.product_id AS product_id, 
+                product_reviews.user_id AS user_id, 
+                product_reviews.rating AS rating, 
+                product_reviews.title AS title, 
+                product_reviews.body AS body, 
+                product_reviews.review_dt AS review_dt,
+                products.merchant_id AS merchant_id
+            FROM product_reviews
+            RIGHT JOIN products
+            WHERE user_id = $1`,
+        [user_id]);
+
+        return result.rows;
+    }
+
+    // ╔╗ ╔╗╔═══╗╔═══╗╔═══╗╔════╗╔═══╗
+    // ║║ ║║║╔═╗║╚╗╔╗║║╔═╗║║╔╗╔╗║║╔══╝
+    // ║║ ║║║╚═╝║ ║║║║║║ ║║╚╝║║╚╝║╚══╗
+    // ║║ ║║║╔══╝ ║║║║║╚═╝║  ║║  ║╔══╝
+    // ║╚═╝║║║   ╔╝╚╝║║╔═╗║ ╔╝╚╗ ║╚══╗
+    // ╚═══╝╚╝   ╚═══╝╚╝ ╚╝ ╚══╝ ╚═══╝
 
     /** Update merchant data with `data`.
      *
