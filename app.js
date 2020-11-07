@@ -24,6 +24,7 @@ const userRouter = require("./routes/users");
 const productRoutes = require("./routes/products");
 const merchantRouter = require("./routes/merchants");
 const eventRoutes = require("./routes/events");
+const orderRoutes = require("./routes/orders");
 
 app.use("/api/reg", regRouter);
 app.use("/api/auth", authRouter);
@@ -31,6 +32,7 @@ app.use("/api/users", userRouter);
 app.use("/api/products", productRoutes);
 app.use("/api/merchants", merchantRouter);
 app.use("/api/events", eventRoutes);
+app.use("/api/orders", orderRoutes);
 
 
 /** 404 handler */

@@ -4,7 +4,16 @@ const { DateTime } = require('luxon');
 
 /** Order Management Class */
 
+// TODO: This functionality will need to be expanded significantly to handle the 
+// full order lifecycle.
+
 class Order {
+    // ╔═══╗╔═══╗╔═══╗╔═══╗╔════╗╔═══╗
+    // ║╔═╗║║╔═╗║║╔══╝║╔═╗║║╔╗╔╗║║╔══╝
+    // ║║ ╚╝║╚═╝║║╚══╗║║ ║║╚╝║║╚╝║╚══╗
+    // ║║ ╔╗║╔╗╔╝║╔══╝║╚═╝║  ║║  ║╔══╝
+    // ║╚═╝║║║║╚╗║╚══╗║╔═╗║ ╔╝╚╗ ║╚══╗
+    // ╚═══╝╚╝╚═╝╚═══╝╚╝ ╚╝ ╚══╝ ╚═══╝
 
     /** Create order with data. Returns new order data. */
 
@@ -56,25 +65,45 @@ class Order {
     }
 
 
-    /** Delete master order and associated product entries. */
+    // ╔═══╗╔═══╗╔═══╗╔═══╗
+    // ║╔═╗║║╔══╝║╔═╗║╚╗╔╗║
+    // ║╚═╝║║╚══╗║║ ║║ ║║║║
+    // ║╔╗╔╝║╔══╝║╚═╝║ ║║║║
+    // ║║║╚╗║╚══╗║╔═╗║╔╝╚╝║
+    // ╚╝╚═╝╚═══╝╚╝ ╚╝╚═══╝  
 
-    static async delete_order(id) {
+    /** Read order details */
+
+    static async get_order(id) {
         const result = await db.query(`
-            DELETE FROM orders
+            SELECT id, user_id, status, payment_id, order_dt
+            FROM orders
             WHERE id = $1
-            RETURNING id`,
-        [id]);
+        `,
+        [id])
 
-        if (result.rows.length === 0) {
-            let notFound = new Error(`Delete failed, unable to locate target order '${id}'`);
-            notFound.status = 404;
-            throw notFound;
+        const order = result.rows[0];
+
+        if (!order) {
+            let error = new Error(`An error occured, could not find an order with the specified id`);
+            error.status = 404;
+            throw error;
         }
 
-        return result.rows[0];
+        return order;
     }
 
-    static async update_order(id) {
+
+    // ╔╗ ╔╗╔═══╗╔═══╗╔═══╗╔════╗╔═══╗
+    // ║║ ║║║╔═╗║╚╗╔╗║║╔═╗║║╔╗╔╗║║╔══╝
+    // ║║ ║║║╚═╝║ ║║║║║║ ║║╚╝║║╚╝║╚══╗
+    // ║║ ║║║╔══╝ ║║║║║╚═╝║  ║║  ║╔══╝
+    // ║╚═╝║║║   ╔╝╚╝║║╔═╗║ ╔╝╚╗ ║╚══╗
+    // ╚═══╝╚╝   ╚═══╝╚╝ ╚╝ ╚══╝ ╚═══╝
+
+    /** Update order details. */
+
+    static async update_order(id, data) {
         // Partial Update: table name, payload data, lookup column name, lookup key
         let {query, values} = partialUpdate(
             "orders",
@@ -92,6 +121,32 @@ class Order {
             throw notFound;
         }
     
+        return result.rows[0];
+    }
+
+
+    // ╔═══╗╔═══╗╔╗   ╔═══╗╔════╗╔═══╗
+    // ╚╗╔╗║║╔══╝║║   ║╔══╝║╔╗╔╗║║╔══╝
+    //  ║║║║║╚══╗║║   ║╚══╗╚╝║║╚╝║╚══╗
+    //  ║║║║║╔══╝║║ ╔╗║╔══╝  ║║  ║╔══╝
+    // ╔╝╚╝║║╚══╗║╚═╝║║╚══╗ ╔╝╚╗ ║╚══╗
+    // ╚═══╝╚═══╝╚═══╝╚═══╝ ╚══╝ ╚═══╝
+
+    /** Delete master order and associated product entries. */
+
+    static async delete_order(id) {
+        const result = await db.query(`
+            DELETE FROM orders
+            WHERE id = $1
+            RETURNING id`,
+        [id]);
+
+        if (result.rows.length === 0) {
+            let notFound = new Error(`Delete failed, unable to locate target order '${id}'`);
+            notFound.status = 404;
+            throw notFound;
+        }
+
         return result.rows[0];
     }
 }

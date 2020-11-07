@@ -1,7 +1,7 @@
 const express = require("express");
 const ExpressError = require("../helpers/expressError");
 const Product = require("../models/product");
-const { ensureCorrectMerchant, ensureIsMerchant, ensureIsUser } = require("../middleware/auth");
+const { ensureIsMerchant, ensureIsUser } = require("../middleware/auth");
 const {DateTime} = require("luxon");
 const jsonschema = require("jsonschema");
 
@@ -544,6 +544,8 @@ productRouter.delete("/:prod_id", async(req, res, next) => {
         }
 
         Product.delete_product(req.params.prod_id);
+
+        return res.json({"message": "Product deleted"})
     } catch (error) {
         console.log(error.code);
 
@@ -563,6 +565,8 @@ productRouter.delete("/:prod_id/img/:img_id", async(req, res, next) => {
         }
 
         Product.delete_product(req.params.img_id);
+
+        return res.json({"message": "Product Image deleted"})
     } catch (error) {
         console.log(error.code);
 
@@ -582,6 +586,8 @@ productRouter.delete('/:prod_id/meta/:meta_id', async(req, res, next) => {
         }
 
         Product.delete_product(req.params.meta_id);
+
+        return res.json({"message": "Product Meta deleted"})
     } catch (error) {
         console.log(error.code);
 
@@ -601,6 +607,8 @@ productRouter.delete('/:prod_id/promo/:promotion_id', async(req, res, next) => {
         }
 
         Product.delete_product(req.params.promotion_id);
+
+        return res.json({"message": "Product Promotion deleted"})
     } catch (error) {
         console.log(error.code);
 
@@ -620,6 +628,8 @@ productRouter.delete('/:prod_id/coupon/:coupon_id', async(req, res, next) => {
         }
 
         Product.delete_product(req.params.coupon_id);
+
+        return res.json({"message": "Product Coupon deleted"})
     } catch (error) {
         console.log(error.code);
 
@@ -639,6 +649,8 @@ productRouter.delete('/:prod_id/mod/:modifier_id', async(req, res, next) => {
         }
 
         Product.delete_product(req.params.modifier_id);
+
+        return res.json({"message": "Product Modifier deleted"})
     } catch (error) {
         console.log(error.code);
 
@@ -658,6 +670,8 @@ productRouter.delete('/:prod_id/review/:review_id', async(req, res, next) => {
         }
 
         Product.delete_product(req.params.review_id);
+
+        return res.json({"message": "Product Review deleted"})
     } catch (error) {
         console.log(error.code);
 
