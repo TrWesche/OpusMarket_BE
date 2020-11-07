@@ -5,6 +5,13 @@ const partialUpdate = require("../helpers/partialUpdate");
 
 class Gathering {
 
+    // ╔═══╗╔═══╗╔═══╗╔═══╗╔════╗╔═══╗
+    // ║╔═╗║║╔═╗║║╔══╝║╔═╗║║╔╗╔╗║║╔══╝
+    // ║║ ╚╝║╚═╝║║╚══╗║║ ║║╚╝║║╚╝║╚══╗
+    // ║║ ╔╗║╔╗╔╝║╔══╝║╚═╝║  ║║  ║╔══╝
+    // ║╚═╝║║║║╚╗║╚══╗║╔═╗║ ╔╝╚╗ ║╚══╗
+    // ╚═══╝╚╝╚═╝╚═══╝╚╝ ╚╝ ╚══╝ ╚═══╝
+
     /** Create gathering with data. Returns new gathering data. */
 
     static async create_gathering(data) {
@@ -75,7 +82,33 @@ class Gathering {
         return result.rows
     }
 
+
+    // ╔═══╗╔═══╗╔═══╗╔═══╗
+    // ║╔═╗║║╔══╝║╔═╗║╚╗╔╗║
+    // ║╚═╝║║╚══╗║║ ║║ ║║║║
+    // ║╔╗╔╝║╔══╝║╚═╝║ ║║║║
+    // ║║║╚╗║╚══╗║╔═╗║╔╝╚╝║
+    // ╚╝╚═╝╚═══╝╚╝ ╚╝╚═══╝  
+
     static async retrieve_single_gathering(id) {
+        const gatheringRes = await db.query(`
+            SELECT id, title, description, link, merchant_id
+            FROM gatherings
+            WHERE id = $1`,
+        [id]);
+
+        const gathering = gatheringRes.rows[0];
+
+        if (!gathering) {
+            const error = new Error(`Unable to find gathering with id, ${id}`);
+            error.status = 404;
+            throw error;
+        }
+
+        return gathering;
+    }
+
+    static async retrieve_gathering_details(id) {
         const gatheringRes = await db.query(`
             SELECT id, title, description, link
             FROM gatherings
@@ -128,6 +161,62 @@ class Gathering {
         return result.rows;
     }
     
+    static async retrieve_gathering_participant(participant_id) {
+        const result = await db.query(`
+        SELECT
+            gathering_merchants.id as id,
+            gathering_merchants.gathering_id AS gathering_id,
+            gathering_merchants.merchant_id AS merchant_id,
+            gatherings.merchant_id AS organizer_id
+        FROM gathering_merchants
+        LEFT JOIN gatherings
+        ON gathering_id = gatherings.id
+        WHERE id = $1`,
+        [participant_id]);
+
+        const participant = result.rows[0];
+
+        if (!participant) {
+            const error = new Error(`Unable to find participant with id, ${id}`);
+            error.status = 404;
+            throw error;
+        }
+
+        return participant;
+    }
+
+    static async retrieve_gathering_image(img_id) {
+        const result = await db.query(`
+        SELECT
+            gathering_images.id as id,
+            gathering_images.gathering_id AS gathering_id,
+            gathering_images.url AS url,
+            gathering_images.alt_text AS alt_text,
+            gatherings.merchant_id AS organizer_id
+        FROM gathering_images
+        LEFT JOIN gatherings
+        ON gathering_id = gatherings.id
+        WHERE id = $1`,
+        [img_id]);
+
+        const image = result.rows[0];
+
+        if (!image) {
+            const error = new Error(`Unable to find image with id, ${id}`);
+            error.status = 404;
+            throw error;
+        }
+
+        return image;
+    }
+
+    // ╔╗ ╔╗╔═══╗╔═══╗╔═══╗╔════╗╔═══╗
+    // ║║ ║║║╔═╗║╚╗╔╗║║╔═╗║║╔╗╔╗║║╔══╝
+    // ║║ ║║║╚═╝║ ║║║║║║ ║║╚╝║║╚╝║╚══╗
+    // ║║ ║║║╔══╝ ║║║║║╚═╝║  ║║  ║╔══╝
+    // ║╚═╝║║║   ╔╝╚╝║║╔═╗║ ╔╝╚╗ ║╚══╗
+    // ╚═══╝╚╝   ╚═══╝╚╝ ╚╝ ╚══╝ ╚═══╝
+
     static async update_gathering(id) {
         // Partial Update: table name, payload data, lookup column name, lookup key
         let {query, values} = partialUpdate(
@@ -149,26 +238,34 @@ class Gathering {
         return result.rows[0];
     }
 
-    static async update_gathering_image(id, data) {
-        // Partial Update: table name, payload data, lookup column name, lookup key
-        let {query, values} = partialUpdate(
-            "gathering_images",
-            data,
-            "id",
-            id
-        );
+    // TODO: Is this functionality necessary? - Consider when designing user flow.
+    // static async update_gathering_image(id, data) {
+    //     let {query, values} = partialUpdate(
+    //         "gathering_images",
+    //         data,
+    //         "id",
+    //         id
+    //     );
     
-        const result = await db.query(query, values);
-        const product = result.rows[0];
+    //     const result = await db.query(query, values);
+    //     const product = result.rows[0];
     
-        if (!product) {
-            let notFound = new Error(`An error occured, could not perform the update to gathering image '${id}'`);
-            notFound.status = 404;
-            throw notFound;
-        }
+    //     if (!product) {
+    //         let notFound = new Error(`An error occured, could not perform the update to gathering image '${id}'`);
+    //         notFound.status = 404;
+    //         throw notFound;
+    //     }
     
-        return result.rows[0];
-    }
+    //     return result.rows[0];
+    // }
+
+
+    // ╔═══╗╔═══╗╔╗   ╔═══╗╔════╗╔═══╗
+    // ╚╗╔╗║║╔══╝║║   ║╔══╝║╔╗╔╗║║╔══╝
+    //  ║║║║║╚══╗║║   ║╚══╗╚╝║║╚╝║╚══╗
+    //  ║║║║║╔══╝║║ ╔╗║╔══╝  ║║  ║╔══╝
+    // ╔╝╚╝║║╚══╗║╚═╝║║╚══╗ ╔╝╚╗ ║╚══╗
+    // ╚═══╝╚═══╝╚═══╝╚═══╝ ╚══╝ ╚═══╝
 
     // TODO: See about consolidating delete operations
     static async delete_gathering(id) {

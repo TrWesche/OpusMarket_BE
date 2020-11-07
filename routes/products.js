@@ -543,7 +543,7 @@ productRouter.delete("/:prod_id", async(req, res, next) => {
             throw new ExpressError(`Unauthorized`, 401);
         }
 
-        Product.delete_product(req.params.prod_id);
+        await Product.delete_product(req.params.prod_id);
 
         return res.json({"message": "Product deleted"})
     } catch (error) {
@@ -564,7 +564,7 @@ productRouter.delete("/:prod_id/img/:img_id", async(req, res, next) => {
             throw new ExpressError(`Unauthorized`, 401);
         }
 
-        Product.delete_product(req.params.img_id);
+        await Product.delete_product(req.params.img_id);
 
         return res.json({"message": "Product Image deleted"})
     } catch (error) {
@@ -585,7 +585,7 @@ productRouter.delete('/:prod_id/meta/:meta_id', async(req, res, next) => {
             throw new ExpressError(`Unauthorized`, 401);
         }
 
-        Product.delete_product(req.params.meta_id);
+        await Product.delete_product(req.params.meta_id);
 
         return res.json({"message": "Product Meta deleted"})
     } catch (error) {
@@ -606,7 +606,7 @@ productRouter.delete('/:prod_id/promo/:promotion_id', async(req, res, next) => {
             throw new ExpressError(`Unauthorized`, 401);
         }
 
-        Product.delete_product(req.params.promotion_id);
+        await Product.delete_product(req.params.promotion_id);
 
         return res.json({"message": "Product Promotion deleted"})
     } catch (error) {
@@ -627,7 +627,7 @@ productRouter.delete('/:prod_id/coupon/:coupon_id', async(req, res, next) => {
             throw new ExpressError(`Unauthorized`, 401);
         }
 
-        Product.delete_product(req.params.coupon_id);
+        await Product.delete_product(req.params.coupon_id);
 
         return res.json({"message": "Product Coupon deleted"})
     } catch (error) {
@@ -648,7 +648,7 @@ productRouter.delete('/:prod_id/mod/:modifier_id', async(req, res, next) => {
             throw new ExpressError(`Unauthorized`, 401);
         }
 
-        Product.delete_product(req.params.modifier_id);
+        await Product.delete_product(req.params.modifier_id);
 
         return res.json({"message": "Product Modifier deleted"})
     } catch (error) {
@@ -669,7 +669,7 @@ productRouter.delete('/:prod_id/review/:review_id', async(req, res, next) => {
             throw new ExpressError(`Unauthorized`, 401);
         }
 
-        Product.delete_product(req.params.review_id);
+        await Product.delete_product(req.params.review_id);
 
         return res.json({"message": "Product Review deleted"})
     } catch (error) {
