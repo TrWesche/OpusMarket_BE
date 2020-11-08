@@ -1,7 +1,19 @@
+// Library Imports
 const express = require("express");
-const ExpressError = require("../helpers/expressError");
 const jwt = require("jsonwebtoken");
+const jsonschema = require('jsonschema');
+
+// Helper Function Imports
+const ExpressError = require("../helpers/expressError");
+
+// Environment Variable Imports
 const { SECRET_KEY } = require("../config");
+
+// Schema Imports
+const userAuthSchema = require("../schemas/auth/userAuthSchema.json");
+const merchantAuthSchema = require("../schemas/auth/merchantAuthSchema.json");
+
+// Model Imports
 const User = require("../models/user");
 const Merchant = require("../models/merchant");
 
@@ -12,14 +24,17 @@ const authRouter = new express.Router()
  **/
 authRouter.post("/user", async (req, res, next) => {
     try {
-        // Validate username & password provided in request
-        const {email, password} = req.body;
-        if (!email || !password) {
-            throw new ExpressError("Email & Password Required", 400);
+        // Validate authentication parameters in request
+        const validate = jsonschema.validate(req.body, userAuthSchema);
+        if(!validate.valid) {
+            //Collect all the errors in an array and throw
+            const listOfErrors = validate.errors.map(e => e.stack);
+            throw new ExpressError(`Email & Password Required: ${listOfErrors}`, 400);
         }
 
         // Validate username & password combination
-        const queryData = await User.authenticate(req.body);
+        const {email, password} = req.body;
+        const queryData = await User.authenticate({email, password});
         if (!queryData) {
             throw new ExpressError("Invalid Email/Password", 400);
         }
@@ -39,16 +54,19 @@ authRouter.post("/user", async (req, res, next) => {
  **/
 authRouter.post("/merchant", async (req, res, next) => {
     try {
-        // Validate username & password provided in request
-        const {email, password} = req.body;
-        if (!email || !password) {
-            throw new ExpressError("Email & Password Required", 400);
+        // Validate authentication parameters in request
+        const validate = jsonschema.validate(req.body, merchantAuthSchema);
+        if(!validate.valid) {
+            //Collect all the errors in an array and throw
+            const listOfErrors = validate.errors.map(e => e.stack);
+            throw new ExpressError(`Email & Password Required: ${listOfErrors}`, 400);
         }
 
         // Validate username & password combination
-        const queryData = await Merchant.authenticate(req.body);
+        const {email, password} = req.body;
+        const queryData = await Merchant.authenticate({email, password});
         if (!queryData) {
-            throw new ExpressError("Invalid Eamil/Password", 400);
+            throw new ExpressError("Invalid Email/Password", 400);
         }
 
         // Return JSON Web Token
