@@ -1,7 +1,16 @@
+// Library Imports
 const express = require('express');
 const ExpressError = require('../helpers/expressError');
+
+// Middleware Imports
 const { ensureIsMerchant } = require('../middleware/auth');
 
+// Schema Imports
+const gatheringSchema = require("../schemas/gathering/gatheringSchema.json");
+const gatheringMerchantSchema = require("../schemas/gathering/gatheringMerchantSchema.json");
+const gatheringImageSchema = require("../schemas/gathering/gatheringImageSchema.json");
+
+// Model Imports
 const Gathering = require('../models/gathering');
 
 const gatheringRouter = new express.Router();
@@ -19,7 +28,7 @@ const gatheringRouter = new express.Router();
  */
 gatheringRouter.post('/new', ensureIsMerchant, async(req, res, next) => {
     try {
-        const validate = jsonschema.validate(req.body, newGatheringSchema);
+        const validate = jsonschema.validate(req.body, gatheringSchema);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
@@ -51,7 +60,7 @@ gatheringRouter.post('/:gathering_id/new/merch', ensureIsMerchant, async(req, re
         }
 
         // Validate the request data
-        const validate = jsonschema.validate(req.body, newGatheringMerchantSchema);
+        const validate = jsonschema.validate(req.body, gatheringMerchantSchema);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
@@ -78,7 +87,7 @@ gatheringRouter.post('/:gathering_id/new/img', ensureIsMerchant, async(req, res,
         }
 
         // Validate the request data
-        const validate = jsonschema.validate(req.body, newGatheringImageSchema);
+        const validate = jsonschema.validate(req.body, gatheringImageSchema);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
@@ -148,7 +157,7 @@ gatheringRouter.patch('/:gathering_id', ensureIsMerchant, async(req, res, next) 
         }
 
         // Validate the request data
-        const validate = jsonschema.validate(req.body, updateGatheringSchema);
+        const validate = jsonschema.validate(req.body, gatheringSchema);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
@@ -160,7 +169,7 @@ gatheringRouter.patch('/:gathering_id', ensureIsMerchant, async(req, res, next) 
         let itemsList = {};
         const newKeys = Object.keys(req.body);
         newKeys.map(key => {
-            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && updateGatheringSchema.hasOwnProperty(key))
+            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && gatheringSchema.hasOwnProperty(key))
                 && (req.body[key] != oldData[key])) {
 
                 itemsList[key] = req.body[key];

@@ -41,7 +41,8 @@ CREATE TABLE "gatherings" (
   "merchant_id" int NOT NULL REFERENCES "merchants" ("id") ON DELETE CASCADE,
   "title" text NOT NULL,
   "description" text NOT NULL,
-  "link" text NOT NULL
+  "link" text NOT NULL,
+  "gathering_dt" TIMESTAMP WITH TIME ZONE
 );
 
 

@@ -1,0 +1,40 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "title": "The root schema",
+    "description": "The root schema comprises the entire JSON document.",
+    "default": {},
+    "examples": [
+        {
+            "url": "http://imagesrc.com/imageID",
+            "alt_text": "Image Description"
+        }
+    ],
+    "required": [
+        "url"
+    ],
+    "properties": {
+        "url": {
+            "$id": "#/properties/url",
+            "type": "uri",
+            "title": "The url schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "http://imagesrc.com/imageID"
+            ]
+        },
+        "alt_text": {
+            "$id": "#/properties/alt_text",
+            "type": "string",
+            "title": "The alt_text schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "Image Description"
+            ]
+        }
+    },
+    "additionalProperties": true
+}

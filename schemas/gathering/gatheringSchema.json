@@ -1,0 +1,65 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "title": "The root schema",
+    "description": "The root schema comprises the entire JSON document.",
+    "default": {},
+    "examples": [
+        {
+            "title": "Gathering Title",
+            "description": "This is the description of the gathering",
+            "link": "http://www.discord.com/gatheringID",
+            "gathering_dt": "2020-11-13T18:30:00+00:00"
+        }
+    ],
+    "required": [
+        "title",
+        "description",
+        "link",
+        "gathering_dt"
+    ],
+    "properties": {
+        "title": {
+            "$id": "#/properties/title",
+            "type": "string",
+            "title": "The title schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "Gathering Title"
+            ]
+        },
+        "description": {
+            "$id": "#/properties/description",
+            "type": "string",
+            "title": "The description schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "This is the description of the gathering"
+            ]
+        },
+        "link": {
+            "$id": "#/properties/link",
+            "type": "uri",
+            "title": "The link schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "http://www.discord.com/gatheringID"
+            ]
+        },
+        "gathering_dt": {
+            "$id": "#/properties/gathering_dt",
+            "type": "date-time",
+            "title": "The gathering_dt schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "2020-11-13T18:30:00+00:00"
+            ]
+        }
+    },
+    "additionalProperties": true
+}
