@@ -1,8 +1,20 @@
+// Library Imports
 const express = require("express");
+const jsonschema = require("jsonschema");
+const { DateTime } = require("luxon");
+
+// Helper Function imports
 const ExpressError = require("../helpers/expressError");
+
+// Schema Imports
+const merchantUpdateSchema = require("../schemas/merchant/merchantUpdateSchema.json");
+
+// Model Imports
 const Merchant = require("../models/merchant");
+
+// Middleware Imports
 const { ensureCorrectMerchant } = require("../middleware/auth");
-const {DateTime} = require("luxon");
+
 
 const merchantRouter = new express.Router();
 
@@ -42,12 +54,12 @@ merchantRouter.patch("/:id/update", ensureCorrectMerchant, async (req, res, next
             throw new ExpressError("Unable to find target merchant", 404);
         }
 
-        // TODO: Validate request data
-        // const validate = jsonschema.validate(req.body, updateSchema);
-        // if (!validate.valid) {
-        //     const listOfErrors = validate.errors.map(e => e.stack);
-        //     throw new ExpressError(`Unable to update User: ${listOfErrors}`, 400)
-        // }
+        // Validate request data
+        const validate = jsonschema.validate(req.body, merchantUpdateSchema);
+        if (!validate.valid) {
+            const listOfErrors = validate.errors.map(e => e.stack);
+            throw new ExpressError(`Unable to update User: ${listOfErrors}`, 400)
+        }
 
         // Build update list for patch query
         let itemsList = {};
@@ -70,8 +82,6 @@ merchantRouter.patch("/:id/update", ensureCorrectMerchant, async (req, res, next
         return next(error);
     }
 })
-
-
 
 // ╔═══╗╔═══╗╔╗   ╔═══╗╔════╗╔═══╗
 // ╚╗╔╗║║╔══╝║║   ║╔══╝║╔╗╔╗║║╔══╝
