@@ -59,17 +59,21 @@ class Merchant {
       const hashedPassword = await bcrypt.hash(data.password, BCRYPT_WORK_FACTOR);
   
       const result = await db.query(
-          `INSERT INTO merchants 
-              (email, password, display_name) 
-            VALUES ($1, $2, $3) 
-            RETURNING id, display_name`,
-          [
-            data.email,
-            hashedPassword,
-            data.display_name
-          ]);
+        `INSERT INTO merchants 
+            (email, password, display_name) 
+          VALUES ($1, $2, $3) 
+          RETURNING id, display_name`,
+      [
+        data.email,
+        hashedPassword,
+        data.display_name
+      ]);
   
-      return result.rows[0];
+      const merchant = result.rows[0];
+      merchant.type = "merchant";
+      
+
+      return merchant;
     }
    
     /** Get merchant data by id

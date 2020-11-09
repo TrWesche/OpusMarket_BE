@@ -70,7 +70,10 @@ class User {
           data.last_name
       ]);
 
-      return result.rows[0];
+      const user = result.rows[0];
+      user.type = "user";
+
+      return user;
     }
    
     /** Get user data by id

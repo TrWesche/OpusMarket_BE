@@ -1,7 +1,19 @@
+// Library Imports
 const express = require("express");
-const ExpressError = require("../helpers/expressError");
 const jwt = require("jsonwebtoken");
+const jsonschema = require('jsonschema');
+
+// Helper Function Imports
+const ExpressError = require("../helpers/expressError");
+
+// Environment Variable Imports
 const { SECRET_KEY } = require("../config");
+
+// Schema Imports
+const userRegisterSchema = require("../schemas/register/userRegisterSchema.json");
+const merchantRegisterSchema = require("../schemas/register/merchantRegisterSchema.json");
+
+// Model Imports
 const User = require("../models/user");
 const Merchant = require("../models/merchant");
 
@@ -20,13 +32,15 @@ const regRouter = new express.Router()
 regRouter.post("/user", async (req, res, next) => {
     // TODO: Should use Schemas to Verify Registration Data
     try {
-        // Validate username & password provided in request
-        const {email, password} = req.body;
-        if (!email || !password) {
-            throw new ExpressError("Email & Password Required", 400);
+        // Validate authentication parameters in request
+        const validate = jsonschema.validate(req.body, userRegisterSchema);
+        if(!validate.valid) {
+            //Collect all the errors in an array and throw
+            const listOfErrors = validate.errors.map(e => e.stack);
+            throw new ExpressError(`Registration Failed: ${listOfErrors}`, 400);
         }
 
-        // Validate username & password combination
+        // Process Registration
         const queryData = await User.register(req.body);    
 
         // Return JSON Web Token
@@ -45,13 +59,15 @@ regRouter.post("/user", async (req, res, next) => {
 regRouter.post("/merchant", async (req, res, next) => {
     // TODO: Should use Schemas to Verify Registration Data
     try {
-        // Validate username & password provided in request
-        const {email, password} = req.body;
-        if (!email || !password) {
-            throw new ExpressError("Email & Password Required", 400);
+        // Validate authentication parameters in request
+        const validate = jsonschema.validate(req.body, merchantRegisterSchema);
+        if(!validate.valid) {
+            //Collect all the errors in an array and throw
+            const listOfErrors = validate.errors.map(e => e.stack);
+            throw new ExpressError(`Registration Failed: ${listOfErrors}`, 400);
         }
-
-        // Validate username & password combination
+        
+        // Process Registration
         const queryData = await Merchant.register(req.body);
 
         // Return JSON Web Token

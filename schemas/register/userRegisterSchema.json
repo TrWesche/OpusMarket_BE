@@ -1,0 +1,68 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "title": "The root schema",
+    "description": "The root schema comprises the entire JSON document.",
+    "default": {},
+    "examples": [
+        {
+            "email": "personsName@emailprovider.com",
+            "password": "passwordToBeEncrypted",
+            "first_name": "FirstName",
+            "last_name": "LastName"
+        }
+    ],
+    "required": [
+        "email",
+        "password",
+        "first_name",
+        "last_name"
+    ],
+    "properties": {
+        "email": {
+            "$id": "#/properties/email",
+            "type": "email",
+            "title": "The email schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "personsName@emailprovider.com"
+            ]
+        },
+        "password": {
+            "$id": "#/properties/password",
+            "type": "string",
+            "title": "The password schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "minLength": 8,
+            "examples": [
+                "passwordToBeEncrypted"
+            ]
+        },
+        "first_name": {
+            "$id": "#/properties/first_name",
+            "type": "string",
+            "title": "The first_name schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "minLength": 2,
+            "examples": [
+                "FirstName"
+            ]
+        },
+        "last_name": {
+            "$id": "#/properties/last_name",
+            "type": "string",
+            "title": "The last_name schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "minLength": 2,
+            "examples": [
+                "LastName"
+            ]
+        }
+    },
+    "additionalProperties": true
+}
