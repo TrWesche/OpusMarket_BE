@@ -65,10 +65,13 @@ merchantRouter.patch("/:id/update", ensureCorrectMerchant, async (req, res, next
         let itemsList = {};
         const newKeys = Object.keys(req.body);
         newKeys.map(key => {
-            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key)) && (req.body[key] != oldData[key])) {
+            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && merchantUpdateSchema.hasOwnProperty(key))
+                && (req.body[key] != oldData[key])) {
+
                 itemsList[key] = req.body[key];
             }
         })
+
 
         // If no changes return original data
         if(Object.keys(itemsList).length === 0) {

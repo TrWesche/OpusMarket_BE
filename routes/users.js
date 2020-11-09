@@ -1,8 +1,20 @@
+// Library Imports
 const express = require("express");
-const ExpressError = require("../helpers/expressError");
-const User = require("../models/user");
-const { ensureCorrectUser } = require("../middleware/auth");
+const jsonschema = require("jsonschema");
 const {DateTime} = require("luxon");
+
+// Helper Function Imports
+const ExpressError = require("../helpers/expressError");
+
+// Schema Imports
+const userUpdateSchema = require("../schemas/user/userUpdateSchema.json");
+
+// Model Imports
+const User = require("../models/user");
+
+// Middleware Imports
+const { ensureCorrectUser } = require("../middleware/auth");
+
 
 const userRouter = new express.Router();
 
@@ -42,18 +54,19 @@ userRouter.patch("/:id/update", ensureCorrectUser, async (req, res, next) => {
             throw new ExpressError("Unable to find target user", 404);
         }
 
-        // TODO: Validate request data
-        // const validate = jsonschema.validate(req.body, updateSchema);
-        // if (!validate.valid) {
-        //     const listOfErrors = validate.errors.map(e => e.stack);
-        //     throw new ExpressError(`Unable to update User: ${listOfErrors}`, 400)
-        // }
+        const validate = jsonschema.validate(req.body, userUpdateSchema);
+        if (!validate.valid) {
+            const listOfErrors = validate.errors.map(e => e.stack);
+            throw new ExpressError(`Unable to update User: ${listOfErrors}`, 400)
+        }
 
         // Build update list for patch query
         let itemsList = {};
         const newKeys = Object.keys(req.body);
         newKeys.map(key => {
-            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key)) && (req.body[key] != oldData[key])) {
+            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && userUpdateSchema.hasOwnProperty(key))
+                && (req.body[key] != oldData[key])) {
+
                 itemsList[key] = req.body[key];
             }
         })
