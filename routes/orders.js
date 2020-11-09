@@ -1,9 +1,20 @@
+// Library Imports
 const express = require('express');
-const ExpressError = require("../helpers/expressError");
-const { ensureIsUser, ensureCorrectUser } = require("../middleware/auth");
 const jsonschema = require("jsonschema");
 
+// Helper Functions imports 
+const ExpressError = require("../helpers/expressError");
+
+// Schema Imports
+const orderSchemaNew = require("../schemas/order/orderSchemaNew.json");
+const orderSchemaUpdate = require("../schemas/order/orderSchemaUpdate.json");
+
+// Model Imports
 const Order = require('../models/order');
+
+// Middleware Imports
+const { ensureIsUser, ensureCorrectUser } = require("../middleware/auth");
+
 
 const orderRoutes = new express.Router();
 
@@ -15,7 +26,7 @@ const orderRoutes = new express.Router();
 // ╚═══╝╚╝╚═╝╚═══╝╚╝ ╚╝ ╚══╝ ╚═══╝
 orderRoutes.post('/new', ensureIsUser, async(req, res, next) => {
     try {
-        const validate = jsonschema.validate(req.body, newOrderSchema);
+        const validate = jsonschema.validate(req.body, orderSchemaNew);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
@@ -72,7 +83,7 @@ orderRoutes.patch('/:order_id', ensureIsUser, async(req, res, next) => {
         };
 
         // Validate the passed in data matches schema requirements
-        const validate = jsonschema.validate(req.body, updateOrderSchema);
+        const validate = jsonschema.validate(req.body, orderSchemaUpdate);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
@@ -84,7 +95,7 @@ orderRoutes.patch('/:order_id', ensureIsUser, async(req, res, next) => {
         let itemsList = {};
         const newKeys = Object.keys(req.body);
         newKeys.map(key => {
-            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && updateOrderSchema.hasOwnProperty(key))
+            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && orderSchemaUpdate.hasOwnProperty(key))
                 && (req.body[key] != oldData[key])) {
 
                 itemsList[key] = req.body[key];

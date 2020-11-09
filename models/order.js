@@ -5,7 +5,9 @@ const { DateTime } = require('luxon');
 /** Order Management Class */
 
 // TODO: This functionality will need to be expanded significantly to handle the 
-// full order lifecycle.
+// full order lifecycle.  A separate order status table seems like it would 
+// provide traceability & flexibility necessary to handle the variety of circumstances
+// involved in order processing.
 
 class Order {
     // ╔═══╗╔═══╗╔═══╗╔═══╗╔════╗╔═══╗

@@ -1,5 +1,6 @@
 const db = require("../db");
 const partialUpdate = require("../helpers/partialUpdate");
+const { DateTime } = require('luxon');
 
 /** Gathering Management Class */
 
@@ -15,12 +16,14 @@ class Gathering {
     /** Create gathering with data. Returns new gathering data. */
 
     static async create_gathering(data) {
+        const adjusted_dt = DateTime.fromISO(data.gathering_dt).toUTC();
+
         const result = await db.query(`
             INSERT INTO gatherings
-                (title, description, link)
-            VALUES ($1, $2, $3)
-            RETURNING (id, title, description, link)`
-            [data.title, data.description, data.link]);
+                (title, description, link, gathering_dt)
+            VALUES ($1, $2, $3, $4)
+            RETURNING (id, title, description, link, gathering_dt)`
+            [data.title, data.description, data.link, adjusted_dt]);
 
         return result.rows[0];
     }
@@ -217,7 +220,9 @@ class Gathering {
     // ║╚═╝║║║   ╔╝╚╝║║╔═╗║ ╔╝╚╗ ║╚══╗
     // ╚═══╝╚╝   ╚═══╝╚╝ ╚╝ ╚══╝ ╚═══╝
 
-    static async update_gathering(id) {
+    static async update_gathering(id, data) {
+        data.gathering_dt = DateTime.fromISO(data.gathering_dt).toUTC();
+
         // Partial Update: table name, payload data, lookup column name, lookup key
         let {query, values} = partialUpdate(
             "gatherings",
