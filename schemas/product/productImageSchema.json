@@ -1,0 +1,54 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "title": "The root schema",
+    "description": "The root schema comprises the entire JSON document.",
+    "default": {},
+    "examples": [
+        {
+            "url": "https://imagestore.com/unqiueid",
+            "alt_text": "Description of Image",
+            "order": 1
+        }
+    ],
+    "required": [
+        "url",
+        "alt_text",
+        "order"
+    ],
+    "properties": {
+        "url": {
+            "$id": "#/properties/url",
+            "type": "uri",
+            "title": "The url schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "https://imagestore.com/unqiueid"
+            ]
+        },
+        "alt_text": {
+            "$id": "#/properties/alt_text",
+            "type": "string",
+            "title": "The alt_text schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "Description of Image"
+            ]
+        },
+        "order": {
+            "$id": "#/properties/order",
+            "type": "integer",
+            "title": "The order schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": 1,
+            "minimum": 1,
+            "examples": [
+                1
+            ]
+        }
+    },
+    "additionalProperties": true
+}

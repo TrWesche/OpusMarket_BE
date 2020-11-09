@@ -20,7 +20,7 @@ function authenticateJWT(req, res, next) {
 
 function ensureLoggedIn(req, res, next) {
   try {
-    if (req.user) {
+    if (req.user.id) {
       return next();
     }
     return next({ status: 401, message: "Unauthorized" });

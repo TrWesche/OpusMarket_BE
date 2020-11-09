@@ -14,7 +14,7 @@ class Product {
 
     /** Create product with data. Returns new product data. */
   
-    static async create_product(data) {
+    static async create_product(data, merchant_id) {
       const result = await db.query(
           `INSERT INTO products 
               (merchant_id, name, description, base_price) 
@@ -24,7 +24,7 @@ class Product {
                 qty_ratings, qty_views, qty_purchases, 
                 qty_returns`,
           [
-            data.merchant_id,
+            merchant_id,
             data.name,
             data.description,
             data.base_price

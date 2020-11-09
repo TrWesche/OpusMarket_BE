@@ -1,9 +1,27 @@
+// Library Imports
 const express = require("express");
-const ExpressError = require("../helpers/expressError");
-const Product = require("../models/product");
-const { ensureIsMerchant, ensureIsUser } = require("../middleware/auth");
-const {DateTime} = require("luxon");
 const jsonschema = require("jsonschema");
+
+// Helper Function Imports
+const ExpressError = require("../helpers/expressError");
+
+// Schema Imports
+const productSchemaNew = require("../schemas/product/productSchemaNew.json");
+const productSchemaUpdate = require("../schemas/product/productSchemaUpdate.json");
+
+const productImageSchema = require("../schemas/product/productImageSchema.json");
+const productMetaSchema = require("../schemas/product/productMetaSchema.json");
+const productPromotionSchema = require("../schemas/product/productPromotionSchema.json");
+const productCouponSchema = require("../schemas/product/productCouponSchema.json");
+const productModifierSchema = require("../schemas/product/productModifierSchema.json");
+const productReviewSchema = require("../schemas/product/productReviewSchema.json");
+
+// Model Imports
+const Product = require("../models/product");
+
+// Middleware Imports
+const { ensureLoggedIn, ensureIsMerchant, ensureIsUser } = require("../middleware/auth");
+
 
 const productRouter = new express.Router();
 
@@ -14,16 +32,16 @@ const productRouter = new express.Router();
 // ║╚═╝║║║║╚╗║╚══╗║╔═╗║ ╔╝╚╗ ║╚══╗
 // ╚═══╝╚╝╚═╝╚═══╝╚╝ ╚╝ ╚══╝ ╚═══╝
 
-productRouter.post('/new', ensureIsMerchant, async(req, res, next) => {
+productRouter.post('/new', ensureLoggedIn, ensureIsMerchant, async(req, res, next) => {
     try {
-        const validate = jsonschema.validate(req.body, newProductSchema);
+        const validate = jsonschema.validate(req.body, productSchemaNew);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
             throw new ExpressError(`Unable to create a new Product: ${listOfErrors}`, 400);
         }
 
-        const result = await Product.create_product(req.body);
+        const result = await Product.create_product(req.body, req.user.id);
 
         return res.json({ "product": result })
     } catch (error) {
@@ -42,7 +60,7 @@ productRouter.post('/:prod_id/new/img', ensureIsMerchant, async(req, res, next) 
         }
 
         // Validate the request data
-        const validate = jsonschema.validate(req.body, newProductImageSchema);
+        const validate = jsonschema.validate(req.body, productImageSchema);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
@@ -66,7 +84,7 @@ productRouter.post('/:prod_id/new/meta', ensureIsMerchant, async(req, res, next)
         }
 
         // Validate the request data
-        const validate = jsonschema.validate(req.body, newProductMetaSchema);
+        const validate = jsonschema.validate(req.body, productMetaSchema);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
@@ -91,7 +109,7 @@ productRouter.post('/:prod_id/new/promotion', ensureIsMerchant, async(req, res, 
         }
 
         // Validate the request data
-        const validate = jsonschema.validate(req.body, newProductPromotionSchema);
+        const validate = jsonschema.validate(req.body, productPromotionSchema);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
@@ -106,6 +124,29 @@ productRouter.post('/:prod_id/new/promotion', ensureIsMerchant, async(req, res, 
     };
 });
 
+productRouter.post("/:prod_id/new/coupon", ensureIsMerchant, async(req, res, next) => {
+    try {
+        // Check for incorrect merchant or product with id not in database
+        const ownerCheck = await Product.retrieve_single_product(req.params.prod_id);
+        if(!ownerCheck.merchant_id || ownerCheck.merchant_id !== req.user.id) {
+            throw new ExpressError(`Unauthorized`, 401);
+        }
+
+        // Validate the request data
+        const validate = jsonschema.validate(req.body, productCouponSchema);
+        if(!validate.valid) {
+            //Collect all the errors in an array and throw
+            const listOfErrors = validate.errors.map(e => e.stack);
+            throw new ExpressError(`Unable to add new Product Modifier: ${listOfErrors}`, 400)
+        }
+
+        const result = await Product.create_product_coupon(req.params.prod_id, req.body);
+
+        return res.json({"product_modifier": result})
+    } catch (error) {
+        return next(error);
+    };
+});
 
 productRouter.post('/:prod_id/new/modifier', ensureIsMerchant, async(req, res, next) => {
     try {
@@ -116,7 +157,7 @@ productRouter.post('/:prod_id/new/modifier', ensureIsMerchant, async(req, res, n
         }
 
         // Validate the request data
-        const validate = jsonschema.validate(req.body, newProductPromotionSchema);
+        const validate = jsonschema.validate(req.body, productModifierSchema);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
@@ -135,7 +176,7 @@ productRouter.post('/:prod_id/new/modifier', ensureIsMerchant, async(req, res, n
 productRouter.post('/:prod_id/new/review', ensureIsUser, async(req, res, next) => {
     try {
         // Validate the request data
-        const validate = jsonschema.validate(req.body, newProductReviewSchema);
+        const validate = jsonschema.validate(req.body, productReviewSchema);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
@@ -199,7 +240,10 @@ productRouter.get('/catalog', async(req, res, next) => {
 // ╚═══╝╚╝   ╚═══╝╚╝ ╚╝ ╚══╝ ╚═══╝
 
 /** Update Product Details */
-productRouter.patch('/:prod_id', async(req, res, next) => {
+// TODO: There should be separate internal system routes for updating tracking
+// data such as ratings, views, purchases, and returns.  This will be explored
+// later in the development cycle.
+productRouter.patch('/:prod_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
         const oldData = await Product.retrieve_single_product(req.params.prod_id);
@@ -210,7 +254,7 @@ productRouter.patch('/:prod_id', async(req, res, next) => {
         }
 
         // Validate the passed in data matches schema requirements
-        const validate = jsonschema.validate(req.body, updateProductSchema);
+        const validate = jsonschema.validate(req.body, productSchemaUpdate);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
@@ -222,7 +266,7 @@ productRouter.patch('/:prod_id', async(req, res, next) => {
         let itemsList = {};
         const newKeys = Object.keys(req.body);
         newKeys.map(key => {
-            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && updateProductSchema.hasOwnProperty(key))
+            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && productSchemaUpdate.hasOwnProperty(key))
                 && (req.body[key] != oldData[key])) {
 
                 itemsList[key] = req.body[key];
@@ -245,7 +289,7 @@ productRouter.patch('/:prod_id', async(req, res, next) => {
 })
 
 /** Update Product Image Details */
-productRouter.patch('/:prod_id/img/:img_id', async(req, res, next) => {
+productRouter.patch('/:prod_id/img/:img_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
         const oldData = await Product.retrieve_single_product_image(req.params.img_id);
@@ -256,7 +300,7 @@ productRouter.patch('/:prod_id/img/:img_id', async(req, res, next) => {
         }
 
         // Validate the passed in data matches schema requirements
-        const validate = jsonschema.validate(req.body, updateProductImageSchema);
+        const validate = jsonschema.validate(req.body, productImageSchema);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
@@ -268,7 +312,7 @@ productRouter.patch('/:prod_id/img/:img_id', async(req, res, next) => {
         let itemsList = {};
         const newKeys = Object.keys(req.body);
         newKeys.map(key => {
-            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && updateProductImageSchema.hasOwnProperty(key))
+            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && productImageSchema.hasOwnProperty(key))
                 && (req.body[key] != oldData[key])) {
 
                 itemsList[key] = req.body[key];
@@ -291,7 +335,7 @@ productRouter.patch('/:prod_id/img/:img_id', async(req, res, next) => {
 });
 
 /** Update Product Meta Details */
-productRouter.patch('/:prod_id/meta/:meta_id', async(req, res, next) => {
+productRouter.patch('/:prod_id/meta/:meta_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
         const oldData = await Product.retrieve_single_product_meta(req.params.meta_id);
@@ -302,7 +346,7 @@ productRouter.patch('/:prod_id/meta/:meta_id', async(req, res, next) => {
         }
 
         // Validate the passed in data matches schema requirements
-        const validate = jsonschema.validate(req.body, updateProductMetaSchema);
+        const validate = jsonschema.validate(req.body, productMetaSchema);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
@@ -314,7 +358,7 @@ productRouter.patch('/:prod_id/meta/:meta_id', async(req, res, next) => {
         let itemsList = {};
         const newKeys = Object.keys(req.body);
         newKeys.map(key => {
-            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && updateProductMetaSchema.hasOwnProperty(key))
+            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && productMetaSchema.hasOwnProperty(key))
                 && (req.body[key] != oldData[key])) {
 
                 itemsList[key] = req.body[key];
@@ -338,7 +382,7 @@ productRouter.patch('/:prod_id/meta/:meta_id', async(req, res, next) => {
 
 
 /** Update Product Promotion Details */
-productRouter.patch('/:prod_id/promo/:promotion_id', async(req, res, next) => {
+productRouter.patch('/:prod_id/promo/:promotion_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
         const oldData = await Product.retrieve_product_promotion(req.params.promotion_id);
@@ -349,7 +393,7 @@ productRouter.patch('/:prod_id/promo/:promotion_id', async(req, res, next) => {
         }
 
         // Validate the passed in data matches schema requirements
-        const validate = jsonschema.validate(req.body, updateProductPromotionSchema);
+        const validate = jsonschema.validate(req.body, productPromotionSchema);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
@@ -361,7 +405,7 @@ productRouter.patch('/:prod_id/promo/:promotion_id', async(req, res, next) => {
         let itemsList = {};
         const newKeys = Object.keys(req.body);
         newKeys.map(key => {
-            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && updateProductPromotionSchema.hasOwnProperty(key))
+            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && productPromotionSchema.hasOwnProperty(key))
                 && (req.body[key] != oldData[key])) {
 
                 itemsList[key] = req.body[key];
@@ -385,7 +429,7 @@ productRouter.patch('/:prod_id/promo/:promotion_id', async(req, res, next) => {
 
 
 /** Update Product Coupon Details */
-productRouter.patch('/:prod_id/coupon/:coupon_id', async(req, res, next) => {
+productRouter.patch('/:prod_id/coupon/:coupon_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
         const oldData = await Product.retrieve_single_product_coupon(req.params.coupon_id);
@@ -396,7 +440,7 @@ productRouter.patch('/:prod_id/coupon/:coupon_id', async(req, res, next) => {
         }
 
         // Validate the passed in data matches schema requirements
-        const validate = jsonschema.validate(req.body, updateProductCouponSchema);
+        const validate = jsonschema.validate(req.body, productCouponSchema);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
@@ -408,7 +452,7 @@ productRouter.patch('/:prod_id/coupon/:coupon_id', async(req, res, next) => {
         let itemsList = {};
         const newKeys = Object.keys(req.body);
         newKeys.map(key => {
-            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && updateProductCouponSchema.hasOwnProperty(key))
+            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && productCouponSchema.hasOwnProperty(key))
                 && (req.body[key] != oldData[key])) {
 
                 itemsList[key] = req.body[key];
@@ -432,7 +476,7 @@ productRouter.patch('/:prod_id/coupon/:coupon_id', async(req, res, next) => {
 
 
 /** Update Product Modifier Details */
-productRouter.patch('/:prod_id/mod/:modifier_id', async(req, res, next) => {
+productRouter.patch('/:prod_id/mod/:modifier_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
         const oldData = await Product.retrieve_single_product_modifier(req.params.modifier_id);
@@ -443,7 +487,7 @@ productRouter.patch('/:prod_id/mod/:modifier_id', async(req, res, next) => {
         }
 
         // Validate the passed in data matches schema requirements
-        const validate = jsonschema.validate(req.body, updateProductModifierSchema);
+        const validate = jsonschema.validate(req.body, productModifierSchema);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
@@ -455,7 +499,7 @@ productRouter.patch('/:prod_id/mod/:modifier_id', async(req, res, next) => {
         let itemsList = {};
         const newKeys = Object.keys(req.body);
         newKeys.map(key => {
-            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && updateProductModifierSchema.hasOwnProperty(key))
+            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && productModifierSchema.hasOwnProperty(key))
                 && (req.body[key] != oldData[key])) {
 
                 itemsList[key] = req.body[key];
@@ -479,7 +523,7 @@ productRouter.patch('/:prod_id/mod/:modifier_id', async(req, res, next) => {
 
 
 /** Update Product Review Details */
-productRouter.patch('/:prod_id/review/:review_id', async(req, res, next) => {
+productRouter.patch('/:prod_id/review/:review_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
         const oldData = await Product.retrieve_single_product_review(req.params.review_id);
@@ -490,7 +534,7 @@ productRouter.patch('/:prod_id/review/:review_id', async(req, res, next) => {
         }
 
         // Validate the passed in data matches schema requirements
-        const validate = jsonschema.validate(req.body, updateProductReviewSchema);
+        const validate = jsonschema.validate(req.body, productReviewSchema);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
@@ -502,7 +546,7 @@ productRouter.patch('/:prod_id/review/:review_id', async(req, res, next) => {
         let itemsList = {};
         const newKeys = Object.keys(req.body);
         newKeys.map(key => {
-            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && updateProductReviewSchema.hasOwnProperty(key))
+            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && productReviewSchema.hasOwnProperty(key))
                 && (req.body[key] != oldData[key])) {
 
                 itemsList[key] = req.body[key];
@@ -533,7 +577,7 @@ productRouter.patch('/:prod_id/review/:review_id', async(req, res, next) => {
 // ╚═══╝╚═══╝╚═══╝╚═══╝ ╚══╝ ╚═══╝
 
 /** Delete entire product */
-productRouter.delete("/:prod_id", async(req, res, next) => {
+productRouter.delete("/:prod_id", ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
         const product = await Product.retrieve_single_product(req.params.prod_id);
@@ -554,7 +598,7 @@ productRouter.delete("/:prod_id", async(req, res, next) => {
 })
 
 /** Delete product image */
-productRouter.delete("/:prod_id/img/:img_id", async(req, res, next) => {
+productRouter.delete("/:prod_id/img/:img_id", ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
         const image = await Product.retrieve_single_product_image(req.params.img_id);
@@ -575,7 +619,7 @@ productRouter.delete("/:prod_id/img/:img_id", async(req, res, next) => {
 });
 
 /** Delete product meta */
-productRouter.delete('/:prod_id/meta/:meta_id', async(req, res, next) => {
+productRouter.delete('/:prod_id/meta/:meta_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
         const meta = await Product.retrieve_single_product_meta(req.params.meta_id);
@@ -596,7 +640,7 @@ productRouter.delete('/:prod_id/meta/:meta_id', async(req, res, next) => {
 });
 
 /** Delete product promotion */
-productRouter.delete('/:prod_id/promo/:promotion_id', async(req, res, next) => {
+productRouter.delete('/:prod_id/promo/:promotion_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
         const promo = await Product.retrieve_product_promotion(req.params.promotion_id);
@@ -617,7 +661,7 @@ productRouter.delete('/:prod_id/promo/:promotion_id', async(req, res, next) => {
 });
 
 /** Delete product coupon */
-productRouter.delete('/:prod_id/coupon/:coupon_id', async(req, res, next) => {
+productRouter.delete('/:prod_id/coupon/:coupon_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
         const coupon = await Product.retrieve_single_product_coupon(req.params.coupon_id);
@@ -638,7 +682,7 @@ productRouter.delete('/:prod_id/coupon/:coupon_id', async(req, res, next) => {
 });
 
 /** Delete product modifier */
-productRouter.delete('/:prod_id/mod/:modifier_id', async(req, res, next) => {
+productRouter.delete('/:prod_id/mod/:modifier_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
         const modifier = await Product.retrieve_single_product_modifier(req.params.modifier_id);
@@ -659,7 +703,7 @@ productRouter.delete('/:prod_id/mod/:modifier_id', async(req, res, next) => {
 });
 
 /** Delete product review */
-productRouter.delete('/:prod_id/review/:review_id', async(req, res, next) => {
+productRouter.delete('/:prod_id/review/:review_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
         const review = await Product.retrieve_single_product_review(req.params.review_id);

@@ -2,7 +2,7 @@
 const express = require('express');
 const jsonschema = require("jsonschema");
 
-// Helper Functions imports 
+// Helper Functions Imports 
 const ExpressError = require("../helpers/expressError");
 
 // Schema Imports
