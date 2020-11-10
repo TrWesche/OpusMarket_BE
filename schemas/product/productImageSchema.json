@@ -20,7 +20,8 @@
     "properties": {
         "url": {
             "$id": "#/properties/url",
-            "type": "uri",
+            "type": "string",
+            "format": "uri",
             "title": "The url schema",
             "description": "An explanation about the purpose of this instance.",
             "default": "",

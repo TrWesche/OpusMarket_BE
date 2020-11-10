@@ -267,4 +267,4 @@ gatheringRouter.delete('/:gathering_id/merch/:img_id', ensureIsMerchant, async(r
     }
 });
 
-module.export = gatheringRouter;
+module.exports = gatheringRouter;

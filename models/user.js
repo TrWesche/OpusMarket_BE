@@ -46,9 +46,8 @@ class User {
           `SELECT email 
               FROM users 
               WHERE email = $1`,
-          [data.email]
-      );
-  
+          [data.email]);
+
       if (duplicateCheck.rows[0]) {
         const err = new Error(
             `A user already exists with that email '${data.email}`);
@@ -62,7 +61,7 @@ class User {
         `INSERT INTO users 
             (email, password, first_name, last_name) 
           VALUES ($1, $2, $3, $4) 
-          RETURNING id, last_name`,
+          RETURNING id, first_name`,
         [
           data.email,
           hashedPassword,

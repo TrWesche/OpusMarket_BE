@@ -42,7 +42,8 @@
         },
         "link": {
             "$id": "#/properties/link",
-            "type": "uri",
+            "type": "string",
+            "format": "uri",
             "title": "The link schema",
             "description": "An explanation about the purpose of this instance.",
             "default": "",
@@ -52,7 +53,8 @@
         },
         "gathering_dt": {
             "$id": "#/properties/gathering_dt",
-            "type": "date-time",
+            "type": "string",
+            "format": "date-time",
             "title": "The gathering_dt schema",
             "description": "An explanation about the purpose of this instance.",
             "default": "",
