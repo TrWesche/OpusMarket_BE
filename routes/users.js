@@ -60,16 +60,21 @@ userRouter.patch("/:id/update", ensureCorrectUser, async (req, res, next) => {
             throw new ExpressError(`Unable to update User: ${listOfErrors}`, 400)
         }
 
-        // Build update list for patch query
+        // Build update list for patch query 
         let itemsList = {};
         const newKeys = Object.keys(req.body);
         newKeys.map(key => {
-            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && userUpdateSchema.hasOwnProperty(key))
+            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && userUpdateSchema.properties.hasOwnProperty(key))
                 && (req.body[key] != oldData[key])) {
 
                 itemsList[key] = req.body[key];
             }
         })
+
+        // If body has password this is a special case and should be added to the itemsList separately
+        if (req.body.hasOwnProperty("password")) {
+            itemsList["password"] = req.body.password;
+        }
 
         // If no changes return original data
         if(Object.keys(itemsList).length === 0) {

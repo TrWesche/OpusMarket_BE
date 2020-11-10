@@ -95,7 +95,7 @@ orderRoutes.patch('/:order_id', ensureIsUser, async(req, res, next) => {
         let itemsList = {};
         const newKeys = Object.keys(req.body);
         newKeys.map(key => {
-            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && orderSchemaUpdate.hasOwnProperty(key))
+            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && orderSchemaUpdate.properties.hasOwnProperty(key))
                 && (req.body[key] != oldData[key])) {
 
                 itemsList[key] = req.body[key];

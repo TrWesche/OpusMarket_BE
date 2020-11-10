@@ -112,6 +112,21 @@ class User {
         data.password = await bcrypt.hash(data.password, BCRYPT_WORK_FACTOR);
       }
   
+      if (data.email) {
+        const duplicateCheck = await db.query(
+          `SELECT email 
+              FROM users 
+              WHERE email = $1`,
+          [data.email]);
+  
+        if (duplicateCheck.rows[0]) {
+          const err = new Error(
+              `Cannot update user email, address ${data.email} is not unique.`);
+          err.status = 409;
+          throw err;
+        }
+      }
+
       // Parital Update: table name, payload data, lookup column name, lookup key
       let {query, values} = partialUpdate(
           "users",
@@ -130,7 +145,8 @@ class User {
       }
   
       delete user.password;
-  
+      delete user.id;
+
       return result.rows[0];
     }
   

@@ -65,13 +65,18 @@ merchantRouter.patch("/:id/update", ensureCorrectMerchant, async (req, res, next
         let itemsList = {};
         const newKeys = Object.keys(req.body);
         newKeys.map(key => {
-            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && merchantUpdateSchema.hasOwnProperty(key))
+            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && merchantUpdateSchema.properties.hasOwnProperty(key))
                 && (req.body[key] != oldData[key])) {
 
                 itemsList[key] = req.body[key];
             }
         })
 
+
+        // If body has password this is a special case and should be added to the itemsList separately
+        if (req.body.hasOwnProperty("password")) {
+            itemsList["password"] = req.body.password;
+        }
 
         // If no changes return original data
         if(Object.keys(itemsList).length === 0) {
