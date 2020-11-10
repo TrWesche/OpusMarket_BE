@@ -107,7 +107,6 @@ class User {
      */
   
     static async update(id, data) {
-      // TODO: Cannot Update ID
       if (data.password) {
         data.password = await bcrypt.hash(data.password, BCRYPT_WORK_FACTOR);
       }

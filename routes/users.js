@@ -54,6 +54,7 @@ userRouter.patch("/:id/update", ensureCorrectUser, async (req, res, next) => {
             throw new ExpressError("Unable to find target user", 404);
         }
 
+        // Validate request data
         const validate = jsonschema.validate(req.body, userUpdateSchema);
         if (!validate.valid) {
             const listOfErrors = validate.errors.map(e => e.stack);

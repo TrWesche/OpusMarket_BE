@@ -89,7 +89,7 @@ class Merchant {
 
       const merchant = result.rows[0];
 
-      if (!user) {
+      if (!merchant) {
         const error = new Error(`Unable to find information on merchant with id: ${id}`);
         error.status = 404;
         throw error;
@@ -113,6 +113,22 @@ class Merchant {
         data.password = await bcrypt.hash(data.password, BCRYPT_WORK_FACTOR);
       }
   
+      if (data.email) {
+        const duplicateCheck = await db.query(
+          `SELECT email 
+              FROM merchants 
+              WHERE email = $1`,
+          [data.email]
+        );
+    
+        if (duplicateCheck.rows[0]) {
+          const err = new Error(
+              `Cannot update merchant email, address ${data.email} is not unique.`);
+          err.status = 409;
+          throw err;
+        }
+      }
+
       // Parital Update: table name, payload data, lookup column name, lookup key
       let {query, values} = partialUpdate(
           "merchants",
@@ -131,6 +147,7 @@ class Merchant {
       }
   
       delete merchant.password;
+      delete merchant.id;
   
       return result.rows[0];
     }
@@ -138,17 +155,19 @@ class Merchant {
     /** Delete target merchant from database; returns undefined. */
   
     static async delete(id) {
-        let result = await db.query(
-                `DELETE FROM merchants 
-                  WHERE id = $1
-                  RETURNING id`,
-                [id]);
+      let result = await db.query(
+              `DELETE FROM merchants 
+                WHERE id = $1
+                RETURNING id`,
+              [id]);
   
       if (result.rows.length === 0) {
         let notFound = new Error(`Delete failed, unable to locate merchant '${id}'`);
         notFound.status = 404;
         throw notFound;
       }
+
+      return result.rows[0];
     }
   }
   

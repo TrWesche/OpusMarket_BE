@@ -101,12 +101,11 @@ merchantRouter.patch("/:id/update", ensureCorrectMerchant, async (req, res, next
 merchantRouter.delete("/:id/delete", ensureCorrectMerchant, async (req, res, next) => {
     try {
         const result = await Merchant.delete(req.params.id);
-
         if(!result) {
             throw new ExpressError("Unable to delete target user account", 404);
         }
 
-        res.cookie("sid", "", {expires: new DateTime.utc()})
+        res.clearCookie('sid');
 
         return res.json({message: "Your account has been deleted."})
     } catch (error) {
@@ -121,9 +120,14 @@ merchantRouter.delete("/:id/delete", ensureCorrectMerchant, async (req, res, nex
 // ║╚═╝║║╚═╝║║╚╩═║║╚═╝║║╚═╝║ ╔╝╚╗ 
 // ╚═══╝╚═══╝╚═══╝╚═══╝╚═══╝ ╚══╝ 
                                
-merchantRouter.get("/logout", async (req, res, next) => {
-    res.cookie("sid", "", {expires: new DateTime.utc()})
-    return res.json({"message": "Logout successful."})
+merchantRouter.get("/:id/logout", async (req, res, next) => {
+    try {
+        res.clearCookie('sid');
+
+        return res.json({"message": "Logout successful."})    
+    } catch (error) {
+        return next(error);
+    }
 })
 
 module.exports = merchantRouter;
