@@ -153,17 +153,19 @@ class User {
     /** Delete target user from database; returns undefined. */
   
     static async delete(id) {
-        let result = await db.query(
-                `DELETE FROM users 
-                  WHERE id = $1
-                  RETURNING id`,
-                [id]);
+      let result = await db.query(
+              `DELETE FROM users 
+                WHERE id = $1
+                RETURNING id`,
+              [id]);
   
       if (result.rows.length === 0) {
         let notFound = new Error(`Delete failed, unable to locate user '${id}'`);
         notFound.status = 404;
         throw notFound;
       }
+
+      return result.rows[0];
     }
   }
   
