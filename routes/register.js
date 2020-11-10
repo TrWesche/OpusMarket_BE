@@ -45,7 +45,7 @@ regRouter.post("/user", async (req, res, next) => {
 
         // Return JSON Web Token
         const token = jwt.sign(queryData, SECRET_KEY);
-        res.cookie("session-token", token, {httpOnly: true, signed: true, maxAge: 86400000}) // 24 hour signed cookie
+        res.cookie("sid", token, {httpOnly: true, signed: true, maxAge: 86400000}) // 24 hour signed cookie
         return res.json({ "message": "Registration successful." })
     } catch (error) {
         next(error)
@@ -72,7 +72,7 @@ regRouter.post("/merchant", async (req, res, next) => {
 
         // Return JSON Web Token
         const token = jwt.sign(queryData, SECRET_KEY);
-        res.cookie("session-token", token, {httpOnly: true, signed: true, maxAge: 86400000}) // 24 hour signed cookie
+        res.cookie("sid", token, {httpOnly: true, signed: true, maxAge: 86400000}) // 24 hour signed cookie
         return res.json({ "message": "Registration successful." })
     } catch (error) {
         next(error)

@@ -7,7 +7,7 @@ const { SECRET_KEY } = require("../config");
 
 function authenticateJWT(req, res, next) {
   try {
-    const authenticationToken = req.cookies.uvert;
+    const authenticationToken = req.signedCookies.sid;
     const payload = jwt.verify(authenticationToken, SECRET_KEY);
     req.user = payload; // create a current user
     return next();
@@ -33,7 +33,7 @@ function ensureLoggedIn(req, res, next) {
 
 function ensureCorrectUser(req, res, next) {
   try {
-    if (req.user.id === req.params.id && req.user.type === "user") {
+    if (req.user.id === +req.params.id && req.user.type === "user") {
       return next();
     }
 
@@ -64,7 +64,7 @@ function ensureIsUser(req, res, next) {
 
 function ensureCorrectMerchant(req, res, next) {
   try {
-    if (req.user.id === req.params.id && req.user.type === "merchant") {
+    if (req.user.id === +req.params.id && req.user.type === "merchant") {
       return next();
     }
 

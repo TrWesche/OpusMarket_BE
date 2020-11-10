@@ -15,7 +15,7 @@ class User {
           `SELECT id, 
                   email, 
                   password,
-                  last_name
+                  first_name
             FROM users 
             WHERE email = $1`,
             [data.email]
@@ -82,8 +82,7 @@ class User {
       const result = await db.query(`
         SELECT email, first_name, last_name
         FROM users
-        WHERE id = $1
-        `,
+        WHERE id = $1`,
       [id]);
 
       const user = result.rows[0];

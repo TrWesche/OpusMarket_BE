@@ -101,7 +101,7 @@ userRouter.delete("/:id/delete", ensureCorrectUser, async (req, res, next) => {
             throw new ExpressError("Unable to delete target user account", 404);
         }
 
-        res.cookie("session-token", "", {expires: new DateTime.utc()})
+        res.cookie("sid", "", {expires: new DateTime.utc()})
 
         return res.json({message: "Your account has been deleted."})
     } catch (error) {
@@ -117,7 +117,7 @@ userRouter.delete("/:id/delete", ensureCorrectUser, async (req, res, next) => {
 // ╚═══╝╚═══╝╚═══╝╚═══╝╚═══╝ ╚══╝ 
                                
 userRouter.get("/logout", async (req, res, next) => {
-    res.cookie("session-token", "", {expires: new DateTime.utc()})
+    res.cookie("sid", "", {expires: new DateTime.utc()})
     return res.json({"message": "Logout successful."})
 })
 
