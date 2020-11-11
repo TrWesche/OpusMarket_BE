@@ -94,7 +94,7 @@ class Gathering {
 
     static async retrieve_single_gathering(id) {
         const gatheringRes = await db.query(`
-            SELECT id, title, description, link, merchant_id
+            SELECT id, title, description, link, merchant_id, gathering_dt
             FROM gatherings
             WHERE id = $1`,
         [id]);
@@ -112,7 +112,7 @@ class Gathering {
 
     static async retrieve_gathering_details(id) {
         const gatheringRes = await db.query(`
-            SELECT id, title, description, link
+            SELECT id, title, description, link, merchant_id, gathering_dt
             FROM gatherings
             WHERE id = $1`,
         [id]);
@@ -157,7 +157,7 @@ class Gathering {
             FROM gathering_merchants
             LEFT JOIN gatherings
             ON gathering_merchants.gathering_id = gatherings.id
-            WHERE merchant_id = $1`,
+            WHERE gathering_merchants.merchant_id = $1`,
         [merchant_id]);
 
         return result.rows;

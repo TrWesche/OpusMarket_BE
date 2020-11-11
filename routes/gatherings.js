@@ -41,6 +41,9 @@ gatheringRouter.post('/new', ensureIsMerchant, async(req, res, next) => {
         // console.log("Schema Passed"); 
 
         const gathering = await Gathering.create_gathering(req.user.id, req.body);
+        const merchants = await Gathering.create_gathering_merchants(gathering.id, {"merchants": [{"id": req.user.id}]})
+
+        gathering.merchants = merchants;
 
         return res.json({ "gathering": gathering })
     } catch (error) {

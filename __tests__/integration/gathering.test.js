@@ -58,3 +58,22 @@
 
 // Test 6 - Fail on Non-Existent Gathering
 // Manual Test - Successful 11/10/2020
+
+
+// Get Gathering Details
+
+// Test 1 - Successful Retrieval of an Existing Gathering
+// Manual Test - Successful 11/10/2020
+
+// Test 2 - Reject on Non-Existing Gathering
+// Manual Test - Successful 11/10/2020
+
+
+
+// Get Merchant Gatherings
+
+// Test 1 - Successful Retrieval of Merchant Gatherings (where they exist)
+// Manual Test - Successful 11/10/2020
+
+// Test 2 - Successful Retrievel of Merchant Gatherings (where there are none)
+// Manual Test - Successful 11/10/2020
