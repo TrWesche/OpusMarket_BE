@@ -10,6 +10,7 @@ const { ensureIsMerchant } = require('../middleware/auth');
 
 // Schema Imports
 const gatheringSchema = require("../schemas/gathering/gatheringSchema.json");
+const gatheringUpdateSchema = require("../schemas/gathering/gatheringUpdateSchema.json");
 const gatheringMerchantSchema = require("../schemas/gathering/gatheringMerchantSchema.json");
 const gatheringImageSchema = require("../schemas/gathering/gatheringImageSchema.json");
 
@@ -163,7 +164,7 @@ gatheringRouter.patch('/:gathering_id', ensureIsMerchant, async(req, res, next) 
         }
 
         // Validate the request data
-        const validate = jsonschema.validate(req.body, gatheringSchema);
+        const validate = jsonschema.validate(req.body, gatheringUpdateSchema);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
@@ -175,7 +176,7 @@ gatheringRouter.patch('/:gathering_id', ensureIsMerchant, async(req, res, next) 
         let itemsList = {};
         const newKeys = Object.keys(req.body);
         newKeys.map(key => {
-            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && gatheringSchema.properties.hasOwnProperty(key))
+            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && gatheringUpdateSchema.properties.hasOwnProperty(key))
                 && (req.body[key] != oldData[key])) {
 
                 itemsList[key] = req.body[key];

@@ -220,7 +220,9 @@ class Gathering {
     // ╚═══╝╚╝   ╚═══╝╚╝ ╚╝ ╚══╝ ╚═══╝
 
     static async update_gathering(id, data) {
-        data.gathering_dt = DateTime.fromISO(data.gathering_dt).toUTC();
+        if (data.gathering_dt) {
+            data.gathering_dt = DateTime.fromISO(data.gathering_dt).toUTC();
+        }
 
         // Partial Update: table name, payload data, lookup column name, lookup key
         let {query, values} = partialUpdate(

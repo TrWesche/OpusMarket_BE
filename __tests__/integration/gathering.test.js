@@ -77,3 +77,24 @@
 
 // Test 2 - Successful Retrievel of Merchant Gatherings (where there are none)
 // Manual Test - Successful 11/10/2020
+
+
+// Update Gathering
+
+// Test 1 - Successful Update Title, Time
+// Manual Test Successful 11/10/2020
+
+// Test 2 - Success Update Delta (Not all variables provided)
+// Manual Test Successful 11/10/2020
+
+// Test 3 - Reject on Empty Title
+// Manual Test - Successful 11/10/2020
+
+// Test 4 - Reject on Incorrect Date/Time Stamp
+// Manual Test - Successful 11/10/2020
+
+// Test 5 - Fail on Missing User Token
+// Not Tested - Same Logic as Create utilizing middleware "ensureIsMerchant"
+
+// Test 6 - Reject on Non-Merchant Token
+// Not Tested - Same Logic as Create utilizing middleware "ensureIsMerchant"
