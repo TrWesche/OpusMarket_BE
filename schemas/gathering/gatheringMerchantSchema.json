@@ -11,18 +11,27 @@
         }
     ],
     "required": [
-        "merchant_id"
+        "merchants"
     ],
     "properties": {
-        "merchant_id": {
-            "$id": "#/properties/merchant_id",
-            "type": "integer",
-            "title": "The merchant_id schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": 0,
-            "examples": [
-                110
-            ]
+        "merchants": {
+            "type": "array",
+            "items": {"$ref": "#/definitions/merchant"}
+        }
+    },
+    "definitions": {
+        "merchant": {
+            "type": "object",
+            "required": ["id"],
+            "properties": {
+                "id": {
+                    "$id": "#/properties/id",
+                    "type": "integer",
+                    "description": "The id of the merchant to be added",
+                    "default": 0,
+                    "examples": [110]
+                }
+            }
         }
     },
     "additionalProperties": true

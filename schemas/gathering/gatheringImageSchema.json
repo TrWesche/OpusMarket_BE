@@ -12,29 +12,38 @@
         }
     ],
     "required": [
-        "url"
     ],
     "properties": {
-        "url": {
-            "$id": "#/properties/url",
-            "type": "string",
-            "format": "uri",
-            "title": "The url schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": "",
-            "examples": [
-                "http://imagesrc.com/imageID"
-            ]
-        },
-        "alt_text": {
-            "$id": "#/properties/alt_text",
-            "type": "string",
-            "title": "The alt_text schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": "",
-            "examples": [
-                "Image Description"
-            ]
+        "images": {
+            "type": "array",
+            "items": {"$ref": "#/definitions/image"}
+        }
+    },
+    "definitions": {
+        "image": {
+            "type": "object",
+            "required": ["url"],
+            "properties": {
+                "url": {
+                    "$id": "#/properties/url",
+                    "type": "string",
+                    "format": "uri",
+                    "title": "The url schema",
+                    "description": "Url defining the image location",
+                    "default": "",
+                    "examples": ["http://imagesrc.com/imageID"]
+                },
+                "alt_text": {
+                    "$id": "#/properties/alt_text",
+                    "type": "string",
+                    "title": "The alt_text schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "Image Description"
+                    ]
+                }
+            }
         }
     },
     "additionalProperties": true

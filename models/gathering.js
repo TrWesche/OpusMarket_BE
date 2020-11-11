@@ -15,19 +15,18 @@ class Gathering {
 
     /** Create gathering with data. Returns new gathering data. */
 
-    static async create_gathering(data) {
-        const adjusted_dt = DateTime.fromISO(data.gathering_dt).toUTC();
+    static async create_gathering(merchant_id, data) {
+        const adjusted_dt = DateTime.fromISO(data.gathering_dt).toUTC().toString();
 
         const result = await db.query(`
             INSERT INTO gatherings
-                (title, description, link, gathering_dt)
-            VALUES ($1, $2, $3, $4)
-            RETURNING (id, title, description, link, gathering_dt)`
-            [data.title, data.description, data.link, adjusted_dt]);
+                (merchant_id, title, description, link, gathering_dt)
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING id, title, description, link, gathering_dt`,
+        [merchant_id, data.title, data.description, data.link, adjusted_dt]);
 
         return result.rows[0];
     }
-
 
     static async create_gathering_merchants(id, data) {
         if (!data.merchants) {
@@ -36,7 +35,7 @@ class Gathering {
             throw error;
         }
 
-        const valueExpressions = ["$1"];
+        const valueExpressions = [];
         let queryValues = [id];
 
         for (const merchant of data.merchants) {
@@ -44,14 +43,14 @@ class Gathering {
             valueExpressions.push(`($1, $${queryValues.length})`)
         }
 
-        const valueExpressionRows = valueList.join(",");
+        const valueExpressionRows = valueExpressions.join(",");
 
         const result = await db.query(`
             INSERT INTO gathering_merchants
                 (gathering_id, merchant_id)
             VALUES
                 ${valueExpressionRows}
-            RETURNING (gathering_id, merchant_id)`,
+            RETURNING gathering_id, merchant_id`,
             queryValues);
         
         return result.rows
@@ -64,7 +63,7 @@ class Gathering {
             throw error;
         }
 
-        const valueExpressions = ["$1"];
+        const valueExpressions = [];
         let queryValues = [id];
 
         for (const image of data.images) {
@@ -72,14 +71,14 @@ class Gathering {
             valueExpressions.push(`($1, $${queryValues.length - 1}, $${queryValues.length})`)
         }
 
-        const valueExpressionRows = valueList.join(",");
+        const valueExpressionRows = valueExpressions.join(",");
 
         const result = await db.query(`
             INSERT INTO gathering_images
                 (gathering_id, url, alt_text)
             VALUES
                 ${valueExpressionRows}
-            RETURNING (gathering_id, url, alt_text)`,
+            RETURNING gathering_id, url, alt_text`,
             queryValues);
         
         return result.rows

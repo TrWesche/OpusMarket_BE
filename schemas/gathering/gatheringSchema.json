@@ -25,6 +25,7 @@
             "type": "string",
             "title": "The title schema",
             "description": "An explanation about the purpose of this instance.",
+            "minLength": 1,
             "default": "",
             "examples": [
                 "Gathering Title"

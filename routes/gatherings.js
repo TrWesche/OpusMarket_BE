@@ -31,16 +31,16 @@ const gatheringRouter = new express.Router();
  */
 gatheringRouter.post('/new', ensureIsMerchant, async(req, res, next) => {
     try {
+        // console.log("Post Started", req.body);
         const validate = jsonschema.validate(req.body, gatheringSchema);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
             throw new ExpressError(`Unable to create a new Gathering: ${listOfErrors}`, 400);
         }
+        // console.log("Schema Passed"); 
 
-        const gathering = await Gathering.create_gathering(req.body);
-        const merchants = await Gathering.create_gathering_merchants(gathering.id, [req.user.id]);
-        gathering.merchants = merchants;
+        const gathering = await Gathering.create_gathering(req.user.id, req.body);
 
         return res.json({ "gathering": gathering })
     } catch (error) {
@@ -246,8 +246,8 @@ gatheringRouter.delete('/:gathering_id/merch/:participant_id', ensureIsMerchant,
     }
 });
 
-/** Delete gathering merchant image*/
-gatheringRouter.delete('/:gathering_id/merch/:img_id', ensureIsMerchant, async(req, res, next) => {
+/** Delete gathering image*/
+gatheringRouter.delete('/:gathering_id/img/:img_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for incorrect organizer, a gathering mismatch, or gathering with id not in database
         const gathering = await Gathering.retrieve_gathering_image(req.params.img_id);
