@@ -12,31 +12,41 @@
         }
     ],
     "required": [
-        "promotion_price",
-        "active"
+        "promotion"
     ],
     "properties": {
-        "promotion_price": {
-            "$id": "#/properties/promotion_price",
-            "type": "number",
-            "title": "The promotion_price schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": 0.0,
-            "minimum": 0.0,
-            "examples": [
-                19.99
-            ]
-        },
-        "active": {
-            "$id": "#/properties/active",
-            "type": "boolean",
-            "title": "The active schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": false,
-            "examples": [
-                true
-            ]
+        "promotion": {
+            "type": "object",
+            "required": [
+                "promotion_price",
+                "active"
+            ],
+            "properties": {
+                "promotion_price": {
+                    "$id": "#/properties/promotion_price",
+                    "type": "number",
+                    "title": "The promotion_price schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": 0.0,
+                    "minimum": 0.0,
+                    "examples": [
+                        19.99
+                    ]
+                },
+                "active": {
+                    "$id": "#/properties/active",
+                    "type": "boolean",
+                    "title": "The active schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": true,
+                    "examples": [
+                        true
+                    ]
+                }
+            }
         }
+
+
     },
     "additionalProperties": true
 }

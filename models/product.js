@@ -14,75 +14,95 @@ class Product {
 
     /** Create product with data. Returns new product data. */
   
-    static async create_product(data, merchant_id) {
-      const result = await db.query(
-          `INSERT INTO products 
-              (merchant_id, name, description, base_price) 
-            VALUES ($1, $2, $3, $4) 
+    static async create_product(merchant_id, products) {
+        const valueExpressions = [];
+        let queryValues = [merchant_id];
+
+        for (const product of products) {
+            queryValues.push(product.name, product.description, product.base_price);
+            valueExpressions.push(`($1, $${queryValues.length - 2}, $${queryValues.length - 1}, $${queryValues.length})`)
+        }
+
+        const valueExpressionRows = valueExpressions.join(",");
+
+        const result = await db.query(`
+            INSERT INTO products
+                (merchant_id, name, description, base_price)
+            VALUES
+                ${valueExpressionRows}
             RETURNING id, merchant_id, name, 
                 description, base_price, avg_rating, 
                 qty_ratings, qty_views, qty_purchases, 
                 qty_returns`,
-          [
-            merchant_id,
-            data.name,
-            data.description,
-            data.base_price
-          ]);
-  
-      return result.rows[0];
+            queryValues);
+    
+        return result.rows
     }
    
 
     /** Adds an image to the product. Returns product image data. */
 
-    static async create_product_image(id, data) {
-        const result = await db.query(
-            `INSERT INTO product_images
-                (product_id, url, alt_text, order)
-            VALUES ($1, $2, $3, $4)
-            RETURNING id, product_id, url, alt_text, order`,
-            [
-                id,
-                data.url,
-                data.alt_text,
-                data.order
-            ]);
+    static async create_product_image(prod_id, images) {
+        const valueExpressions = [];
+        let queryValues = [prod_id];
 
-        return result.rows[0];
+        for (const image of images) {
+            queryValues.push(image.url, image.alt_text, image.order);
+            valueExpressions.push(`($1, $${queryValues.length - 2}, $${queryValues.length - 1}, $${queryValues.length})`)
+        }
+
+        const valueExpressionRows = valueExpressions.join(",");
+
+        // TODO: ORDER needs to be changed to "weight" - no name conflicts and better flexibility in how data is displayed
+        const result = await db.query(`
+            INSERT INTO product_images
+                (product_id, url, alt_text, "order")
+            VALUES
+                ${valueExpressionRows}
+            RETURNING id, product_id, url, alt_text, "order"`,
+            queryValues);
+    
+        return result.rows
     }
 
 
     /** Adds category meta-data to a product.  Returns category data. */
 
-    static async create_product_meta(id, data) {
-        const result = await db.query(
-            `INSERT INTO product_meta
-                (product_id, title, description)
-            VALUES ($1, $2, $3, $4)
-            RETURNING id, product_id, title, description`,
-            [
-                id,
-                data.type,
-                data.title,
-                data.description
-            ]);
+    static async create_product_meta(prod_id, metas) {
+        const valueExpressions = [];
+        let queryValues = [prod_id];
 
-        return result.rows[0];
+        for (const meta of metas) {
+            queryValues.push(meta.title, meta.description);
+            valueExpressions.push(`($1, $${queryValues.length - 1}, $${queryValues.length})`)
+        }
+
+        const valueExpressionRows = valueExpressions.join(",");
+
+        const result = await db.query(`
+            INSERT INTO product_meta
+                (product_id, title, description)
+            VALUES
+                ${valueExpressionRows}
+            RETURNING id, product_id, title, description`,
+            queryValues);
+    
+        return result.rows
     }
 
 
     /** Adds a promotion to a product.  Returns promotion data. */
 
-    static async create_product_promotion(id, data) {
+    static async create_product_promotion(prod_id, promotion) {
         const result = await db.query(
             `INSERT INTO product_promotions
-                (product_id, promotion_price)
-            VALUES ($1, $2)
-            RETURNING id, product_id, promotion_price`,
+                (product_id, promotion_price, active)
+            VALUES ($1, $2, $3)
+            RETURNING id, product_id, promotion_price, active`,
             [
-                id,
-                data.promotion_price
+                prod_id,
+                promotion.promotion_price,
+                promotion.active
             ]);
 
         return result.rows[0];
@@ -91,58 +111,71 @@ class Product {
 
     /** Adds modifiers to a product.  Returns modifier data. */
 
-    static async create_product_modifier(id, data) {
-        const result = await db.query(
-            `INSERT INTO product_modifiers
-                (product_id, name, description)
-            VALUES ($1, $2, $3)
-            RETURNING id, product_id, name, description`,
-            [
-                id,
-                data.product_id,
-                data.name,
-                data.description
-            ]);
+    static async create_product_modifier(prod_id, modifiers) {
+        const valueExpressions = [];
+        let queryValues = [prod_id];
 
-        return result.rows[0];
+        for (const modifier of modifiers) {
+            queryValues.push(modifier.name, modifier.description);
+            valueExpressions.push(`($1, $${queryValues.length - 1}, $${queryValues.length})`)
+        }
+
+        const valueExpressionRows = valueExpressions.join(",");
+
+        const result = await db.query(`
+            INSERT INTO product_modifiers
+                (product_id, name, description)
+            VALUES
+                ${valueExpressionRows}
+            RETURNING id, product_id, name, description`,
+            queryValues);
+    
+        return result.rows
     }
 
 
     /** Creates a coupon for a product.  Returns coupon data. */
 
-    static async create_product_coupon(id, data) {
-        const result = await db.query(
-            `INSERT INTO product_coupons
-                (product_id, code, pct_discount, active)
-            VALUES ($1, $2, $3, $4)
-            RETURNING id, product_id, code, pct_discount, active`,
-            [
-                id,
-                data.code,
-                data.pct_discount,
-                data.active
-            ]);
+    static async create_product_coupon(prod_id, coupons) {
+        const valueExpressions = [];
+        let queryValues = [prod_id];
 
-        return result.rows[0];
+        for (const coupon of coupons) {
+            queryValues.push(coupon.code, coupon.pct_discount, coupon.active);
+            valueExpressions.push(`($1, $${queryValues.length - 2}, $${queryValues.length - 1}, $${queryValues.length})`)
+        }
+
+        const valueExpressionRows = valueExpressions.join(",");
+
+        const result = await db.query(`
+            INSERT INTO product_coupons
+                (product_id, code, pct_discount, active)
+            VALUES
+                ${valueExpressionRows}
+            RETURNING id, product_id, code, pct_discount, active`,
+            queryValues);
+    
+        return result.rows
     }
 
 
     /** Creates a review for a product.  Returns review data. */
 
-    static async create_product_review(id, user_id, data) {
+    static async create_product_review(prod_id, user_id, review) {
+        // TODO: On product reviews this needs to have a side effect of updating the product overall rating.
         const current_dt = DateTime.utc();
 
         const result = await db.query(
             `INSERT INTO product_reviews
                 (product_id, user_id, rating, title, body, review_dt)
-            VALUES ($1, $2, $3, $4, $5)
+            VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING id, product_id, user_id, rating, title, body, review_dt`,
             [
-                id,
+                prod_id,
                 user_id,
-                data.rating,
-                data.title,
-                data.body,
+                review.rating,
+                review.title,
+                review.body,
                 current_dt
             ]
         )

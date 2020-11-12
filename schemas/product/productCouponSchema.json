@@ -13,46 +13,61 @@
         }
     ],
     "required": [
-        "code",
-        "pct_discount",
-        "active"
+        "coupons"
     ],
     "properties": {
-        "code": {
-            "$id": "#/properties/code",
-            "type": "string",
-            "title": "The code schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": "",
-            "pattern": "^[A-Za-z0-9]+$",
-            "minLength": 2,
-            "maxLength": 32,
-            "examples": [
-                "50PCTOFF"
-            ]
-        },
-        "pct_discount": {
-            "$id": "#/properties/pct_discount",
-            "type": "number",
-            "title": "The pct_discount schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": 0.0,
-            "exclusiveMinimum": 0.0,
-            "maximum": 1.0,
-            "examples": [
-                0.5
-            ]
-        },
-        "active": {
-            "$id": "#/properties/active",
-            "type": "boolean",
-            "title": "The active schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": false,
-            "examples": [
-                true
-            ]
+        "coupons": {
+            "type": "array",
+            "items": {"$ref": "#/definitions/coupon"}
         }
+    },
+    "definitions": {
+        "coupon": {
+            "type": "object",
+            "required": [
+                "code",
+                "pct_discount",
+                "active"
+            ],
+            "properties": {
+                "code": {
+                    "$id": "#/properties/code",
+                    "type": "string",
+                    "title": "The code schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "pattern": "^[A-Za-z0-9]+$",
+                    "minLength": 2,
+                    "maxLength": 32,
+                    "examples": [
+                        "50PCTOFF"
+                    ]
+                },
+                "pct_discount": {
+                    "$id": "#/properties/pct_discount",
+                    "type": "number",
+                    "title": "The pct_discount schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": 0.0,
+                    "exclusiveMinimum": 0.0,
+                    "maximum": 1.0,
+                    "examples": [
+                        0.5
+                    ]
+                },
+                "active": {
+                    "$id": "#/properties/active",
+                    "type": "boolean",
+                    "title": "The active schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": false,
+                    "examples": [
+                        true
+                    ]
+                }
+            }
+        }
+        
     },
     "additionalProperties": true
 }

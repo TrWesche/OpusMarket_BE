@@ -7,47 +7,67 @@
     "default": {},
     "examples": [
         {
-            "name": "Product Name",
-            "description": "Description of Product",
-            "base_price": 29.99
+            "products": [
+                {
+                    "name": "Product Name",
+                    "description": "Description of Product",
+                    "base_price": 29.99
+                }
+            ]
         }
     ],
     "required": [
-        "name",
-        "description",
-        "base_price"
+        "products"
     ],
     "properties": {
-        "name": {
-            "$id": "#/properties/name",
-            "type": "string",
-            "title": "The name schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": "",
-            "examples": [
-                "Product Name"
-            ]
-        },
-        "description": {
-            "$id": "#/properties/description",
-            "type": "string",
-            "title": "The description schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": "",
-            "examples": [
-                "Description of Product"
-            ]
-        },
-        "base_price": {
-            "$id": "#/properties/base_price",
-            "type": "number",
-            "title": "The base_price schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": 0.0,
-            "minimum": 0.0,
-            "examples": [
-                29.99
-            ]
+        "products": {
+            "type": "array",
+            "items": {"$ref": "#/definitions/product"}
+        }
+    },
+    "definitions": {
+        "product": {
+            "type": "object",
+            "required": [
+                "name",
+                "description",
+                "base_price"
+            ],
+            "properties": {
+                "name": {
+                    "$id": "#/properties/name",
+                    "type": "string",
+                    "title": "The name schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "minLength": 1,
+                    "examples": [
+                        "Product Name"
+                    ]
+                },
+                "description": {
+                    "$id": "#/properties/description",
+                    "type": "string",
+                    "title": "The description schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "minLength": 1,
+                    "examples": [
+                        "Description of Product"
+                    ]
+                },
+                "base_price": {
+                    "$id": "#/properties/base_price",
+                    "type": "number",
+                    "title": "The base_price schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": 0.0,
+                    "minimum": 0.0,
+                    "examples": [
+                        29.99
+                    ]
+                }
+            }
         }
     },
     "additionalProperties": true

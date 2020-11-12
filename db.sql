@@ -97,7 +97,8 @@ CREATE TABLE "gathering_images" (
   "alt_text" text
 );
 
-
+-- TODO: ORDER NEEDS TO BE CHANGED TO WEIGHT ->> Name conflict resoultion & greater flexibility
+                 
 CREATE TABLE "product_images" (
   "id" SERIAL PRIMARY KEY,
   "product_id" int NOT NULL REFERENCES "products" ("id") ON DELETE CASCADE,

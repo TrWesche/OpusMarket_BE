@@ -7,48 +7,67 @@
     "default": {},
     "examples": [
         {
-            "url": "https://imagestore.com/unqiueid",
-            "alt_text": "Description of Image",
-            "order": 1
+            "images": [
+                {
+                    "url": "https://imagestore.com/unqiueid",
+                    "alt_text": "Description of Image",
+                    "order": 1
+                }
+            ]
         }
     ],
     "required": [
-        "url",
-        "alt_text",
-        "order"
+        "images"
     ],
     "properties": {
-        "url": {
-            "$id": "#/properties/url",
-            "type": "string",
-            "format": "uri",
-            "title": "The url schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": "",
-            "examples": [
-                "https://imagestore.com/unqiueid"
-            ]
-        },
-        "alt_text": {
-            "$id": "#/properties/alt_text",
-            "type": "string",
-            "title": "The alt_text schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": "",
-            "examples": [
-                "Description of Image"
-            ]
-        },
-        "order": {
-            "$id": "#/properties/order",
-            "type": "integer",
-            "title": "The order schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": 1,
-            "minimum": 1,
-            "examples": [
-                1
-            ]
+        "images": {
+            "type": "array",
+            "items": {"$ref": "#/definitions/image"}
+        }
+    },
+    "definitions": {
+        "image": {
+            "type": "object",
+            "required": [
+                "url",
+                "alt_text",
+                "order"
+            ],
+            "properties": {
+                "url": {
+                    "$id": "#/properties/url",
+                    "type": "string",
+                    "format": "uri",
+                    "title": "The url schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "https://imagestore.com/unqiueid"
+                    ]
+                },
+                "alt_text": {
+                    "$id": "#/properties/alt_text",
+                    "type": "string",
+                    "title": "The alt_text schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "minLength": 1,
+                    "examples": [
+                        "Description of Image"
+                    ]
+                },
+                "order": {
+                    "$id": "#/properties/order",
+                    "type": "integer",
+                    "title": "The order schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": 1,
+                    "minimum": 1,
+                    "examples": [
+                        1
+                    ]
+                }
+            }
         }
     },
     "additionalProperties": true

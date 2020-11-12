@@ -12,29 +12,44 @@
         }
     ],
     "required": [
-        "name",
-        "description"
+        "modifiers"
     ],
     "properties": {
-        "name": {
-            "$id": "#/properties/name",
-            "type": "string",
-            "title": "The name schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": "",
-            "examples": [
-                "Modifier Name"
-            ]
-        },
-        "description": {
-            "$id": "#/properties/description",
-            "type": "string",
-            "title": "The description schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": "",
-            "examples": [
-                "Modifier Description"
-            ]
+        "modifiers": {
+            "type": "array",
+            "items": {"$ref": "#/definitions/modifier"}
+        }
+    },
+    "definitions": {
+        "modifier": {
+            "type": "object",
+            "required": [
+                "name",
+                "description"
+            ],
+            "properties": {
+                "name": {
+                    "$id": "#/properties/name",
+                    "type": "string",
+                    "title": "The name schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "minLength": 1,
+                    "examples": [
+                        "Modifier Name"
+                    ]
+                },
+                "description": {
+                    "$id": "#/properties/description",
+                    "type": "string",
+                    "title": "The description schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "Modifier Description"
+                    ]
+                }
+            }
         }
     },
     "additionalProperties": true

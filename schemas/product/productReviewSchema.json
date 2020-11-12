@@ -13,40 +13,48 @@
         }
     ],
     "required": [
-        "rating"
+        "review"
     ],
     "properties": {
-        "rating": {
-            "$id": "#/properties/rating",
-            "type": "integer",
-            "title": "The rating schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": 1,
-            "minimum": 1,
-            "maximum": 5,
-            "examples": [
-                5
-            ]
-        },
-        "title": {
-            "$id": "#/properties/title",
-            "type": "string",
-            "title": "The title schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": "",
-            "examples": [
-                "Review Title"
-            ]
-        },
-        "body": {
-            "$id": "#/properties/body",
-            "type": "string",
-            "title": "The body schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": "",
-            "examples": [
-                "Body Text of Review"
-            ]
+        "review": {
+            "type": "object",
+            "required": [
+                "rating"
+            ],
+            "properties": {
+                "rating": {
+                    "$id": "#/properties/rating",
+                    "type": "integer",
+                    "title": "The rating schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": 1,
+                    "minimum": 1,
+                    "maximum": 5,
+                    "examples": [
+                        5
+                    ]
+                },
+                "title": {
+                    "$id": "#/properties/title",
+                    "type": "string",
+                    "title": "The title schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "Review Title"
+                    ]
+                },
+                "body": {
+                    "$id": "#/properties/body",
+                    "type": "string",
+                    "title": "The body schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "Body Text of Review"
+                    ]
+                }
+            }
         }
     },
     "additionalProperties": true
