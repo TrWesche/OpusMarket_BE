@@ -220,7 +220,7 @@ gatheringRouter.delete('/:gathering_id', ensureIsMerchant, async(req, res, next)
 
         // If changes update product and return updated data
         const result = await Gathering.delete_gathering(req.params.gathering_id);
-        return res.json({ "message": `Gathering ${result} deleted.` })
+        return res.json({ "message": `Gathering removed.` })
 
     } catch (error) {
         console.log(error.code);
@@ -236,12 +236,12 @@ gatheringRouter.delete('/:gathering_id/merch/:participant_id', ensureIsMerchant,
         const gathering = await Gathering.retrieve_gathering_participant(req.params.participant_id);
         if(!gathering.organizer_id) {
             throw new ExpressError("Gathering not found", 404);
-        } else if(gathering.organizer_id !== req.user.id || gathering.gathering_id !== req.params.gathering_id) {
+        } else if(gathering.organizer_id !== req.user.id || gathering.gathering_id !== +req.params.gathering_id) {
             throw new ExpressError(`Unauthorized`, 401);
         }
 
         const result = await Gathering.delete_gathering_merchant(req.params.participant_id);
-        return res.json({ "message": `Gathering Participant ${result} deleted.` })
+        return res.json({ "message": `Gathering Participant removed.` })
 
     } catch (error) {
         console.log(error.code);
@@ -257,12 +257,12 @@ gatheringRouter.delete('/:gathering_id/img/:img_id', ensureIsMerchant, async(req
         const gathering = await Gathering.retrieve_gathering_image(req.params.img_id);
         if(!gathering.organizer_id) {
             throw new ExpressError("Image not found", 404);
-        } else if(gathering.organizer_id !== req.user.id || gathering.gathering_id !== req.params.gathering_id) {
+        } else if(gathering.organizer_id !== req.user.id || gathering.gathering_id !== +req.params.gathering_id) {
             throw new ExpressError(`Unauthorized`, 401);
         }
 
         const result = await Gathering.delete_gathering_image(req.params.img_id);
-        return res.json({ "message": `Gathering Image ${result} deleted.` })
+        return res.json({ "message": `Gathering Image removed.` })
 
     } catch (error) {
         console.log(error.code);

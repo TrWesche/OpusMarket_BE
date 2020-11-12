@@ -166,14 +166,14 @@ class Gathering {
     static async retrieve_gathering_participant(participant_id) {
         const result = await db.query(`
         SELECT
-            gathering_merchants.id as id,
+            gathering_merchants.id AS id,
             gathering_merchants.gathering_id AS gathering_id,
             gathering_merchants.merchant_id AS merchant_id,
             gatherings.merchant_id AS organizer_id
         FROM gathering_merchants
         LEFT JOIN gatherings
         ON gathering_id = gatherings.id
-        WHERE id = $1`,
+        WHERE gathering_merchants.id = $1`,
         [participant_id]);
 
         const participant = result.rows[0];
@@ -190,15 +190,15 @@ class Gathering {
     static async retrieve_gathering_image(img_id) {
         const result = await db.query(`
         SELECT
-            gathering_images.id as id,
+            gathering_images.id AS id,
             gathering_images.gathering_id AS gathering_id,
             gathering_images.url AS url,
             gathering_images.alt_text AS alt_text,
             gatherings.merchant_id AS organizer_id
         FROM gathering_images
         LEFT JOIN gatherings
-        ON gathering_id = gatherings.id
-        WHERE id = $1`,
+        ON gathering_images.gathering_id = gatherings.id
+        WHERE gathering_images.id = $1`,
         [img_id]);
 
         const image = result.rows[0];

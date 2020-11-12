@@ -98,3 +98,35 @@
 
 // Test 6 - Reject on Non-Merchant Token
 // Not Tested - Same Logic as Create utilizing middleware "ensureIsMerchant"
+
+
+
+// Delete Gathering - 
+
+// Test 1 - Successfully Delete Image
+// Manual Test Successful - 11/12/2020
+
+// Test 2 - Reject Delete on Invalid ID
+// Manual Test Successful - 11/12/2020
+
+// Test 3 - Reject Delete on Not Gathering Organizer
+// Manual Test Successful 11/12/2020
+
+// Test 4 - Successfully Delete Participant
+// Manual Test Successful - 11/12/2020
+
+// Test 5 - Reject Delete on Invalid ID
+// Manual Test Successful 11/12/2020
+
+// Test 6 - Reject Delete on Not Gathering Organizer
+// Manual Test Successful 11/12/2020
+
+// Test 7 - Successfully Delete Gathering
+// Cascade Works - Gathering Delete = Assoc Image & Particpant Deletions 11/12/2020
+// Manual Test Successful - 11/12/2020
+
+// Test 8 - Reject Delete on Invalid ID
+// Manual Test Successful 11/12/2020
+
+// Test 9 - Reject Delete on Not Gathering Organizer
+// Manual Test Successful 11/12/2020
