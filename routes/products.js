@@ -532,7 +532,6 @@ productRouter.patch('/:prod_id/modifier/:modifier_id', ensureIsMerchant, async(r
     };
 });
 
-
 /** Update Product Review Details */
 productRouter.patch('/:prod_id/review/:review_id', ensureIsUser, async(req, res, next) => {
     try {
@@ -619,7 +618,7 @@ productRouter.delete("/:prod_id/img/:img_id", ensureIsMerchant, async(req, res, 
             throw new ExpressError(`Unauthorized`, 401);
         }
 
-        await Product.delete_product(req.params.img_id);
+        await Product.delete_product_image(req.params.img_id);
 
         return res.json({"message": "Product Image deleted"})
     } catch (error) {
@@ -640,7 +639,7 @@ productRouter.delete('/:prod_id/meta/:meta_id', ensureIsMerchant, async(req, res
             throw new ExpressError(`Unauthorized`, 401);
         }
 
-        await Product.delete_product(req.params.meta_id);
+        await Product.delete_product_meta(req.params.meta_id);
 
         return res.json({"message": "Product Meta deleted"})
     } catch (error) {
@@ -651,7 +650,7 @@ productRouter.delete('/:prod_id/meta/:meta_id', ensureIsMerchant, async(req, res
 });
 
 /** Delete product promotion */
-productRouter.delete('/:prod_id/promo/:promotion_id', ensureIsMerchant, async(req, res, next) => {
+productRouter.delete('/:prod_id/promotion/:promotion_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
         const promo = await Product.retrieve_product_promotion(req.params.promotion_id);
@@ -661,7 +660,7 @@ productRouter.delete('/:prod_id/promo/:promotion_id', ensureIsMerchant, async(re
             throw new ExpressError(`Unauthorized`, 401);
         }
 
-        await Product.delete_product(req.params.promotion_id);
+        await Product.delete_product_promotion(req.params.promotion_id);
 
         return res.json({"message": "Product Promotion deleted"})
     } catch (error) {
@@ -682,7 +681,7 @@ productRouter.delete('/:prod_id/coupon/:coupon_id', ensureIsMerchant, async(req,
             throw new ExpressError(`Unauthorized`, 401);
         }
 
-        await Product.delete_product(req.params.coupon_id);
+        await Product.delete_product_coupon(req.params.coupon_id);
 
         return res.json({"message": "Product Coupon deleted"})
     } catch (error) {
@@ -693,7 +692,7 @@ productRouter.delete('/:prod_id/coupon/:coupon_id', ensureIsMerchant, async(req,
 });
 
 /** Delete product modifier */
-productRouter.delete('/:prod_id/mod/:modifier_id', ensureIsMerchant, async(req, res, next) => {
+productRouter.delete('/:prod_id/modifier/:modifier_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
         const modifier = await Product.retrieve_single_product_modifier(req.params.modifier_id);
@@ -703,7 +702,7 @@ productRouter.delete('/:prod_id/mod/:modifier_id', ensureIsMerchant, async(req, 
             throw new ExpressError(`Unauthorized`, 401);
         }
 
-        await Product.delete_product(req.params.modifier_id);
+        await Product.delete_product_modifier(req.params.modifier_id);
 
         return res.json({"message": "Product Modifier deleted"})
     } catch (error) {
@@ -714,7 +713,7 @@ productRouter.delete('/:prod_id/mod/:modifier_id', ensureIsMerchant, async(req, 
 });
 
 /** Delete product review */
-productRouter.delete('/:prod_id/review/:review_id', ensureIsMerchant, async(req, res, next) => {
+productRouter.delete('/:prod_id/review/:review_id', ensureIsUser, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
         const review = await Product.retrieve_single_product_review(req.params.review_id);
@@ -724,7 +723,7 @@ productRouter.delete('/:prod_id/review/:review_id', ensureIsMerchant, async(req,
             throw new ExpressError(`Unauthorized`, 401);
         }
 
-        await Product.delete_product(req.params.review_id);
+        await Product.delete_product_review(req.params.review_id);
 
         return res.json({"message": "Product Review deleted"})
     } catch (error) {

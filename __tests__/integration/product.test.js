@@ -337,28 +337,84 @@
 // ---- DELETE TESTS ----
 // ======================
 // Delete Product
+// Test 1 - Delete Success
+// Cascade? - Success 11/12/2020
+// Manual Test Success - 11/12/2020
+
+// Test 2 - Rejection - Not a Merchant User
+// Manual Test Success - 11/12/2020
+
+// Test 3 - Rejection - Not Correct Merchant
+// Manual Test Success - 11/12/2020
 
 
 
 // Delete Product Image
+// Test 1 - Delete Success
+// Manual Test Success - 11/12/2020
+
+// Test 2 - Rejection - Not a Merchant User
+// Manual Test Success - 11/12/2020
+
+// Test 3 - Rejection - Not Correct Merchant
+// Manual Test Success - 11/12/2020
 
 
 
 // Delete Product Meta Data
+// Test 1 - Delete Success
+// Manual Test Success - 11/12/2020
+
+// Test 2 - Rejection - Not a Merchant User
+// Manual Test Success - 11/12/2020
+
+// Test 3 - Rejection - Not Correct Merchant
+// Manual Test Success - 11/12/2020
 
 
 
 // Delete Product Promotion
+// Test 1 - Delete Success
+// Manual Test Success - 11/12/2020
 
+// Test 2 - Rejection - Not a Merchant User
+// Manual Test Success - 11/12/2020
 
-
-// Delete Product Modifier
+// Test 3 - Rejection - Not Correct Merchant
+// Manual Test Success - 11/12/2020
 
 
 
 // Delete Product Coupon
+// Test 1 - Delete Success
+// Manual Test Success - 11/12/2020
+
+// Test 2 - Rejection - Not a Merchant User
+// Manual Test Success - 11/12/2020
+
+// Test 3 - Rejection - Not Correct Merchant
+// Manual Test Success - 11/12/2020
+
+
+
+// Delete Product Modifier
+// Test 1 - Delete Success
+// Manual Test Success - 11/12/2020
+
+// Test 2 - Rejection - Not a Merchant User
+// Manual Test Success - 11/12/2020
+
+// Test 3 - Rejection - Not Correct Merchant
+// Manual Test Success - 11/12/2020
 
 
 
 // Delete Product Review
+// Test 1 - Delete Success
+// Manual Test Success - 11/12/2020
 
+// Test 2 - Rejection - Not a Buying User
+// Manual Test Success - 11/12/2020
+
+// Test 3 - Rejection - Not Correct Buyer
+// Manual Test Success - 11/12/2020
