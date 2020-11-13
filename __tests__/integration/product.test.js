@@ -176,11 +176,30 @@
 // ----  READ TESTS  ----
 // ======================
 // Get Product Details
+// --------------------------
+// Test 1 - Can retrieve full product details
+// Manual Test Success - 11/12/2020
 
+// Test 2 - Returns 404 on product not found
+// Manual Test Success - 11/12/2020
 
 
 // Get Catalog
+// --------------------------
+// Test 1 - Can retrieve product catalogue no search parameters
+// Manual Test Success - 11/12/2020
 
+// Test 2 - Can retrieve products by name search string
+// Manual Test Success - 11/12/2020
+
+// Test 3 - Can retrieve products by tag data
+// Manual Test Success - 11/12/2020
+
+// Test 4 - Can retrieve products by rating data
+// Manual Test Success - 11/12/2020
+
+// Test 5 - Can retrieve products with multiple filters
+// Manual Test Success - 11/12/2020
 
 
 
@@ -244,4 +263,3 @@
 
 // Delete Product Review
 
-wq 

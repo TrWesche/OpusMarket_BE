@@ -162,7 +162,7 @@ class Product {
     /** Creates a review for a product.  Returns review data. */
 
     static async create_product_review(prod_id, user_id, review) {
-        // TODO: On product reviews this needs to have a side effect of updating the product overall rating.
+        // TODO: On product reviews this needs to have a side effect of updating the product overall rating & qty ratings.
         const current_dt = DateTime.utc();
 
         const result = await db.query(
@@ -214,6 +214,8 @@ class Product {
     /** Retreive data on a single product */
 
     static async retrieve_product_details(id) {
+        // TODO: Side effect - on view increment product views counter
+
         const productRes = await db.query(
         `SELECT merchant_id, name, description, base_price, avg_rating
             FROM products
@@ -231,7 +233,7 @@ class Product {
         // TODO: Implement these parallel calls with a Promise wrapper
 
         const product_imagesRes = await db.query(
-        `SELECT id, url, alt_text, order
+        `SELECT id, url, alt_text, "order"
             FROM product_images
             WHERE product_id = $1`,
         [id]);
@@ -255,14 +257,20 @@ class Product {
         product.modifiers = product_modifiersRes.rows;
 
         const product_reviewsRes = await db.query(
-            `SELECT id, first_name, rating, title, body, review_dt
-                FROM product_reviews
-                LEFT JOIN users
-                ON product_reviews.user_id = users.id
-                WHERE product_id = $1
-                ORDER BY review_dt DESC
-                LIMIT 10
-                OFFSET $2`,
+            `SELECT
+                product_reviews.id AS id,
+                users.first_name AS first_name,
+                product_reviews.rating AS rating,
+                product_reviews.title AS title,
+                product_reviews.body AS body,
+                product_reviews.review_dt AS review_dt
+            FROM product_reviews
+            LEFT JOIN users
+            ON product_reviews.user_id = users.id
+            WHERE product_reviews.product_id = $1
+            ORDER BY review_dt DESC
+            LIMIT 10
+            OFFSET $2`,
             [id, 0]);
         
         product.reviews = product_reviewsRes.rows;
@@ -273,34 +281,39 @@ class Product {
 
     /** Retreive data on multiple products by category, can expand filters later */
 
-    static async retrieve_filtered_products(data) {
+    static async retrieve_filtered_products(query) {
         // TODO: Currently filters on meta tags & rating. Need to put additional effort into making this more
         // configurable & maintainable.
 
         // TODO: Not pulling in image currently, will need to add this functionality.
         let baseQuery = `
-            SELECT DISTINCT ON (product_id) prod_id, 
-                product_meta.title AS meta_title, 
-                product_meta.description AS meta_description,
-                products.name AS name,
-                products.description AS description,
-                products.base_price AS base_price,
-                products.avg_rating AS avg_rating,
-            FROM product_meta
-            RIGHT JOIN products
-            ON prod_id = products.id
-            LEFT JOIN product_images
-            ON prod_id = product_images.product_id`;
+        SELECT 
+            DISTINCT ON (products.id)
+            products.id,
+            product_meta.title AS meta_title, 
+            product_meta.description AS meta_description,
+            products.name AS name,
+            products.description AS description,
+            products.base_price AS base_price,
+            products.avg_rating AS avg_rating,
+            product_images.url AS img_url
+        FROM products
+        FULL OUTER JOIN product_meta
+        ON products.id = product_meta.product_id
+        FULL OUTER JOIN product_images
+        ON products.id = product_images.product_id`;
 
         let orExpressions = [];
         let andExpressions = [];
         let queryValues = [];
 
         // Collect product name search values
-        if (data.s) {
-            for (const searchVal of data.s) {
-                queryValues.push(searchVal);
-                orExpressions.push(`name ILIKE $${queryValues.length}`);
+        if (query.s) {
+            const searchArray = query.s.split(" ");
+
+            for (const searchVal of searchArray) {
+                queryValues.push('%'+ searchVal + '%');
+                orExpressions.push(`products.name ILIKE $${queryValues.length}`);
             }
 
             const resQuery = `(${orExpressions.join(" OR ")})`;
@@ -309,21 +322,23 @@ class Product {
         }
 
         // Collect meta tag search values
-        if (data.t) {
-            for (const metaTag of data.t) {
-                queryValues.push(metaTag);
-                orExpressions.push(`meta_title ILIKE $${queryValues.length}`);
+        if (query.t) {
+            const searchArray = query.t.split(" ");
+
+            for (const searchVal of searchArray) {
+                queryValues.push('%'+ searchVal + '%');
+                orExpressions.push(`product_meta.title ILIKE $${queryValues.length}`);
             }
 
             const resQuery = `(${orExpressions.join(" OR ")})`;
             andExpressions.push(resQuery);
             orExpressions = [];
         }
-        
+
         // Add rating filter value
-        if (data.r) {
-            queryValues.push(data.r)
-            orExpressions.push(`avg_rating >= ${queryValues.length}`)
+        if (query.r) {
+            queryValues.push(query.r)
+            orExpressions.push(`products.avg_rating >= $${queryValues.length}`)
 
             const resQuery = `(${orExpressions.join(" OR ")})`;
             andExpressions.push(resQuery);
@@ -336,7 +351,7 @@ class Product {
 
         // Finalize query and return results
 
-        let finalQuery = baseQuery + andExpressions.join(" AND ") + " ORDER BY name";
+        let finalQuery = baseQuery + andExpressions.join(" AND ");
         const companiesRes = await db.query(finalQuery, queryValues);
         return companiesRes.rows;
     }  

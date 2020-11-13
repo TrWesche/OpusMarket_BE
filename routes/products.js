@@ -21,6 +21,7 @@ const Product = require("../models/product");
 
 // Middleware Imports
 const { ensureLoggedIn, ensureIsMerchant, ensureIsUser } = require("../middleware/auth");
+const { query } = require("../db");
 
 
 const productRouter = new express.Router();
@@ -51,7 +52,6 @@ productRouter.post('/new', ensureLoggedIn, ensureIsMerchant, async(req, res, nex
     };
 });
 
-
 productRouter.post('/:prod_id/new/img', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for incorrect merchant or product with id not in database
@@ -76,7 +76,6 @@ productRouter.post('/:prod_id/new/img', ensureIsMerchant, async(req, res, next) 
     };
 });
 
-
 productRouter.post('/:prod_id/new/meta', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for incorrect merchant or product with id not in database
@@ -100,7 +99,6 @@ productRouter.post('/:prod_id/new/meta', ensureIsMerchant, async(req, res, next)
         return next(error);
     };
 });
-
 
 productRouter.post('/:prod_id/new/promotion', ensureIsMerchant, async(req, res, next) => {
     try {
@@ -206,10 +204,30 @@ productRouter.post('/:prod_id/new/review', ensureIsUser, async(req, res, next) =
 // ║║║╚╗║╚══╗║╔═╗║╔╝╚╝║
 // ╚╝╚═╝╚═══╝╚╝ ╚╝╚═══╝   
 
-productRouter.get('/:prod_id', async(req, res, next) => {
+productRouter.get('/catalog', async(req, res, next) => {
+    try {
+        let queryData;
+        // Check for query params validity - search = s, tag = t, rating = r
+        // TODO: Add category search? - c = category?
+
+        // TODO: Is a schema on the search query string necessary?
+        // if (Object.keys(req.query).length && jsonschema.validate(req.query, catalogSearchSchema).valid) {
+        if (Object.keys(req.query).length) {
+            queryData = await Product.retrieve_filtered_products(req.query);
+        } else {
+            queryData = await Product.retrieve_filtered_products({});
+        }
+
+        return res.json({"products": queryData})
+    } catch (error) {
+        return next(error);
+    }
+})
+
+productRouter.get('/catalog/:prod_id', async(req, res, next) => {
     try {
         // Check for product with id not in database
-        const result = await Product.retrieve_single_product(req.params.prod_id);
+        const result = await Product.retrieve_product_details(req.params.prod_id);
         if(!result) {
             throw new ExpressError(`The requested product could not be found`, 404);
         }
@@ -218,24 +236,6 @@ productRouter.get('/:prod_id', async(req, res, next) => {
     } catch (error) {
         return next(error);
     };
-})
-
-
-productRouter.get('/catalog', async(req, res, next) => {
-    try {
-        let queryData;
-        // Check for query params validity - search = s, tag = t, rating = r
-        // TODO: Add category search? - c = category?
-        if (Object.keys(req.query).length && jsonschema.validate(req.query, catalogSearchSchema).valid) {
-            queryData = await Product.retrieve_filtered_products(req.query);
-        } else {
-            queryData = await Product.retrieve_filtered_products(null);
-        }
-
-        return res.json({products: queryData})
-    } catch (error) {
-        return next(error);
-    }
 })
 
 
