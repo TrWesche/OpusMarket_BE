@@ -104,7 +104,7 @@ CREATE TABLE "product_images" (
   "product_id" int NOT NULL REFERENCES "products" ("id") ON DELETE CASCADE,
   "url" text NOT NULL,
   "alt_text" text,
-  "order" int
+  "weight" int
 );
 
 CREATE TABLE "product_meta" (

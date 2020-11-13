@@ -7,45 +7,44 @@
     "default": {},
     "examples": [
         {
-            "name": "Product Name",
-            "description": "Description of Product",
-            "base_price": 29.99
+            "url": "https://imagestore.com/unqiueid",
+            "alt_text": "Description of Image",
+            "order": 1
         }
     ],
-    "required": [
-    ],
+    "required": [],
     "properties": {
-        "name": {
-            "$id": "#/properties/name",
+        "url": {
+            "$id": "#/properties/url",
             "type": "string",
-            "title": "The name schema",
+            "format": "uri",
+            "title": "The url schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "https://imagestore.com/unqiueid"
+            ]
+        },
+        "alt_text": {
+            "$id": "#/properties/alt_text",
+            "type": "string",
+            "title": "The alt_text schema",
             "description": "An explanation about the purpose of this instance.",
             "default": "",
             "minLength": 1,
             "examples": [
-                "Product Name"
+                "Description of Image"
             ]
         },
-        "description": {
-            "$id": "#/properties/description",
-            "type": "string",
-            "title": "The description schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": "",
-            "minLength": 1,
+        "weight": {
+            "$id": "#/properties/weight",
+            "type": "integer",
+            "title": "The weight schema",
+            "description": "A higher image weight will move the image forward in the image rotation.",
+            "default": 1,
+            "minimum": 1,
             "examples": [
-                "Description of Product"
-            ]
-        },
-        "base_price": {
-            "$id": "#/properties/base_price",
-            "type": "number",
-            "title": "The base_price schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": 0.0,
-            "minimum": 0.0,
-            "examples": [
-                29.99
+                1, 10
             ]
         }
     },

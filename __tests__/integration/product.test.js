@@ -28,18 +28,15 @@
 // --------------------------
 // Test 1 - Single Product Creation
 // Manual Test Success - 11/12/2020
-// -- Note, Table needs to be changed, these will need a retest
 
 // Test 2 - Multiple Product Creation
 // Manual Test Success - 11/12/2020
-// -- Note, Table needs to be changed, these will need a retest
 
 // Test 3 - Rejection - Missing Required Information
 // Manual Test Success - 11/12/2020
 
 // Test 4 - Rejection - Value outside of Weight Bounds
-// Manual Test - Waiting until column name update
-// -- Note, Table needs to be changed, these will need a retest
+// Manual Test Success - 11/12/2020
 
 // Test 5 - Rejection - Invalid url
 // Manual Test Success - 11/12/2020
@@ -101,28 +98,6 @@
 
 
 
-// Add Product Modifier
-// --------------------------
-// Test 1 - Single Modifier Creation
-// Manual Test Success - 11/12/2020
-
-// Test 2 - Multiple ProduModifierct Creation
-// Manual Test Success - 11/12/2020
-
-// Test 3 - Rejection - Missing Required Information
-// Manual Test Success - 11/12/2020
-
-// Test 4 - Rejection - Name Length to Short (1 char)
-// Manual Test Success - 11/12/2020
-
-// Test 5 - Rejection - Not a Merchant User
-// Manual Test Success - 11/12/2020
-
-// Test 6 - Rejection - Not Correct Merchant
-// Manual Test Success - 11/12/2020
-
-
-
 // Add Product Coupon
 // --------------------------
 // Test 1 - Single Coupon Creation
@@ -152,6 +127,29 @@
 
 // Test 9 - Rejection - Not Correct Merchant
 // Manual Test Success - 11/12/2020
+
+
+
+// Add Product Modifier
+// --------------------------
+// Test 1 - Single Modifier Creation
+// Manual Test Success - 11/12/2020
+
+// Test 2 - Multiple Product Modifier Creation
+// Manual Test Success - 11/12/2020
+
+// Test 3 - Rejection - Missing Required Information
+// Manual Test Success - 11/12/2020
+
+// Test 4 - Rejection - Name Length to Short (1 char)
+// Manual Test Success - 11/12/2020
+
+// Test 5 - Rejection - Not a Merchant User
+// Manual Test Success - 11/12/2020
+
+// Test 6 - Rejection - Not Correct Merchant
+// Manual Test Success - 11/12/2020
+
 
 
 // Add Product Review
@@ -207,30 +205,131 @@
 // ---- UPDATE TESTS ----
 // ======================
 // Update Product
+// --------------------------
+// Test 1 - Product Update
+// Manual Test Success - 11/12/2020
 
+// Test 2 - Rejection - Negative Value for Price
+// Manual Test Success - 11/12/2020
+
+// Test 3 - Rejection - Min Length Title / Description Violation
+// Manual Test Success - 11/12/2020
+
+// Test 4 - Rejection - Not a Merchant User
+// Manual Test Success - 11/12/2020
+
+// Test 5 - Rejection - Incorrect Merchant
+// Manual Test Success - 11/12/2020
 
 
 // Update Product Image
+// --------------------------
+// Test 1 - Update Image
+// Manual Test Success - 11/12/2020
 
+// Test 2 - Rejection - Value outside of Weight Bounds
+// Manual Test Success - 11/12/2020
+
+// Test 3 - Rejection - Invalid url
+// Manual Test Success - 11/12/2020
+
+// Test 4 - Rejection - Alt Text to Short
+// Manual Test Success - 11/12/2020
+
+// Test 5 - Rejection - Not a Merchant User
+// Manual Test Success - 11/12/2020
+
+// Test 6 - Rejection - Not Correct Merchant
+// Manual Test Success - 11/12/2020
 
 
 // Update Product Meta Data
+// --------------------------
+// Test 1 - Update Meta
+// Manual Test Success - 11/12/2020
+
+// Test 2 - Rejection - Name Length to Short (1 char)
+// Manual Test Success - 11/12/2020
+
+// Test 3 - Rejection - Not a Merchant User
+// Manual Test Success - 11/12/2020
+
+// Test 4 - Rejection - Not Correct Merchant
+// Manual Test Success - 11/12/2020
 
 
 
 // Update Product Promotion
+// --------------------------
+// Test 1 - Promotion Update
+// Manual Test Success - 11/12/2020
 
+// Test 2 - Rejection - Negative Promotion Value
+// Manual Test Success - 11/12/2020
 
+// Test 3 - Rejection - Not a Merchant User
+// Manual Test Success - 11/12/2020
 
-// Update Product Modifier
+// Test 4 - Rejection - Not Correct Merchant
+// Manual Test Success - 11/12/2020
 
 
 
 // Update Product Coupon
+// --------------------------
+// Test 1 - Update Coupon
+// Manual Test Success - 11/12/2020
+
+// Test 4 - Rejection - Code Length to Short (2 char)
+// Manual Test Success - 11/12/2020
+
+// Test 5 - Rejection - Code Incudes Illegal Characters (Only 0-9 a-Z allowed)
+// Note: Might need to change the default message, may be confusing as it returns the RegEx pattern
+// Manual Test Success - 11/12/2020
+
+// Test 6 - Rejection - Negative Discount
+// Manual Test Success - 11/12/2020
+
+// Test 7 - Rejection - Greather than 100% (1) Discount
+// Manual Test Success - 11/12/2020
+
+// Test 8 - Rejection - Not a Merchant User
+// Manual Test Success - 11/12/2020
+
+// Test 9 - Rejection - Not Correct Merchant
+// Manual Test Success - 11/12/2020
+
+
+
+// Update Product Modifier
+// --------------------------
+// Test 1 - Update Modifier
+// Manual Test Success - 11/12/2020
+
+// Test 2 - Rejection - Name Length to Short (1 char)
+// Manual Test Success - 11/12/2020
+
+// Test 3 - Rejection - Not a Merchant User
+// Manual Test Success - 11/12/2020
+
+// Test 4 - Rejection - Not Correct Merchant
+// Manual Test Success - 11/12/2020
 
 
 
 // Update Product Review
+// --------------------------
+// Test 1 - Review Update
+// Manual Test Success - 11/12/2020
+
+// Test 2 - Rejection - Non-Integer Type for Rating
+// Manual Test Success - 11/12/2020
+
+// Test 3 - Rejection - Rating Out of Bounds (1-5)
+// Manual Test Success - 11/12/2020
+
+// Test 4 - Rejection - Not a Buying User
+// Manual Test Success - 11/12/2020
 
 
 

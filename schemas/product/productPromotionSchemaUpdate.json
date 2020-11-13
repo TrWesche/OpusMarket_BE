@@ -1,0 +1,40 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "title": "The root schema",
+    "description": "The root schema comprises the entire JSON document.",
+    "default": {},
+    "examples": [
+        {
+            "promotion_price": 19.99,
+            "active": true
+        }
+    ],
+    "required": [
+    ],
+    "properties": {
+        "promotion_price": {
+            "$id": "#/properties/promotion_price",
+            "type": "number",
+            "title": "The promotion_price schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": 0.0,
+            "minimum": 0.0,
+            "examples": [
+                19.99
+            ]
+        },
+        "active": {
+            "$id": "#/properties/active",
+            "type": "boolean",
+            "title": "The active schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": true,
+            "examples": [
+                true
+            ]
+        }
+    },
+    "additionalProperties": true
+}

@@ -31,7 +31,7 @@
             "required": [
                 "url",
                 "alt_text",
-                "order"
+                "weight"
             ],
             "properties": {
                 "url": {
@@ -56,11 +56,11 @@
                         "Description of Image"
                     ]
                 },
-                "order": {
-                    "$id": "#/properties/order",
+                "weight": {
+                    "$id": "#/properties/weight",
                     "type": "integer",
-                    "title": "The order schema",
-                    "description": "An explanation about the purpose of this instance.",
+                    "title": "The weight schema",
+                    "description": "A higher image weight will move the image forward in the image rotation.",
                     "default": 1,
                     "minimum": 1,
                     "examples": [

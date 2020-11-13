@@ -13,7 +13,6 @@ class Product {
     // ╚═══╝╚╝╚═╝╚═══╝╚╝ ╚╝ ╚══╝ ╚═══╝
 
     /** Create product with data. Returns new product data. */
-  
     static async create_product(merchant_id, products) {
         const valueExpressions = [];
         let queryValues = [merchant_id];
@@ -39,15 +38,13 @@ class Product {
         return result.rows
     }
    
-
     /** Adds an image to the product. Returns product image data. */
-
     static async create_product_image(prod_id, images) {
         const valueExpressions = [];
         let queryValues = [prod_id];
 
         for (const image of images) {
-            queryValues.push(image.url, image.alt_text, image.order);
+            queryValues.push(image.url, image.alt_text, image.weight);
             valueExpressions.push(`($1, $${queryValues.length - 2}, $${queryValues.length - 1}, $${queryValues.length})`)
         }
 
@@ -56,18 +53,16 @@ class Product {
         // TODO: ORDER needs to be changed to "weight" - no name conflicts and better flexibility in how data is displayed
         const result = await db.query(`
             INSERT INTO product_images
-                (product_id, url, alt_text, "order")
+                (product_id, url, alt_text, weight)
             VALUES
                 ${valueExpressionRows}
-            RETURNING id, product_id, url, alt_text, "order"`,
+            RETURNING id, product_id, url, alt_text, weight`,
             queryValues);
     
         return result.rows
     }
 
-
     /** Adds category meta-data to a product.  Returns category data. */
-
     static async create_product_meta(prod_id, metas) {
         const valueExpressions = [];
         let queryValues = [prod_id];
@@ -90,10 +85,13 @@ class Product {
         return result.rows
     }
 
-
     /** Adds a promotion to a product.  Returns promotion data. */
-
     static async create_product_promotion(prod_id, promotion) {
+        // TODO: Functionality here should be expanded with business rules:
+        // I.e.
+        // - Only 1 promotion active at a time -> setting 1 active has a side effect
+        // of deactivating others
+        // - Promotion value cannot be higher then the regular list price
         const result = await db.query(
             `INSERT INTO product_promotions
                 (product_id, promotion_price, active)
@@ -108,34 +106,7 @@ class Product {
         return result.rows[0];
     }
 
-
-    /** Adds modifiers to a product.  Returns modifier data. */
-
-    static async create_product_modifier(prod_id, modifiers) {
-        const valueExpressions = [];
-        let queryValues = [prod_id];
-
-        for (const modifier of modifiers) {
-            queryValues.push(modifier.name, modifier.description);
-            valueExpressions.push(`($1, $${queryValues.length - 1}, $${queryValues.length})`)
-        }
-
-        const valueExpressionRows = valueExpressions.join(",");
-
-        const result = await db.query(`
-            INSERT INTO product_modifiers
-                (product_id, name, description)
-            VALUES
-                ${valueExpressionRows}
-            RETURNING id, product_id, name, description`,
-            queryValues);
-    
-        return result.rows
-    }
-
-
     /** Creates a coupon for a product.  Returns coupon data. */
-
     static async create_product_coupon(prod_id, coupons) {
         const valueExpressions = [];
         let queryValues = [prod_id];
@@ -158,9 +129,30 @@ class Product {
         return result.rows
     }
 
+    /** Adds modifiers to a product.  Returns modifier data. */
+    static async create_product_modifier(prod_id, modifiers) {
+        const valueExpressions = [];
+        let queryValues = [prod_id];
+
+        for (const modifier of modifiers) {
+            queryValues.push(modifier.name, modifier.description);
+            valueExpressions.push(`($1, $${queryValues.length - 1}, $${queryValues.length})`)
+        }
+
+        const valueExpressionRows = valueExpressions.join(",");
+
+        const result = await db.query(`
+            INSERT INTO product_modifiers
+                (product_id, name, description)
+            VALUES
+                ${valueExpressionRows}
+            RETURNING id, product_id, name, description`,
+            queryValues);
+    
+        return result.rows
+    }
 
     /** Creates a review for a product.  Returns review data. */
-
     static async create_product_review(prod_id, user_id, review) {
         // TODO: On product reviews this needs to have a side effect of updating the product overall rating & qty ratings.
         const current_dt = DateTime.utc();
@@ -191,7 +183,6 @@ class Product {
     // ╚╝╚═╝╚═══╝╚╝ ╚╝╚═══╝   
 
     /** Retreive data on a single product */
-
     static async retrieve_single_product(id) {
         const productRes = await db.query(
         `SELECT merchant_id, name, description, base_price, avg_rating
@@ -210,9 +201,7 @@ class Product {
         return product;
     }
 
-
     /** Retreive data on a single product */
-
     static async retrieve_product_details(id) {
         // TODO: Side effect - on view increment product views counter
 
@@ -233,7 +222,7 @@ class Product {
         // TODO: Implement these parallel calls with a Promise wrapper
 
         const product_imagesRes = await db.query(
-        `SELECT id, url, alt_text, "order"
+        `SELECT id, url, alt_text, weight
             FROM product_images
             WHERE product_id = $1`,
         [id]);
@@ -278,9 +267,7 @@ class Product {
         return product;
     }
 
-
     /** Retreive data on multiple products by category, can expand filters later */
-
     static async retrieve_filtered_products(query) {
         // TODO: Currently filters on meta tags & rating. Need to put additional effort into making this more
         // configurable & maintainable.
@@ -356,8 +343,8 @@ class Product {
         return companiesRes.rows;
     }  
 
-    /** Retrieve single product image  */
 
+    /** Retrieve single product image  */
     static async retrieve_single_product_image(id) {
         const result = await db.query(`
             SELECT 
@@ -365,12 +352,12 @@ class Product {
                 product_images.product_id AS product_id, 
                 product_images.url AS url, 
                 product_images.alt_text AS alt_text, 
-                product_images.order AS order,
+                product_images.weight AS weight,
                 products.merchant_id AS merchant_id
             FROM product_images
             RIGHT JOIN products
             ON product_id = products.id
-            WHERE id = $1`,
+            WHERE product_images.id = $1`,
         [id]);
         
         const image = result.rows[0];
@@ -392,7 +379,7 @@ class Product {
                 product_images.product_id AS product_id, 
                 product_images.url AS url, 
                 product_images.alt_text AS alt_text, 
-                product_images.order AS order,
+                product_images.weight AS weight,
                 products.merchant_id AS merchant_id
             FROM product_images
             RIGHT JOIN products
@@ -405,7 +392,6 @@ class Product {
 
 
     /** Retrieve single product meta  */
-
     static async retrieve_single_product_meta(id) {
         const result = await db.query(`
             SELECT 
@@ -417,7 +403,7 @@ class Product {
             FROM product_meta
             RIGHT JOIN products
             ON product_id = products.id
-            WHERE id = $1`,
+            WHERE product_meta.id = $1`,
         [id]);
         
         const meta = result.rows[0];
@@ -432,7 +418,6 @@ class Product {
     }
 
     /** Retreive product metas */
-
     static async retrieve_product_metas(prod_id) {
         const result = await db.query(`
             SELECT 
@@ -463,7 +448,7 @@ class Product {
             FROM product_promotions
             RIGHT JOIN products
             ON product_id = products.id
-            WHERE id = $1`,
+            WHERE product_promotions.id = $1`,
         [id]);
         
         const promotion = result.rows[0];
@@ -476,6 +461,7 @@ class Product {
 
         return promotion;
     }
+
 
     /** Retreive single product coupon */
     static async retrieve_single_product_coupon(id) {
@@ -490,7 +476,7 @@ class Product {
             FROM product_coupons
             RIGHT JOIN products
             ON product_id = products.id
-            WHERE id = $1`,
+            WHERE product_coupons.id = $1`,
         [id]);
 
         const coupon = result.rows[0];
@@ -536,7 +522,7 @@ class Product {
             FROM product_modifiers
             RIGHT JOIN products
             ON product_id = products.id
-            WHERE id = $1`,
+            WHERE product_modifiers.id = $1`,
         [id]);
 
         const modifier = result.rows[0];
@@ -568,6 +554,7 @@ class Product {
         return result.rows;
     }
 
+
     /** Retrieve single review */
     static async retrieve_single_product_review(id) {
         const result = await db.query(`
@@ -583,7 +570,7 @@ class Product {
             FROM product_reviews
             RIGHT JOIN products
             ON product_id = products.id
-            WHERE id = $1`,
+            WHERE product_reviews.id = $1`,
         [id]);
 
         const review = result.rows[0];
@@ -675,6 +662,23 @@ class Product {
         return result.rows[0];
     }
   
+    // TODO: Statistical Update Routes
+    // static async update_product_stats_ratings() {
+
+    // }
+
+    // static async update_product_stats_views() {
+
+    // }
+
+    // static async update_product_stats_purchases() {
+
+    // }
+
+    // static async update_product_states_returns() {
+
+    // }
+
     static async update_product_image(id, data) {
         // Partial Update: table name, payload data, lookup column name, lookup key
         let {query, values} = partialUpdate(
@@ -718,6 +722,12 @@ class Product {
     }
 
     static async update_product_promotion(id, data) {
+        // TODO: Functionality here should be expanded with business rules:
+        // I.e.
+        // - Only 1 promotion active at a time -> setting 1 active has a side effect
+        // of deactivating others
+        // - Promotion value cannot be higher then the regular list price
+
         // Partial Update: table name, payload data, lookup column name, lookup key
         let {query, values} = partialUpdate(
             "product_promotions",
@@ -783,7 +793,7 @@ class Product {
     static async update_product_review(id, data) {
         // Partial Update: table name, payload data, lookup column name, lookup key
         let {query, values} = partialUpdate(
-            "product_review",
+            "product_reviews",
             data,
             "id",
             id

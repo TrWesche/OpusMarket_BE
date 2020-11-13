@@ -7,45 +7,46 @@
     "default": {},
     "examples": [
         {
-            "name": "Product Name",
-            "description": "Description of Product",
-            "base_price": 29.99
+            "code": "50PCTOFF",
+            "pct_discount": 0.5,
+            "active": true
         }
     ],
-    "required": [
-    ],
+    "required": [],
     "properties": {
-        "name": {
-            "$id": "#/properties/name",
+        "code": {
+            "$id": "#/properties/code",
             "type": "string",
-            "title": "The name schema",
+            "title": "The code schema",
             "description": "An explanation about the purpose of this instance.",
             "default": "",
-            "minLength": 1,
+            "pattern": "^[A-Za-z0-9]+$",
+            "minLength": 2,
+            "maxLength": 32,
             "examples": [
-                "Product Name"
+                "50PCTOFF"
             ]
         },
-        "description": {
-            "$id": "#/properties/description",
-            "type": "string",
-            "title": "The description schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": "",
-            "minLength": 1,
-            "examples": [
-                "Description of Product"
-            ]
-        },
-        "base_price": {
-            "$id": "#/properties/base_price",
+        "pct_discount": {
+            "$id": "#/properties/pct_discount",
             "type": "number",
-            "title": "The base_price schema",
+            "title": "The pct_discount schema",
             "description": "An explanation about the purpose of this instance.",
             "default": 0.0,
-            "minimum": 0.0,
+            "exclusiveMinimum": 0.0,
+            "maximum": 1.0,
             "examples": [
-                29.99
+                0.5
+            ]
+        },
+        "active": {
+            "$id": "#/properties/active",
+            "type": "boolean",
+            "title": "The active schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": false,
+            "examples": [
+                true
             ]
         }
     },

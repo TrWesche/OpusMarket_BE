@@ -10,18 +10,28 @@ const productSchemaNew = require("../schemas/product/productSchemaNew.json");
 const productSchemaUpdate = require("../schemas/product/productSchemaUpdate.json");
 
 const productImageSchema = require("../schemas/product/productImageSchema.json");
+const productImageSchemaUpdate = require("../schemas/product/productImageSchemaUpdate.json");
+
 const productMetaSchema = require("../schemas/product/productMetaSchema.json");
+const productMetaSchemaUpdate = require("../schemas/product/productMetaSchemaUpdate.json");
+
 const productPromotionSchema = require("../schemas/product/productPromotionSchema.json");
+const productPromotionSchemaUpdate = require('../schemas/product/productPromotionSchemaUpdate.json');
+
 const productCouponSchema = require("../schemas/product/productCouponSchema.json");
+const productCouponSchemaUpdate = require("../schemas/product/productCouponSchemaUpdate.json");
+
 const productModifierSchema = require("../schemas/product/productModifierSchema.json");
+const productModifierSchemaUpdate = require("../schemas/product/productModifierSchemaUpdate.json");
+
 const productReviewSchema = require("../schemas/product/productReviewSchema.json");
+const productReviewSchemaUpdate = require("../schemas/product/productReviewSchemaUpdate.json");
 
 // Model Imports
 const Product = require("../models/product");
 
 // Middleware Imports
 const { ensureLoggedIn, ensureIsMerchant, ensureIsUser } = require("../middleware/auth");
-const { query } = require("../db");
 
 
 const productRouter = new express.Router();
@@ -247,9 +257,6 @@ productRouter.get('/catalog/:prod_id', async(req, res, next) => {
 // ╚═══╝╚╝   ╚═══╝╚╝ ╚╝ ╚══╝ ╚═══╝
 
 /** Update Product Details */
-// TODO: There should be separate internal system routes for updating tracking
-// data such as ratings, views, purchases, and returns.  This will be explored
-// later in the development cycle.
 productRouter.patch('/:prod_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
@@ -307,7 +314,7 @@ productRouter.patch('/:prod_id/img/:img_id', ensureIsMerchant, async(req, res, n
         }
 
         // Validate the passed in data matches schema requirements
-        const validate = jsonschema.validate(req.body, productImageSchema);
+        const validate = jsonschema.validate(req.body, productImageSchemaUpdate);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
@@ -319,7 +326,7 @@ productRouter.patch('/:prod_id/img/:img_id', ensureIsMerchant, async(req, res, n
         let itemsList = {};
         const newKeys = Object.keys(req.body);
         newKeys.map(key => {
-            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && productImageSchema.properties.hasOwnProperty(key))
+            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && productImageSchemaUpdate.properties.hasOwnProperty(key))
                 && (req.body[key] != oldData[key])) {
 
                 itemsList[key] = req.body[key];
@@ -353,7 +360,7 @@ productRouter.patch('/:prod_id/meta/:meta_id', ensureIsMerchant, async(req, res,
         }
 
         // Validate the passed in data matches schema requirements
-        const validate = jsonschema.validate(req.body, productMetaSchema);
+        const validate = jsonschema.validate(req.body, productMetaSchemaUpdate);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
@@ -365,7 +372,7 @@ productRouter.patch('/:prod_id/meta/:meta_id', ensureIsMerchant, async(req, res,
         let itemsList = {};
         const newKeys = Object.keys(req.body);
         newKeys.map(key => {
-            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && productMetaSchema.properties.hasOwnProperty(key))
+            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && productMetaSchemaUpdate.properties.hasOwnProperty(key))
                 && (req.body[key] != oldData[key])) {
 
                 itemsList[key] = req.body[key];
@@ -387,9 +394,8 @@ productRouter.patch('/:prod_id/meta/:meta_id', ensureIsMerchant, async(req, res,
     };
 })
 
-
 /** Update Product Promotion Details */
-productRouter.patch('/:prod_id/promo/:promotion_id', ensureIsMerchant, async(req, res, next) => {
+productRouter.patch('/:prod_id/promotion/:promotion_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
         const oldData = await Product.retrieve_product_promotion(req.params.promotion_id);
@@ -400,7 +406,7 @@ productRouter.patch('/:prod_id/promo/:promotion_id', ensureIsMerchant, async(req
         }
 
         // Validate the passed in data matches schema requirements
-        const validate = jsonschema.validate(req.body, productPromotionSchema);
+        const validate = jsonschema.validate(req.body, productPromotionSchemaUpdate);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
@@ -412,7 +418,7 @@ productRouter.patch('/:prod_id/promo/:promotion_id', ensureIsMerchant, async(req
         let itemsList = {};
         const newKeys = Object.keys(req.body);
         newKeys.map(key => {
-            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && productPromotionSchema.properties.hasOwnProperty(key))
+            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && productPromotionSchemaUpdate.properties.hasOwnProperty(key))
                 && (req.body[key] != oldData[key])) {
 
                 itemsList[key] = req.body[key];
@@ -434,7 +440,6 @@ productRouter.patch('/:prod_id/promo/:promotion_id', ensureIsMerchant, async(req
     };
 });
 
-
 /** Update Product Coupon Details */
 productRouter.patch('/:prod_id/coupon/:coupon_id', ensureIsMerchant, async(req, res, next) => {
     try {
@@ -447,7 +452,7 @@ productRouter.patch('/:prod_id/coupon/:coupon_id', ensureIsMerchant, async(req, 
         }
 
         // Validate the passed in data matches schema requirements
-        const validate = jsonschema.validate(req.body, productCouponSchema);
+        const validate = jsonschema.validate(req.body, productCouponSchemaUpdate);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
@@ -459,7 +464,7 @@ productRouter.patch('/:prod_id/coupon/:coupon_id', ensureIsMerchant, async(req, 
         let itemsList = {};
         const newKeys = Object.keys(req.body);
         newKeys.map(key => {
-            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && productCouponSchema.properties.hasOwnProperty(key))
+            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && productCouponSchemaUpdate.properties.hasOwnProperty(key))
                 && (req.body[key] != oldData[key])) {
 
                 itemsList[key] = req.body[key];
@@ -481,9 +486,8 @@ productRouter.patch('/:prod_id/coupon/:coupon_id', ensureIsMerchant, async(req, 
     };
 });
 
-
 /** Update Product Modifier Details */
-productRouter.patch('/:prod_id/mod/:modifier_id', ensureIsMerchant, async(req, res, next) => {
+productRouter.patch('/:prod_id/modifier/:modifier_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
         const oldData = await Product.retrieve_single_product_modifier(req.params.modifier_id);
@@ -494,7 +498,7 @@ productRouter.patch('/:prod_id/mod/:modifier_id', ensureIsMerchant, async(req, r
         }
 
         // Validate the passed in data matches schema requirements
-        const validate = jsonschema.validate(req.body, productModifierSchema);
+        const validate = jsonschema.validate(req.body, productModifierSchemaUpdate);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
@@ -506,7 +510,7 @@ productRouter.patch('/:prod_id/mod/:modifier_id', ensureIsMerchant, async(req, r
         let itemsList = {};
         const newKeys = Object.keys(req.body);
         newKeys.map(key => {
-            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && productModifierSchema.properties.hasOwnProperty(key))
+            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && productModifierSchemaUpdate.properties.hasOwnProperty(key))
                 && (req.body[key] != oldData[key])) {
 
                 itemsList[key] = req.body[key];
@@ -530,7 +534,7 @@ productRouter.patch('/:prod_id/mod/:modifier_id', ensureIsMerchant, async(req, r
 
 
 /** Update Product Review Details */
-productRouter.patch('/:prod_id/review/:review_id', ensureIsMerchant, async(req, res, next) => {
+productRouter.patch('/:prod_id/review/:review_id', ensureIsUser, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
         const oldData = await Product.retrieve_single_product_review(req.params.review_id);
@@ -541,7 +545,7 @@ productRouter.patch('/:prod_id/review/:review_id', ensureIsMerchant, async(req, 
         }
 
         // Validate the passed in data matches schema requirements
-        const validate = jsonschema.validate(req.body, productReviewSchema);
+        const validate = jsonschema.validate(req.body, productReviewSchemaUpdate);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
@@ -553,7 +557,7 @@ productRouter.patch('/:prod_id/review/:review_id', ensureIsMerchant, async(req, 
         let itemsList = {};
         const newKeys = Object.keys(req.body);
         newKeys.map(key => {
-            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && productReviewSchema.properties.hasOwnProperty(key))
+            if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && productReviewSchemaUpdate.properties.hasOwnProperty(key))
                 && (req.body[key] != oldData[key])) {
 
                 itemsList[key] = req.body[key];

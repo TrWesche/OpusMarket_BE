@@ -7,13 +7,11 @@
     "default": {},
     "examples": [
         {
-            "name": "Product Name",
-            "description": "Description of Product",
-            "base_price": 29.99
+            "name": "Modifier Name",
+            "description": "Modifier Description"
         }
     ],
-    "required": [
-    ],
+    "required": [],
     "properties": {
         "name": {
             "$id": "#/properties/name",
@@ -23,7 +21,7 @@
             "default": "",
             "minLength": 1,
             "examples": [
-                "Product Name"
+                "Modifier Name"
             ]
         },
         "description": {
@@ -32,20 +30,8 @@
             "title": "The description schema",
             "description": "An explanation about the purpose of this instance.",
             "default": "",
-            "minLength": 1,
             "examples": [
-                "Description of Product"
-            ]
-        },
-        "base_price": {
-            "$id": "#/properties/base_price",
-            "type": "number",
-            "title": "The base_price schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": 0.0,
-            "minimum": 0.0,
-            "examples": [
-                29.99
+                "Modifier Description"
             ]
         }
     },

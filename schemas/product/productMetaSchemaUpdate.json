@@ -7,23 +7,23 @@
     "default": {},
     "examples": [
         {
-            "name": "Product Name",
-            "description": "Description of Product",
-            "base_price": 29.99
+            "title": "Name for Meta Tag",
+            "description": "Description of Meta Tag"
         }
     ],
-    "required": [
-    ],
+    "required": [],
     "properties": {
-        "name": {
-            "$id": "#/properties/name",
+        "title": {
+            "$id": "#/properties/title",
             "type": "string",
-            "title": "The name schema",
+            "title": "The title schema",
             "description": "An explanation about the purpose of this instance.",
             "default": "",
             "minLength": 1,
             "examples": [
-                "Product Name"
+                "mens",
+                "shirt",
+                "blue"
             ]
         },
         "description": {
@@ -34,18 +34,7 @@
             "default": "",
             "minLength": 1,
             "examples": [
-                "Description of Product"
-            ]
-        },
-        "base_price": {
-            "$id": "#/properties/base_price",
-            "type": "number",
-            "title": "The base_price schema",
-            "description": "An explanation about the purpose of this instance.",
-            "default": 0.0,
-            "minimum": 0.0,
-            "examples": [
-                29.99
+                "Description of Meta Tag"
             ]
         }
     },
