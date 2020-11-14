@@ -115,9 +115,20 @@ class Order {
         // TODO: Need to append applied promotions & coupon data
 
         order.products = products;
-
         return order;
     }
+
+    // TODO
+    // static async get_user_orders(user_id) {
+
+    // }
+
+    // TODO
+    // This may take some additional thinking.  Hopefully can be accomplished
+    // without changing db structure
+    // static async get_merchant_orders(merchant_id) {
+
+    // }
 
     // ╔╗ ╔╗╔═══╗╔═══╗╔═══╗╔════╗╔═══╗
     // ║║ ║║║╔═╗║╚╗╔╗║║╔═╗║║╔╗╔╗║║╔══╝
@@ -134,7 +145,6 @@ class Order {
         }
 
         const result = await update_order_payment(id, payment_id);
-
         return result;
     }
 
@@ -165,7 +175,6 @@ class Order {
     // This should only be available as a cleanup route for the system, not a user route
     static async delete_order(id) {
         const result = await delete_master_order(id);
-
         return result;
     }
 }

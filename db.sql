@@ -43,42 +43,6 @@ CREATE TABLE "gatherings" (
   "gathering_dt" TIMESTAMP WITH TIME ZONE
 );
 
-CREATE TABLE "order_products" (
-  "id" SERIAL PRIMARY KEY,
-  "order_id" int NOT NULL REFERENCES "orders" ("id"),
-  "product_id" int REFERENCES "products" ("id") ON DELETE SET NULL,
-  "product_name" text NOT NULL,
-  "quantity" int NOT NULL,
-  "base_price" decimal NOT NULL,
-  "modifier_id" int REFERENCES "modifiers" ("id") ON DELETE SET NULL,
-  "modifier_name" text
-);
-
-CREATE TABLE "order_status" (
-  "id" SERIAL PRIMARY KEY,
-  "order_id" int NOT NULL REFERENCES "orders" ("id"),
-  "status" text NOT NULL,
-  "status_dt" TIMESTAMP WITH TIME ZONE,
-  "notes" text
-)
-
-CREATE TABLE "order_promotions" (
-  "id" SERIAL PRIMARY KEY,
-  "order_id" int NOT NULL REFERENCES "orders" ("id"),
-  "product_id" int REFERENCES "products" ("id") ON DELETE SET NULL,
-  "promotion_id" int REFERENCES "product_promotions" ("id") ON DELETE SET NULL,
-  "promotion_price" decimal NOT NULL
-)
-
-CREATE TABLE "order_coupons" (
-  "id" SERIAL PRIMARY KEY,
-  "order_id" int NOT NULL REFERENCES "orders" ("id"),
-  "product_id" int NOT NULL REFERENCES "products" ("id") ON DELETE SET NULL,
-  "coupon_id" int REFERENCES "product_coupons" ("id") ON DELETE SET NULL,
-  "coupon_code" text NOT NULL,
-  "pct_discount" decimal NOT NULL
-)
-
 CREATE TABLE "merchant_about" (
   "id" SERIAL PRIMARY KEY,
   "merchant_id" int NOT NULL REFERENCES "merchants" ("id") ON DELETE CASCADE,
@@ -167,4 +131,41 @@ CREATE TABLE "product_reviews" (
   "title" text,
   "body" text,
   "review_dt" TIMESTAMP WITH TIME ZONE
+);
+
+
+CREATE TABLE "order_products" (
+  "id" SERIAL PRIMARY KEY,
+  "order_id" int NOT NULL REFERENCES "orders" ("id"),
+  "product_id" int REFERENCES "products" ("id") ON DELETE SET NULL,
+  "product_name" text NOT NULL,
+  "quantity" int NOT NULL,
+  "base_price" decimal NOT NULL,
+  "modifier_id" int REFERENCES "product_modifiers" ("id") ON DELETE SET NULL,
+  "modifier_name" text
+);
+
+CREATE TABLE "order_status" (
+  "id" SERIAL PRIMARY KEY,
+  "order_id" int NOT NULL REFERENCES "orders" ("id"),
+  "status" text NOT NULL,
+  "status_dt" TIMESTAMP WITH TIME ZONE,
+  "notes" text
+);
+
+CREATE TABLE "order_promotions" (
+  "id" SERIAL PRIMARY KEY,
+  "order_id" int NOT NULL REFERENCES "orders" ("id"),
+  "product_id" int REFERENCES "products" ("id") ON DELETE SET NULL,
+  "promotion_id" int REFERENCES "product_promotions" ("id") ON DELETE SET NULL,
+  "promotion_price" decimal NOT NULL
+);
+
+CREATE TABLE "order_coupons" (
+  "id" SERIAL PRIMARY KEY,
+  "order_id" int NOT NULL REFERENCES "orders" ("id"),
+  "product_id" int NOT NULL REFERENCES "products" ("id") ON DELETE SET NULL,
+  "coupon_id" int REFERENCES "product_coupons" ("id") ON DELETE SET NULL,
+  "coupon_code" text NOT NULL,
+  "pct_discount" decimal NOT NULL
 );
