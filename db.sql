@@ -47,12 +47,44 @@ CREATE TABLE "gatherings" (
 
 
 
-CREATE TABLE "orders_products" (
+CREATE TABLE "order_products" (
   "id" SERIAL PRIMARY KEY,
   "order_id" int NOT NULL REFERENCES "orders" ("id"),
-  "product_id" int NOT NULL REFERENCES "products" ("id"),
-  "status" text DEFAULT 'added'
+  "product_id" int REFERENCES "products" ("id") ON DELETE SET NULL,
+  "product_name" text NOT NULL,
+  "quantity" int NOT NULL,
+  "base_price" decimal NOT NULL
 );
+
+CREATE TABLE "order_status" (
+  "id" SERIAL PRIMARY KEY,
+  "order_id" int NOT NULL REFERENCES "orders" ("id"),
+  "status" text NOT NULL,
+  "status_dt" TIMESTAMP WITH TIME ZONE,
+  "notes" text
+)
+
+CREATE TABLE "ordprods_promotions" (
+  "id" SERIAL PRIMARY KEY,
+  "ordprods_id" int NOT NULL REFERENCES "order_products" ("id"),
+  "promotion_id" int REFERENCES "product_promotions" ("id") ON DELETE SET NULL,
+  "promotion_price" decimal NOT NULL
+)
+
+CREATE TABLE "ordprods_coupons" (
+  "id" SERIAL PRIMARY KEY,
+  "ordprods_id" int NOT NULL REFERENCES "order_products" ("id"),
+  "coupon_id" int REFERENCES "product_coupons" ("id") ON DELETE SET NULL,
+  "coupon_code" text NOT NULL,
+  "pct_discount" decimal NOT NULL
+)
+
+CREATE TABLE "ordprods_modifiers" (
+  "id" SERIAL PRIMARY KEY,
+  "ordprods_id" int NOT NULL REFERENCES "order_products" ("id"),
+  "modifier_id" int REFERENCES "product_modifiers" ("id") ON DELETE SET NULL,
+  "name" text NOT NULL
+)
 
 CREATE TABLE "merchant_about" (
   "id" SERIAL PRIMARY KEY,
@@ -96,8 +128,6 @@ CREATE TABLE "gathering_images" (
   "url" text NOT NULL,
   "alt_text" text
 );
-
--- TODO: ORDER NEEDS TO BE CHANGED TO WEIGHT ->> Name conflict resoultion & greater flexibility
                  
 CREATE TABLE "product_images" (
   "id" SERIAL PRIMARY KEY,
