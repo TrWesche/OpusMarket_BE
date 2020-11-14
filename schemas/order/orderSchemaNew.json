@@ -16,19 +16,9 @@
                         "name": "mens shirt",
                         "quantity": 1,
                         "base_price": 19.99,
-                        "modifiers": {
-                            "id": 3,
-                            "name": "Large"
-                        },
-                        "promotion": {
-                            "id": 1,
-                            "promotion_price": 15.99
-                        },
-                        "coupon": {
-                            "id": 4,
-                            "code": "MEMDAY",
-                            "pct_discount": 0.2
-                        }
+                        "modifier_id": 3,
+                        "promotion_id": 1,
+                        "coupon_id": 4
                     }
                 ]
             }
@@ -111,72 +101,26 @@
                     "minimum": 0.0,
                     "examples": [ 19.99 ]
                 },
-                "modifiers": {
-                    "type": "object",
-                    "required": ["modifier_id", "name"],
-                    "properties": {
-                        "modifier_id": {
-                            "type": "integer",
-                            "title": "Modifier Identifier",
-                            "description": "The ID from the associated modifier",
-                            "minimum": 1,
-                            "examples": [3]
-                        },
-                        "name": {
-                            "type": "string",
-                            "title": "Modifier Name",
-                            "description": "The name assigned to the product modifier",
-                            "minLength": 1,
-                            "examples": ["Large"]
-                        }
-                    }
+                "modifier_id": {
+                    "type": "integer",
+                    "title": "Modifier Identifier",
+                    "description": "The ID from the associated modifier",
+                    "minimum": 1,
+                    "examples": [3]
                 },
-                "promotion": {
-                    "type": "object",
-                    "required": ["promotion_id", "promotion_price"],
-                    "properties": {
-                        "promotion_id": {
-                            "type": "integer",
-                            "title": "Promotion Identifier",
-                            "description": "The ID from the associated promotion",
-                            "minimum": 1,
-                            "examples": [1]
-                        },
-                        "promotion_price": {
-                            "type": "number",
-                            "title": "Promotion Price",
-                            "description": "Product price under promotion at time of sale",
-                            "minimum": 0.0,
-                            "examples": [15.99]
-                        }
-                    }
+                "promotion_id": {
+                    "type": "integer",
+                    "title": "Promotion Identifier",
+                    "description": "The ID from the associated promotion",
+                    "minimum": 1,
+                    "examples": [1]
                 },
-                "coupon": {
-                    "type": "object",
-                    "required": ["coupon_id", "coupon_code", "pct_discount"],
-                    "properties": {
-                        "coupon_id": {
-                            "type": "integer",
-                            "title": "Coupon Identifier",
-                            "description": "The ID from the associated coupon",
-                            "minimum": 1,
-                            "examples": [4]
-                        },
-                        "coupon_code": {
-                            "type": "string",
-                            "title": "Coupon Code",
-                            "description": "The text code from the associated coupon",
-                            "minLength": 1,
-                            "examples": ["MEMDAY"]
-                        },
-                        "pct_discount": {
-                            "type": "number",
-                            "title": "Coupon Discount Percentage",
-                            "description": "Percentage discount provided by coupon",
-                            "minimum": 0.0,
-                            "examples": [0.2]
-                        }
-                    }
+                "coupon_id": {
+                    "type": "integer",
+                    "title": "Coupon Identifier",
+                    "description": "The ID from the associated coupon",
+                    "minimum": 1,
+                    "examples": [4]
                 }
             }
         }

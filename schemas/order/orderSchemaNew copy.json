@@ -1,0 +1,185 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "title": "The root schema",
+    "description": "The root schema comprises the entire JSON document.",
+    "default": {},
+    "examples": [
+        {
+            "order": {
+                "user_id": 100,
+                "payment_id": "ABCD1234",
+                "products": [
+                    {
+                        "id": 10,
+                        "name": "mens shirt",
+                        "quantity": 1,
+                        "base_price": 19.99,
+                        "modifiers": {
+                            "id": 3,
+                            "name": "Large"
+                        },
+                        "promotion": {
+                            "id": 1,
+                            "promotion_price": 15.99
+                        },
+                        "coupon": {
+                            "id": 4,
+                            "code": "MEMDAY",
+                            "pct_discount": 0.2
+                        }
+                    }
+                ]
+            }
+        }    
+    ],
+    "required": [
+        "order"
+    ],
+    "properties" : {
+        "order": {
+            "type": "object",
+            "required": [
+                "user_id",
+                "payment_id",
+                "products"
+            ],
+            "properties": {
+                "user_id": {
+                    "$id": "#/properties/user_id",
+                    "type": "integer",
+                    "title": "The user_id schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": 0,
+                    "examples": [
+                        100
+                    ]
+                },
+                "payment_id": {
+                    "$id": "#/properties/payment_id",
+                    "type": "string",
+                    "title": "The payment_id schema",
+                    "description": "An explanation about the purpose of this instance.",
+                    "default": "",
+                    "examples": [
+                        "ABCD1234"
+                    ]
+                },
+                "products": {
+                    "$id": "#/properties/products",
+                    "type": "array",
+                    "items": {"$ref": "#/definitions/product"}
+                }
+            }
+        }
+    },
+    "definitions": {
+        "product": {
+            "type": "object",
+            "required": [
+                "id",
+                "name",
+                "quantity",
+                "base_price"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "title": "Product Identifier",
+                    "description": "The ID from the associated product",
+                    "minimum": 1,
+                    "examples": [ 10 ]
+                },
+                "name": {
+                    "type": "string",
+                    "title": "Product Name",
+                    "description": "The name from the associated product",
+                    "examples": [ "shirt" ]
+                },
+                "quantity": {
+                    "type": "integer",
+                    "title": "Product Quantity",
+                    "description": "The quantity of the associated product ordered",
+                    "minLength": 1,
+                    "examples": [ 1 ]
+                },
+                "base_price": {
+                    "type": "number",
+                    "title": "Product Base Price",
+                    "description": "The non-discounted base-price of the associated product ordered",
+                    "minimum": 0.0,
+                    "examples": [ 19.99 ]
+                },
+                "modifiers": {
+                    "type": "object",
+                    "required": ["modifier_id", "name"],
+                    "properties": {
+                        "modifier_id": {
+                            "type": "integer",
+                            "title": "Modifier Identifier",
+                            "description": "The ID from the associated modifier",
+                            "minimum": 1,
+                            "examples": [3]
+                        },
+                        "name": {
+                            "type": "string",
+                            "title": "Modifier Name",
+                            "description": "The name assigned to the product modifier",
+                            "minLength": 1,
+                            "examples": ["Large"]
+                        }
+                    }
+                },
+                "promotion": {
+                    "type": "object",
+                    "required": ["promotion_id", "promotion_price"],
+                    "properties": {
+                        "promotion_id": {
+                            "type": "integer",
+                            "title": "Promotion Identifier",
+                            "description": "The ID from the associated promotion",
+                            "minimum": 1,
+                            "examples": [1]
+                        },
+                        "promotion_price": {
+                            "type": "number",
+                            "title": "Promotion Price",
+                            "description": "Product price under promotion at time of sale",
+                            "minimum": 0.0,
+                            "examples": [15.99]
+                        }
+                    }
+                },
+                "coupon": {
+                    "type": "object",
+                    "required": ["coupon_id", "coupon_code", "pct_discount"],
+                    "properties": {
+                        "coupon_id": {
+                            "type": "integer",
+                            "title": "Coupon Identifier",
+                            "description": "The ID from the associated coupon",
+                            "minimum": 1,
+                            "examples": [4]
+                        },
+                        "coupon_code": {
+                            "type": "string",
+                            "title": "Coupon Code",
+                            "description": "The text code from the associated coupon",
+                            "minLength": 1,
+                            "examples": ["MEMDAY"]
+                        },
+                        "pct_discount": {
+                            "type": "number",
+                            "title": "Coupon Discount Percentage",
+                            "description": "Percentage discount provided by coupon",
+                            "minimum": 0.0,
+                            "examples": [0.2]
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "additionalProperties": true
+}
