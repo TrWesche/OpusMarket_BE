@@ -17,7 +17,7 @@
                         "quantity": 1,
                         "base_price": 19.99,
                         "modifier_id": 3,
-                        "promotion_id": 1,
+                        "modifier_name": "large",
                         "coupon_id": 4
                     }
                 ]
@@ -32,7 +32,6 @@
             "type": "object",
             "required": [
                 "user_id",
-                "payment_id",
                 "products"
             ],
             "properties": {
