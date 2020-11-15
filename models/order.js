@@ -10,7 +10,8 @@ const {
     validate_order_owner, 
     read_order_products, 
     update_order_payment, 
-    delete_master_order } = require('../repositories/order.repository');
+    delete_master_order, 
+    validate_order_products} = require('../repositories/order.repository');
 const ExpressError = require("../helpers/expressError");
 
 
@@ -26,10 +27,27 @@ class Order {
     /** Create order with data. Returns new order data. */
     static async create_order(user_id, data) {
         // Check the order has product contents
-        if (data.products.length = 0) {
+        if (data.products.length === 0) {
             const error = new ExpressError(`Error: Cannot create a order with no products`, 400);
             throw error;
         }
+
+        // Validate product information (product ids, modifier ids, and coupon ids)
+        const validated_products = await validate_order_products(data.products);
+
+        if (validated_products.length !== data.products.length) {
+            const error = new ExpressError(`Error: Invalid product id, modifier id, or coupon id provided`, 400);
+            throw error;
+        }
+
+        // TODO: Don't like this at all, another O(n2) how can this be handled better?
+        for (const outputProduct of validated_products) {
+            for (const inputProduct of data.products) {
+                if (outputProduct.id === inputProduct.id) {
+                    outputProduct.quantity = inputProduct.quantity;
+                };
+            };
+        };
 
         // Create master order
         const order = await create_master_order(user_id);
@@ -37,10 +55,11 @@ class Order {
         if (!order) {
             const error = new ExpressError(`Error: Could not create a new order`, 500);
             throw error;
-        }
+        };
 
         // After master order created add products to database
-        const products = await add_order_products(order.id, data.products);
+        const products = await add_order_products(order.id, validated_products);
+
 
         // Validate promotions against backend and store details
         const current_promotions = await validate_promotions(data.products);
@@ -54,23 +73,26 @@ class Order {
         // Construct the products section of the order object and append
         // TODO: This is a bad implementation, O(n2) -- Need to think about how to make this better
         for (const product of products) {
+            // console.log("Product", product);
             for (const promotion of promotions) {
+                // console.log("Promotion", promotion);
                 if (product.product_id === promotion.product_id) {
                     product.promotion = promotion;
-                }
-            }
+                };
+            };
 
             for (const coupon of coupons) {
+                // console.log("Coupon", coupon);
                 if (product.product_id === coupon.product_id) {
                     product.coupon = coupon;
-                }
-            }
-        }
+                };
+            };
+        };
 
         order.products = products;
 
         // Create a status update on the backend noting the order was created
-        const status = await add_order_status(order.id, {status: "created", notes: null})
+        const status = await add_order_status(order.id, {status: "created", notes: null});
 
         return order;
     }

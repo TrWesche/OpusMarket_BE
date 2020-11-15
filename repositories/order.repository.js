@@ -87,7 +87,6 @@ async function validate_order_owner(order_id, user_id) {
 
 
 async function add_order_status(order_id, data) {
-    const {status, notes} = data;
     const current_dt = DateTime.utc();
 
     try {
@@ -98,7 +97,7 @@ async function add_order_status(order_id, data) {
                 ($1, $2, $3, $4)
             RETURNING
                 id, status, notes, status_dt`,
-        [order_id, status, notes, current_dt]);
+        [order_id, data.status, data.notes, current_dt]);
 
         return result.rows[0];
     } catch (error) {
@@ -107,17 +106,66 @@ async function add_order_status(order_id, data) {
 };
 
 
+async function validate_order_products(products) {
+    const orExpressions = [];
+    const searchValues = [];
+
+    for (const product of products) {
+        const andExpressions = [];
+        searchValues.push(product.id);
+        andExpressions.push(`products.id = $${searchValues.length}`);
+
+        if (product.modifier_id) {
+            searchValues.push(product.modifier_id);
+            andExpressions.push(`product_modifiers.id = $${searchValues.length}`);
+        }
+
+        if (product.coupon_id) {
+            searchValues.push(product.coupon_id);
+            andExpressions.push(`product_coupons.id = $${searchValues.length}`);
+            andExpressions.push(`product_coupons.active = true`);
+        }
+
+        orExpressions.push(`( ${andExpressions.join(' AND ')}  )`)
+    }
+
+    try {
+        const result = await db.query(`
+            SELECT 
+                products.id AS "id",
+                products.name AS "name",
+                products.base_price AS "base_price",
+                product_modifiers.id AS "modifier_id",
+                product_modifiers.name AS "modifier_name",
+                product_coupons.id AS "coupon_id"
+            FROM products
+            FULL OUTER JOIN product_modifiers
+            ON products.id = product_modifiers.product_id
+            FULL OUTER JOIN product_coupons
+            ON products.id = product_coupons.product_id
+            WHERE ${orExpressions.join(' OR ')}`,
+        searchValues);
+
+        return result.rows;
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to validate order products - ${error}`, 500);
+    };
+};
+
+
 async function add_order_products(order_id, products) {
     const valueExpressions = [];
     let queryValues = [order_id];
 
+
     for (const product of products) {
         queryValues.push(product.id, product.name, product.quantity, product.base_price, product.modifier_id, product.modifier_name);
-        valueExpressions.push(`($1, $${queryValues.length})`);
+        valueExpressions.push(`($1, $${queryValues.length - 5}, $${queryValues.length - 4}, $${queryValues.length - 3}, 
+                                    $${queryValues.length - 2}, $${queryValues.length - 1}, $${queryValues.length})`);
     };
 
-    const valueExpressionRows = valueList.join(",");
-    
+    const valueExpressionRows = valueExpressions.join(",");
+
     try {
         const result = await db.query(`
             INSERT INTO order_products
@@ -126,7 +174,7 @@ async function add_order_products(order_id, products) {
                 ${valueExpressionRows}
             RETURNING 
                 product_id, id, product_name, quantity, base_price, modifier_name`, 
-        [queryValues]);
+        queryValues);
 
         return result.rows;  
     } catch (error) {
@@ -194,7 +242,7 @@ async function validate_promotions(products) {
 
     for (const product of products) {
         searchValues.push(product.id);
-        searchExpressions.push(`${searchValues.length}`);
+        searchExpressions.push(`$${searchValues.length}`);
     };
 
     const searchExpression = searchExpressions.join(",");
@@ -213,7 +261,7 @@ async function validate_promotions(products) {
             ON
                 products.id = product_promotions.product_id
             WHERE
-                products_promotions.active = true AND products.id IN (${searchExpression})`,
+                product_promotions.active = true AND products.id IN (${searchExpression})`,
         searchValues)
 
         return result.rows;
@@ -230,10 +278,10 @@ async function save_promotions(order_id, validated_promotions) {
 
     for (const promo of validated_promotions) {
         queryValues.push(promo.product_id, promo.promotion_id, promo.promotion_price);
-        valueExpressions.push(`($1, $${queryValues.length})`);
+        valueExpressions.push(`($1, $${queryValues.length - 2},  $${queryValues.length - 1},  $${queryValues.length})`);
     };
 
-    const valueExpressionRows = valueList.join(",");
+    const valueExpressionRows = valueExpressions.join(",");
 
     try {
         const result = await db.query(`
@@ -241,13 +289,10 @@ async function save_promotions(order_id, validated_promotions) {
                 (order_id, product_id, promotion_id, promotion_price)
             VALUES
                 ${valueExpressionRows}
-            RETURNING (
-                json_build_object(
-                    product_id,
-                    json_build_object(id, promotion_price)
-                )
-            )`, 
-        [queryValues]);
+            RETURNING 
+                product_id, id, promotion_id, promotion_price
+            `, 
+        queryValues);
 
         return result.rows;  
 
@@ -263,7 +308,7 @@ async function validate_coupons(product_coupon_pairs) {
 
     for (const pair of product_coupon_pairs) {
         searchValues.push(pair.id, pair.coupon_id);
-        searchExpressions.push(`($${searchValues.length - 1} AND $${searchValues.length})`);
+        searchExpressions.push(`(products.id = $${searchValues.length - 1} AND product_coupons.id = $${searchValues.length})`);
     };
 
     const searchExpression = searchExpressions.join(" OR ");
@@ -273,8 +318,8 @@ async function validate_coupons(product_coupon_pairs) {
             SELECT
                 products.id AS product_id,
                 product_coupons.id AS coupon_id,
-                product_promotions.coupon_code AS coupon_code,
-                product_promotions.pct_discount AS pct_discount
+                product_coupons.code AS coupon_code,
+                product_coupons.pct_discount AS pct_discount
             FROM
                 products
             FULL OUTER JOIN
@@ -282,7 +327,7 @@ async function validate_coupons(product_coupon_pairs) {
             ON
                 products.id = product_coupons.product_id
             WHERE
-                products_coupons.active = true AND (${searchExpression})`,
+                (product_coupons.active = true) AND (${searchExpression})`,
         searchValues)
 
         return result.rows;
@@ -298,10 +343,10 @@ async function save_coupons(order_id, validated_coupons) {
 
     for (const coupon of validated_coupons) {
         queryValues.push(coupon.product_id, coupon.coupon_id, coupon.coupon_code, coupon.pct_discount);
-        valueExpressions.push(`($1, $${queryValues.length})`);
+        valueExpressions.push(`($1, $${queryValues.length - 3}, $${queryValues.length - 2}, $${queryValues.length - 1}, $${queryValues.length})`);
     };
 
-    const valueExpressionRows = valueList.join(",");
+    const valueExpressionRows = valueExpressions.join(",");
 
     // Save active promotions at time of purchase for recall
     try {
@@ -310,15 +355,10 @@ async function save_coupons(order_id, validated_coupons) {
                 (order_id, product_id, coupon_id, coupon_code, pct_discount)
             VALUES
                 ${valueExpressionRows}
-            RETURNING (
-                json_build_object(
-                    'product_id', product_id, 
-                    'coupon_id', id, 
-                    'coupon_code', coupon_code, 
-                    'pct_discount', pct_discount)
-                )
-            )`,  
-        [queryValues]);
+            RETURNING 
+                product_id, id, coupon_id, coupon_code, pct_discount
+            `,  
+        queryValues);
 
         return result.rows;  
 
@@ -336,6 +376,7 @@ module.exports = {
     delete_master_order,
     validate_order_owner,
     add_order_status,
+    validate_order_products,
     add_order_products,
     read_order_products,
     update_order_product,

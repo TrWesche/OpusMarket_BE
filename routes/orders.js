@@ -33,9 +33,9 @@ orderRoutes.post('/new', ensureIsUser, async(req, res, next) => {
             throw new ExpressError(`Unable to create a new Order: ${listOfErrors}`, 400);
         }
 
-        const result = await Order.create_order(req.body);
+        const result = await Order.create_order(req.user.id, req.body.order);
 
-        return result.rows[0];
+        return res.json({"order": result});
     } catch (error) {
         console.log(error);
         
