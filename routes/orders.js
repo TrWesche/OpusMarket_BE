@@ -52,10 +52,7 @@ orderRoutes.post('/new', ensureIsUser, async(req, res, next) => {
 // ╚╝╚═╝╚═══╝╚╝ ╚╝╚═══╝  
 orderRoutes.get('/:order_id', ensureIsUser, async(req, res, next) => {
     try {
-        const order = await Order.get_order_details(+req.params.order_id);
-        if(!order.user_id || order.user_id !== req.user.id) {
-            throw new ExpressError(`Unauthorized`, 401);
-        };
+        const order = await Order.get_order_details(+req.params.order_id, req.user.id);
 
         return res.json({"order": order});
     } catch (error) {

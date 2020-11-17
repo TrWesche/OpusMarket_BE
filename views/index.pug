@@ -1,0 +1,38 @@
+extends layout
+block content
+  script(type="text/javascript" src=basepath)
+  script(type="text/javascript").
+    window.applicationId= "#{square_application_id}";
+    window.locationId= "#{square_location_id}";
+  script(type="text/javascript" src="/js/sq-payment-form.js")
+
+  div(class="sq-payment-form")
+    div(id="sq-walletbox")
+      button(id="sq-google-pay" class="button-google-pay").
+      button(id="sq-apple-pay" class="sq-apple-pay").
+      button(id="sq-masterpass" class="sq-masterpass").
+      div(class="sq-wallet-divider")
+        span(class="sq-wallet-divider__text").
+          Or
+
+    div(id="sq-ccbox")
+      form(id="nonce-form" novalidate action="process-payment" method="post")
+        div(class="sq-field")
+          label(class="sq-label") Card Number
+          div(id="sq-card-number")
+        div(class="sq-field-wrapper")
+          div(class="sq-field sq-field--in-wrapper")
+            label(class="sq-label") CVV
+            div(id="sq-cvv")
+          div(class="sq-field sq-field--in-wrapper")
+            label(class="sq-label") Expiration
+            div(id="sq-expiration-date")
+          div(class="sq-field sq-field--in-wrapper")
+            label(class="sq-label") Postal Code
+            div(id="sq-postal-code")
+        div(class="sq-field")
+            button(id="sq-creditcard" class="sq-button" onclick="onGetCardNonce(event)").
+              Pay $#{payment_amount} Now
+
+        div(id="error")
+        input(type="hidden" id="card-nonce" name="nonce")

@@ -2,11 +2,12 @@ const db = require("../db");
 const { DateTime } = require('luxon');
 const ExpressError = require("../helpers/expressError");
 
+
 async function create_master_order(user_id) {
     try {
         const result = await db.query(`
             INSERT INTO orders
-                (user_id)
+                (user_id,)
             VALUES
                 ($1)
             RETURNING 
@@ -79,7 +80,7 @@ async function validate_order_owner(order_id, user_id) {
             throw new ExpressError(`An Error Occured: Unable to retrieve order information - Record does not exist`, 500)
         }
 
-        return (user_id === result.rows[0].user_id);
+        return (user_id === order.user_id);
     } catch (error) {
         throw new ExpressError(`An Error Occured: Unable to retrieve order information - ${error}`, 500);
     };

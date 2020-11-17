@@ -11,6 +11,7 @@ CREATE TABLE "users" (
 CREATE TABLE "orders" (
   "id" SERIAL PRIMARY KEY,
   "user_id" int NOT NULL REFERENCES "users" ("id"),
+  "order_total" decimal,
   "payment_id" text
 );
 

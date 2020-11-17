@@ -1,6 +1,6 @@
 /** Express app for jobly. */
-
 const express = require("express");
+const path = require("path");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 
@@ -17,7 +17,14 @@ app.use(authenticateJWT);
 // add logging system
 app.use(morgan("tiny"));
 
-/** Routes */
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'pug');
+
+// Serve up square form Javascript
+app.use(express.static(path.join(__dirname, 'public')))
+
+/** API Routes */
 const regRouter = require("./routes/register");
 const authRouter = require("./routes/auth");
 const userRouter = require("./routes/users");
@@ -34,6 +41,10 @@ app.use("/api/merchants", merchantRouter);
 app.use("/api/gatherings", gatheringRouter);
 app.use("/api/orders", orderRoutes);
 
+/** View Routes */
+const paymentRouter = require("./apis/Square/paymentRouter");
+
+app.use("/i", paymentRouter);
 
 /** 404 handler */
 app.use(function(req, res, next) {

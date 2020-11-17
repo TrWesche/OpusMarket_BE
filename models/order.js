@@ -56,45 +56,46 @@ class Order {
             const error = new ExpressError(`Error: Could not create a new order`, 500);
             throw error;
         };
-
-        // After master order created add products to database
-        const products = await add_order_products(order.id, validated_products);
-
-
-        // Validate promotions against backend and store details
-        const current_promotions = await validate_promotions(data.products);
-        const promotions = await save_promotions(order.id, current_promotions);
-
-        // Validate coupons against backend and store details
-        const validated_coupons = await validate_coupons(data.products);
-        const coupons = await save_coupons(order.id, validated_coupons);
-
-
-        // Construct the products section of the order object and append
-        // TODO: This is a bad implementation, O(n2) -- Need to think about how to make this better
-        for (const product of products) {
-            // console.log("Product", product);
-            for (const promotion of promotions) {
-                // console.log("Promotion", promotion);
-                if (product.product_id === promotion.product_id) {
-                    product.promotion = promotion;
+       
+        try {
+            // After master order created add products to database
+            const products = await add_order_products(order.id, validated_products);
+    
+            // Validate promotions against backend and store details
+            const current_promotions = await validate_promotions(data.products);
+            const promotions = await save_promotions(order.id, current_promotions);
+    
+            // Validate coupons against backend and store details
+            const validated_coupons = await validate_coupons(data.products);
+            const coupons = await save_coupons(order.id, validated_coupons);
+    
+    
+            // Construct the products section of the order object and append
+            // TODO: This is a bad implementation, O(n2) -- Need to think about how to make this better
+            for (const product of products) {
+                for (const promotion of promotions) {
+                    if (product.product_id === promotion.product_id) {
+                        product.promotion = promotion;
+                    };
+                };
+    
+                for (const coupon of coupons) {
+                    if (product.product_id === coupon.product_id) {
+                        product.coupon = coupon;
+                    };
                 };
             };
-
-            for (const coupon of coupons) {
-                // console.log("Coupon", coupon);
-                if (product.product_id === coupon.product_id) {
-                    product.coupon = coupon;
-                };
-            };
-        };
-
-        order.products = products;
-
-        // Create a status update on the backend noting the order was created
-        const status = await add_order_status(order.id, {status: "created", notes: null});
-
-        return order;
+    
+            order.products = products;
+    
+            // Create a status update on the backend noting the order was created
+            const status = await add_order_status(order.id, {status: "created", notes: null});
+    
+            return order;     
+        } catch (error) {
+            const cleanup = await delete_master_order(order.id);
+            throw new ExpressError(error.message, error.status);
+        }
     }
 
 
@@ -107,8 +108,8 @@ class Order {
 
     /** Read order details */
 
-    static async get_order(id) {
-        const check = await validate_order_owner(id, req.user.id);
+    static async get_order(id, user_id) {
+        const check = await validate_order_owner(id, user_id);
         if (!check) {
             throw new ExpressError(`Unauthorized`, 401)
         }
@@ -121,8 +122,8 @@ class Order {
     }
 
 
-    static async get_order_details(id) {
-        const check = await validate_order_owner(id, req.user.id);
+    static async get_order_details(id, user_id) {
+        const check = await validate_order_owner(id, user_id);
         if (!check) {
             throw new ExpressError(`Unauthorized`, 401)
         }
