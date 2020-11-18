@@ -54,7 +54,7 @@ productRouter.post('/new', ensureLoggedIn, ensureIsMerchant, async(req, res, nex
 
         const result = await Product.create_product(req.user.id, req.body.products);
 
-        return res.json({ "products": result })
+        return res.json({ "product": result })
     } catch (error) {
         console.log(error.code);
 
@@ -134,7 +134,7 @@ productRouter.post('/:prod_id/new/promotion', ensureIsMerchant, async(req, res, 
 
         const result = await Product.create_product_promotion(+req.params.prod_id, req.body.promotion);
 
-        return res.json({"product_promotion": result})
+        return res.json({"product_promotions": result})
     } catch (error) {
         return next(error);
     };
@@ -182,7 +182,7 @@ productRouter.post("/:prod_id/new/coupon", ensureIsMerchant, async(req, res, nex
 
         const result = await Product.create_product_coupon(+req.params.prod_id, req.body.coupons);
 
-        return res.json({"product_coupon": result})
+        return res.json({"product_coupons": result})
     } catch (error) {
         return next(error);
     };
@@ -200,7 +200,7 @@ productRouter.post('/:prod_id/new/review', ensureIsUser, async(req, res, next) =
 
         const result = await Product.create_product_review(+req.params.prod_id, req.user.id, req.body.review);
 
-        return res.json({"product_review": result})
+        return res.json({"product_reviews": result})
     } catch (error) {
         return next(error);
     };

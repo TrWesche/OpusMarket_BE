@@ -58,7 +58,7 @@ gatheringRouter.post('/new', ensureIsMerchant, async(req, res, next) => {
  *  Creating merchant can add additional merchant participants to the gathering
  *  merchant participants list.
 */
-gatheringRouter.post('/:gathering_id/new/merch', ensureIsMerchant, async(req, res, next) => {
+gatheringRouter.post('/:gathering_id/new/merchant', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for incorrect merchant or gathering with id not in database
         const ownerCheck = await Gathering.retrieve_single_gathering(req.params.gathering_id);
@@ -230,7 +230,7 @@ gatheringRouter.delete('/:gathering_id', ensureIsMerchant, async(req, res, next)
 });
 
 /** Delete gathering merchant participant*/
-gatheringRouter.delete('/:gathering_id/merch/:participant_id', ensureIsMerchant, async(req, res, next) => {
+gatheringRouter.delete('/:gathering_id/merchant/:participant_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for incorrect organizer, a gathering mismatch, or gathering with id not in database
         const gathering = await Gathering.retrieve_gathering_participant(req.params.participant_id);
