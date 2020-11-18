@@ -73,7 +73,7 @@ orderRoutes.get('/:order_id', ensureIsUser, async(req, res, next) => {
 orderRoutes.patch('/:order_id/pay', ensureIsUser, async(req, res, next) => {
     try {
         // TODO: Square API integration
-        // const payment_id = await SquareAPI.process_payment()
+        // res.redirect()
         const payment_id = 0;
 
         const result = await Order.record_payment(+req.params.order_id, payment_id);

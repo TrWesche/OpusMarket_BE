@@ -3,6 +3,7 @@ const express = require("express");
 const path = require("path");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
+const bodyParser = require('body-parser');
 
 const ExpressError = require("./helpers/expressError");
 const app = express();
@@ -12,6 +13,10 @@ const { authenticateJWT } = require("./middleware/auth");
 
 app.use(express.json());
 app.use(cookieParser(COOKIE_SIG));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+  extended: false
+}));
 app.use(authenticateJWT);
 
 // add logging system
@@ -42,7 +47,7 @@ app.use("/api/gatherings", gatheringRouter);
 app.use("/api/orders", orderRoutes);
 
 /** View Routes */
-const paymentRouter = require("./apis/Square/paymentRouter");
+const paymentRouter = require("./integrations/Square/paymentRouter");
 
 app.use("/i", paymentRouter);
 

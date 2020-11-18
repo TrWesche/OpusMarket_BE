@@ -1,6 +1,6 @@
 extends layout
 block content
-  script(type="text/javascript" src=basepath)
+  script(type="text/javascript" src=paymentFormPath)
   script(type="text/javascript").
     window.applicationId= "#{square_application_id}";
     window.locationId= "#{square_location_id}";
@@ -16,7 +16,7 @@ block content
           Or
 
     div(id="sq-ccbox")
-      form(id="nonce-form" novalidate action="process-payment" method="post")
+      form(id="nonce-form" novalidate action="i/process-payment" method="post")
         div(class="sq-field")
           label(class="sq-label") Card Number
           div(id="sq-card-number")

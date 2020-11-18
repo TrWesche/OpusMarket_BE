@@ -34,19 +34,19 @@ const paymentForm = new SqPaymentForm({
   }],
 
   // Initialize Google Pay button ID
-  googlePay: {
-    elementId: 'sq-google-pay'
-  },
+  // googlePay: {
+  //   elementId: 'sq-google-pay'
+  // },
 
   // Initialize Apple Pay placeholder ID
-  applePay: {
-    elementId: 'sq-apple-pay'
-  },
+  // applePay: {
+  //   elementId: 'sq-apple-pay'
+  // },
 
   // Initialize Masterpass placeholder ID
-  masterpass: {
-    elementId: 'sq-masterpass'
-  },
+  // masterpass: {
+  //   elementId: 'sq-masterpass'
+  // },
 
   // Initialize the credit card placeholders
   cardNumber: {
@@ -82,22 +82,22 @@ const paymentForm = new SqPaymentForm({
       }
 
       // Only show the button if Google Pay is enabled
-      if (methods.googlePay === true) {
-        var googlePayBtn = document.getElementById('sq-google-pay');
-        googlePayBtn.style.display = 'inline-block';
-      }
+      // if (methods.googlePay === true) {
+      //   var googlePayBtn = document.getElementById('sq-google-pay');
+      //   googlePayBtn.style.display = 'inline-block';
+      // }
 
       // Only show the button if Apple Pay for Web is enabled
-      if (methods.applePay === true) {
-        var applePayBtn = document.getElementById('sq-apple-pay');
-        applePayBtn.style.display = 'inline-block';
-      }
+      // if (methods.applePay === true) {
+      //   var applePayBtn = document.getElementById('sq-apple-pay');
+      //   applePayBtn.style.display = 'inline-block';
+      // }
 
       // Only show the button if Masterpass is enabled
-      if (methods.masterpass === true) {
-        var masterpassBtn = document.getElementById('sq-masterpass');
-        masterpassBtn.style.display = 'inline-block';
-      }
+      // if (methods.masterpass === true) {
+      //   var masterpassBtn = document.getElementById('sq-masterpass');
+      //   masterpassBtn.style.display = 'inline-block';
+      // }
     },
 
     /*

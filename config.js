@@ -20,6 +20,8 @@ const SQUARE_LOC_ID = process.env.SQUARE_LOC_ID;
 
 const SQUARE_API_BASEPATH = process.env.SQUARE_API_BASEPATH;
 
+const SQUARE_PAYMENT_FORM_PATH = process.env.SQUARE_PAYMENT_FORM_PATH;
+
 // database is:
 //
 // - on Heroku, get from env var DATABASE_URL
@@ -44,5 +46,6 @@ module.exports = {
   SQUARE_TOKEN,
   SQUARE_VERSION,
   SQUARE_LOC_ID,
-  SQUARE_API_BASEPATH
+  SQUARE_API_BASEPATH,
+  SQUARE_PAYMENT_FORM_PATH
 };
