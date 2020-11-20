@@ -4,12 +4,17 @@ const path = require("path");
 const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const bodyParser = require('body-parser');
+const cors = require("cors");
 
 const ExpressError = require("./helpers/expressError");
 const app = express();
 
-const { COOKIE_SIG } = require("./config");
+const { COOKIE_SIG, ORIGIN_FRONTEND } = require("./config");
 const { authenticateJWT } = require("./middleware/auth");
+const corsOptions = {
+  origin: ORIGIN_FRONTEND,
+  optionsSuccessStatus: 200
+}
 
 app.use(express.json());
 app.use(cookieParser(COOKIE_SIG));
@@ -18,6 +23,7 @@ app.use(bodyParser.urlencoded({
   extended: false
 }));
 app.use(authenticateJWT);
+app.use(cors(corsOptions))
 
 // add logging system
 app.use(morgan("tiny"));
@@ -49,7 +55,7 @@ app.use("/api/orders", orderRoutes);
 /** View Routes */
 const paymentRouter = require("./integrations/Square/paymentRouter");
 
-app.use("/i", paymentRouter);
+app.use("/api/sqpay", paymentRouter);
 
 /** 404 handler */
 app.use(function(req, res, next) {

@@ -6,7 +6,7 @@ const SECRET_KEY = process.env.SECRET_KEY || "test";
 
 const COOKIE_SIG = process.env.COOKIE_SIG || "test";
 
-const PORT = +process.env.PORT || 3000;
+const PORT = +process.env.PORT || 5000;
 
 const BCRYPT_WORK_FACTOR = 12;
 
@@ -21,6 +21,10 @@ const SQUARE_LOC_ID = process.env.SQUARE_LOC_ID;
 const SQUARE_API_BASEPATH = process.env.SQUARE_API_BASEPATH;
 
 const SQUARE_PAYMENT_FORM_PATH = process.env.SQUARE_PAYMENT_FORM_PATH;
+
+const SQUARE_PAYMENTS_PATH = process.env.SQUARE_PAYMENTS_PATH;
+
+const ORIGIN_FRONTEND = process.env.ORIGIN_FRONTEND;
 
 // database is:
 //
@@ -47,5 +51,7 @@ module.exports = {
   SQUARE_VERSION,
   SQUARE_LOC_ID,
   SQUARE_API_BASEPATH,
-  SQUARE_PAYMENT_FORM_PATH
+  SQUARE_PAYMENT_FORM_PATH,
+  SQUARE_PAYMENTS_PATH,
+  ORIGIN_FRONTEND
 };
