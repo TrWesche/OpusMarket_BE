@@ -11,7 +11,7 @@
                 {
                     "name": "Product Name",
                     "description": "Description of Product",
-                    "base_price": 29.99
+                    "base_price": 2999
                 }
             ]
         }
@@ -58,13 +58,13 @@
                 },
                 "base_price": {
                     "$id": "#/properties/base_price",
-                    "type": "number",
+                    "type": "integer",
                     "title": "The base_price schema",
                     "description": "An explanation about the purpose of this instance.",
-                    "default": 0.0,
-                    "minimum": 0.0,
+                    "default": 0,
+                    "minimum": 0,
                     "examples": [
-                        29.99
+                        2999
                     ]
                 }
             }

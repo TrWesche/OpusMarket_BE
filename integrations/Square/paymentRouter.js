@@ -21,11 +21,11 @@ const paymentRouter = new express.Router();
 
 paymentRouter.post('/process-payment', async (req, res) => {
   const request_params = req.body;
+  console.log(req.body);
 
   const idempotency_key = uuidv4();
 
   // Charge the customer's card
-  // const payments_api = new squareConnect.PaymentsApi();
   const request_body = {
     source_id: request_params.nonce,
     verification_token: request_params.buyerVerificationToken,

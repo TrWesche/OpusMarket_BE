@@ -1,13 +1,13 @@
 const db = require("../db");
 const { DateTime } = require('luxon');
 const ExpressError = require("../helpers/expressError");
-
+const partialUpdate = require("../helpers/partialUpdate");
 
 async function create_master_order(user_id) {
     try {
         const result = await db.query(`
             INSERT INTO orders
-                (user_id,)
+                (user_id)
             VALUES
                 ($1)
             RETURNING 
@@ -24,7 +24,7 @@ async function create_master_order(user_id) {
 async function read_master_order(order_id) {
     try {
         const result = await db.query(`
-            SELECT id, user_id
+            SELECT id, user_id, order_total
             FROM orders
             WHERE id = $1`,
         [order_id]); 
@@ -36,21 +36,26 @@ async function read_master_order(order_id) {
 };
 
 
-async function update_order_payment(order_id, payment_id) {
-    try {
-        const result = await db.query(`
-            UPDATE orders
-            SET payment_id = $1
-            WHERE id = $2
-            RETURNING payment_id, id`,
-        [payment_id, order_id])
+async function update_master_order(id, data) {
+    // Partial Update: table name, payload data, lookup column name, lookup key
+    let {query, values} = partialUpdate(
+        "orders",
+        data,
+        "id",
+        id
+    );
 
-        return result.rows[0];
-    } catch (error) {
-        throw new ExpressError(`An Error Occured: Unable to update order payment - ${error}`, 500);
+    const result = await db.query(query, values);
+    const product = result.rows[0];
+
+    if (!product) {
+        let notFound = new Error(`An error occured, could not perform the update to product '${id}'`);
+        notFound.status = 404;
+        throw notFound;
     };
-};
 
+    return result.rows[0];
+};
 
 async function delete_master_order(order_id) {
     try {
@@ -113,6 +118,12 @@ async function validate_order_products(products) {
 
     for (const product of products) {
         const andExpressions = [];
+
+        // If there is not quantity of products to add, skip adding to order 
+        if (product.quantity <= 0) {
+            continue;
+        }
+
         searchValues.push(product.id);
         andExpressions.push(`products.id = $${searchValues.length}`);
 
@@ -160,8 +171,10 @@ async function add_order_products(order_id, products) {
 
 
     for (const product of products) {
-        queryValues.push(product.id, product.name, product.quantity, product.base_price, product.modifier_id, product.modifier_name);
-        valueExpressions.push(`($1, $${queryValues.length - 5}, $${queryValues.length - 4}, $${queryValues.length - 3}, 
+        queryValues.push(product.id, product.name, product.quantity, product.base_price, product.promotion_price,
+                        product.coupon_discount, product.final_price, product.modifier_id, product.modifier_name);
+        valueExpressions.push(`($1, $${queryValues.length - 8}, $${queryValues.length - 7}, $${queryValues.length - 6},
+                                    $${queryValues.length - 5}, $${queryValues.length - 4}, $${queryValues.length - 3}, 
                                     $${queryValues.length - 2}, $${queryValues.length - 1}, $${queryValues.length})`);
     };
 
@@ -170,11 +183,12 @@ async function add_order_products(order_id, products) {
     try {
         const result = await db.query(`
             INSERT INTO order_products
-                (order_id, product_id, product_name, quantity, base_price, modifier_id, modifier_name)
+                (order_id, product_id, product_name, quantity, base_price, promotion_price,
+                    coupon_discount, final_price, modifier_id, modifier_name)
             VALUES
                 ${valueExpressionRows}
             RETURNING 
-                product_id, id, product_name, quantity, base_price, modifier_name`, 
+                id, product_id, product_name, quantity, base_price, promotion_price, coupon_discount, final_price, modifier_name`, 
         queryValues);
 
         return result.rows;  
@@ -187,7 +201,7 @@ async function add_order_products(order_id, products) {
 async function read_order_products(order_id) {
     try {
         const result = await db.query(`
-            SELECT id, product_id, product_name, quantity, base_price
+            SELECT id, product_id, product_name, quantity, base_price, promotion_price, coupon_discount, final_price, modifier_name
             FROM order_products
             WHERE order_id = $1`,
         [order_id]);
@@ -373,7 +387,7 @@ async function save_coupons(order_id, validated_coupons) {
 module.exports = {
     create_master_order,
     read_master_order,
-    update_order_payment,
+    update_master_order,
     delete_master_order,
     validate_order_owner,
     add_order_status,

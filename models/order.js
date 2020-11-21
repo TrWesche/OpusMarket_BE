@@ -1,5 +1,6 @@
 const { 
-    create_master_order, 
+    create_master_order,
+    update_master_order,
     add_order_products, 
     add_order_status, 
     validate_promotions, 
@@ -9,7 +10,6 @@ const {
     read_master_order, 
     validate_order_owner, 
     read_order_products, 
-    update_order_payment, 
     delete_master_order, 
     validate_order_products} = require('../repositories/order.repository');
 const ExpressError = require("../helpers/expressError");
@@ -40,15 +40,6 @@ class Order {
             throw error;
         }
 
-        // TODO: Don't like this at all, another O(n2) how can this be handled better?
-        for (const outputProduct of validated_products) {
-            for (const inputProduct of data.products) {
-                if (outputProduct.id === inputProduct.id) {
-                    outputProduct.quantity = inputProduct.quantity;
-                };
-            };
-        };
-
         // Create master order
         const order = await create_master_order(user_id);
 
@@ -58,36 +49,64 @@ class Order {
         };
        
         try {
-            // After master order created add products to database
-            const products = await add_order_products(order.id, validated_products);
-    
             // Validate promotions against backend and store details
             const current_promotions = await validate_promotions(data.products);
             const promotions = await save_promotions(order.id, current_promotions);
     
             // Validate coupons against backend and store details
             const validated_coupons = await validate_coupons(data.products);
-            const coupons = await save_coupons(order.id, validated_coupons);
-    
-    
-            // Construct the products section of the order object and append
-            // TODO: This is a bad implementation, O(n2) -- Need to think about how to make this better
-            for (const product of products) {
+            const coupons = await save_coupons(order.id, validated_coupons);            
+
+
+            // TODO: Don't like this at all, another O(n^2) how can this be handled better?
+            // Build data for order products table and calculate product and order totals
+            let order_total = 0;
+            for (const outputProduct of validated_products) {
+                // Store quantity details
+                for (const inputProduct of data.products) {
+                    if (outputProduct.id === inputProduct.id) {
+                        outputProduct.quantity = inputProduct.quantity;
+                    };
+                };
+
+                // Store promotion price details
                 for (const promotion of promotions) {
-                    if (product.product_id === promotion.product_id) {
-                        product.promotion = promotion;
+                    if (outputProduct.id === promotion.product_id) {
+                        outputProduct.promotion_price = promotion.promotion_price;
                     };
                 };
-    
+
+                // Store coupon discount details
                 for (const coupon of coupons) {
-                    if (product.product_id === coupon.product_id) {
-                        product.coupon = coupon;
+                    if (outputProduct.id === coupon.product_id) {
+                        outputProduct.coupon_discount = coupon.pct_discount;
                     };
                 };
+
+                // Calculate total price
+                if (outputProduct.promotion_price && outputProduct.coupon_discount) {
+                    outputProduct.final_price = Math.floor((outputProduct.promotion_price * (1 - outputProduct.coupon_discount) * outputProduct.quantity));
+                } else if (outputProduct.promotion_price) {
+                    outputProduct.final_price = (outputProduct.promotion_price * outputProduct.quantity);
+                } else if (outputProduct.coupon_discount) {
+                    outputProduct.final_price = Math.floor((outputProduct.base_price * (1 - outputProduct.coupon_discount) * outputProduct.quantity));
+                } else {
+                    outputProduct.final_price = (outputProduct.base_price * outputProduct.quantity);
+                };
+                order_total = order_total + outputProduct.final_price;
             };
+            
+
+            // After master order created and source data calculated add products to database
+            const products = await add_order_products(order.id, validated_products);
     
+            // Save master order total to database
+            await update_master_order(order.id, {order_total: order_total});
+
+            // Update the orders object for return from api
+            order.order_total = order_total;
             order.products = products;
-    
+
             // Create a status update on the backend noting the order was created
             const status = await add_order_status(order.id, {status: "created", notes: null});
     
@@ -161,13 +180,13 @@ class Order {
     // ╚═══╝╚╝   ╚═══╝╚╝ ╚╝ ╚══╝ ╚═══╝
 
     /** Record payment details. */
-    static async record_payment(id, payment_id) {
+    static async record_payment(id, data) {
         const check = await validate_order_owner(id, req.user.id);
         if (!check) {
             throw new ExpressError(`Unauthorized`, 401)
         }
 
-        const result = await update_order_payment(id, payment_id);
+        const result = await update_master_order(id, data);
         return result;
     }
 

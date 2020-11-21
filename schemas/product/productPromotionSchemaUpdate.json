@@ -7,7 +7,7 @@
     "default": {},
     "examples": [
         {
-            "promotion_price": 19.99,
+            "promotion_price": 1999,
             "active": true
         }
     ],
@@ -16,13 +16,13 @@
     "properties": {
         "promotion_price": {
             "$id": "#/properties/promotion_price",
-            "type": "number",
+            "type": "integer",
             "title": "The promotion_price schema",
             "description": "An explanation about the purpose of this instance.",
-            "default": 0.0,
-            "minimum": 0.0,
+            "default": 0,
+            "minimum": 0,
             "examples": [
-                19.99
+                1999
             ]
         },
         "active": {

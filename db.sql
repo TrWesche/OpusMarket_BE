@@ -11,8 +11,12 @@ CREATE TABLE "users" (
 CREATE TABLE "orders" (
   "id" SERIAL PRIMARY KEY,
   "user_id" int NOT NULL REFERENCES "users" ("id"),
-  "order_total" decimal,
-  "payment_id" text
+  "order_total" int,
+  "remote_payment_id" text,
+  "remote_paymaent_dt" TIMESTAMP WITH TIME ZONE,
+  "remote_order_id" text,
+  "remote_receipt_id" text,
+  "remote_receipt_url" text  
 );
 
 CREATE TABLE "merchants" (
@@ -27,7 +31,7 @@ CREATE TABLE "products" (
   "merchant_id" int NOT NULL REFERENCES "merchants" ("id") ON DELETE CASCADE,
   "name" text NOT NULL,
   "description" text NOT NULL,
-  "base_price" decimal NOT NULL,
+  "base_price" int NOT NULL,
   "avg_rating" decimal DEFAULT 0,
   "qty_ratings" int DEFAULT 0,
   "qty_views" int DEFAULT 0,
@@ -105,7 +109,7 @@ CREATE TABLE "product_meta" (
 CREATE TABLE "product_promotions" (
   "id" SERIAL PRIMARY KEY,
   "product_id" int NOT NULL REFERENCES "products" ("id") ON DELETE CASCADE,
-  "promotion_price" decimal NOT NULL,
+  "promotion_price" int NOT NULL,
   "active" boolean DEFAULT FALSE
 );
 
@@ -141,7 +145,10 @@ CREATE TABLE "order_products" (
   "product_id" int REFERENCES "products" ("id") ON DELETE SET NULL,
   "product_name" text NOT NULL,
   "quantity" int NOT NULL,
-  "base_price" decimal NOT NULL,
+  "base_price" int NOT NULL,
+  "promotion_price" int,
+  "coupon_discount" decimal,
+  "final_price" int NOT NULL,
   "modifier_id" int REFERENCES "product_modifiers" ("id") ON DELETE SET NULL,
   "modifier_name" text
 );
@@ -159,7 +166,7 @@ CREATE TABLE "order_promotions" (
   "order_id" int NOT NULL REFERENCES "orders" ("id"),
   "product_id" int REFERENCES "products" ("id") ON DELETE SET NULL,
   "promotion_id" int REFERENCES "product_promotions" ("id") ON DELETE SET NULL,
-  "promotion_price" decimal NOT NULL
+  "promotion_price" int NOT NULL
 );
 
 CREATE TABLE "order_coupons" (
