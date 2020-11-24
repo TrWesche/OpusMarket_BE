@@ -273,6 +273,23 @@ class Product {
         // configurable & maintainable.
 
         // TODO: Not pulling in image currently, will need to add this functionality.
+        // let baseQuery = `
+        // SELECT 
+        //     DISTINCT ON (products.id)
+        //     products.id,
+        //     product_meta.title AS meta_title, 
+        //     product_meta.description AS meta_description,
+        //     products.name AS name,
+        //     products.description AS description,
+        //     products.base_price AS base_price,
+        //     products.avg_rating AS avg_rating,
+        //     product_images.url AS img_url
+        // FROM products
+        // FULL OUTER JOIN product_meta
+        // ON products.id = product_meta.product_id
+        // FULL OUTER JOIN product_images
+        // ON products.id = product_images.product_id`;
+
         let baseQuery = `
         SELECT 
             DISTINCT ON (products.id)
@@ -282,13 +299,18 @@ class Product {
             products.name AS name,
             products.description AS description,
             products.base_price AS base_price,
+            product_promotions.promotion_price AS promotion_price,
             products.avg_rating AS avg_rating,
             product_images.url AS img_url
         FROM products
         FULL OUTER JOIN product_meta
         ON products.id = product_meta.product_id
         FULL OUTER JOIN product_images
-        ON products.id = product_images.product_id`;
+        ON products.id = product_images.product_id
+        LEFT JOIN product_promotions
+        ON products.id = product_promotions.product_id
+        AND product_promotions.active = true`;
+
 
         let orExpressions = [];
         let andExpressions = [];
