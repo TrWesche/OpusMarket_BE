@@ -21,7 +21,7 @@ const paymentRouter = new express.Router();
 
 paymentRouter.post('/process-payment', async (req, res) => {
   const request_params = req.body;
-  console.log(req.body);
+  // console.log(req.body);
 
   const idempotency_key = uuidv4();
 

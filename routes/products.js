@@ -249,6 +249,25 @@ productRouter.get('/catalog/:prod_id', async(req, res, next) => {
 })
 
 
+/** Get Product Coupon Details */
+// TODO: In the future should require user to be logged in
+productRouter.get('/:prod_id/coupon/:coupon_code', async(req, res, next) => {
+    try {
+        // Check for product with id not in database or an incorrect owner
+        const couponDetails = await Product.retrieve_product_coupon_by_code(req.params.prod_id, req.params.coupon_code)
+        // if(!couponDetails.product_id || couponDetails.product_id !== req.params.prod_id) {
+        //     throw new ExpressError("Coupon not valid", 404);
+        // }
+
+        return res.json({"product_coupon": couponDetails});
+    } catch (error) {
+        console.log(error.code);
+
+        return next(error);
+    };
+});
+
+
 // ╔╗ ╔╗╔═══╗╔═══╗╔═══╗╔════╗╔═══╗
 // ║║ ║║║╔═╗║╚╗╔╗║║╔═╗║║╔╗╔╗║║╔══╝
 // ║║ ║║║╚═╝║ ║║║║║║ ║║╚╝║║╚╝║╚══╗

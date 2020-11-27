@@ -512,6 +512,26 @@ class Product {
         return coupon;
     }
 
+    /** Retreive product coupon by coupon code and product id */
+    static async retrieve_product_coupon_by_code(product_id, coupon_code) {
+        const result = await db.query(`
+            SELECT 
+                id, code, pct_discount
+            FROM product_coupons
+            WHERE product_id = $1 AND code = $2 AND active = true`,
+        [product_id, coupon_code]);
+
+        const coupon = result.rows[0];
+
+        if (!coupon) {
+            const error = new Error(`Unable to find valid coupon with code, ${coupon_code}`);
+            error.status = 404;
+            throw error;
+        }
+
+        return coupon;
+    }
+
     /** Retrieve product coupons */
     static async retrieve_product_coupons(prod_id) {
         const result = await db.query(`

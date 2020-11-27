@@ -26,6 +26,14 @@ class Order {
 
     /** Create order with data. Returns new order data. */
     static async create_order(user_id, data) {
+        //TODO: Improve Create Order Function Flow - Transactions and Validity Checks.  Additional Notes below:
+                // - For validating in the orders this should be handled by the insert function checking for foreign key consistency
+
+                // - use Postgres transactions to handle order creation.  This allows for the database to rollback the operation easily without needing to add extra functionality.  This allows for the grouping of multiple queries.
+                // 	- Also good for serailization.  Each transaction can work autonomously
+
+                // - "BEGIN" -> "COMMIT" if fails "ROLLBACK"
+
         // Check the order has product contents
         if (data.products.length === 0) {
             const error = new ExpressError(`Error: Cannot create a order with no products`, 400);
