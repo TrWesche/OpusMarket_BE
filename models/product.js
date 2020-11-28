@@ -272,7 +272,7 @@ class Product {
         // TODO: Currently filters on meta tags & rating. Need to put additional effort into making this more
         // configurable & maintainable.
 
-        // TODO: Not pulling in image currently, will need to add this functionality.
+
         // let baseQuery = `
         // SELECT 
         //     DISTINCT ON (products.id)
@@ -290,6 +290,8 @@ class Product {
         // FULL OUTER JOIN product_images
         // ON products.id = product_images.product_id`;
 
+        // 
+
         let baseQuery = `
         SELECT 
             DISTINCT ON (products.id)
@@ -301,12 +303,15 @@ class Product {
             products.base_price AS base_price,
             product_promotions.promotion_price AS promotion_price,
             products.avg_rating AS avg_rating,
-            product_images.url AS img_url
+            product_images.url AS img_url,
+            product_modifiers.id AS modifier_id
         FROM products
         FULL OUTER JOIN product_meta
         ON products.id = product_meta.product_id
         FULL OUTER JOIN product_images
         ON products.id = product_images.product_id
+        FULL OUTER JOIN product_modifiers
+        ON products.id = product_modifiers.product_id
         LEFT JOIN product_promotions
         ON products.id = product_promotions.product_id
         AND product_promotions.active = true`;
