@@ -143,7 +143,8 @@ async function validate_order_products(products) {
 
     try {
         const result = await db.query(`
-            SELECT 
+            SELECT
+                DISTINCT ON (products.id)
                 products.id AS "id",
                 products.name AS "name",
                 products.base_price AS "base_price",
@@ -291,6 +292,10 @@ async function save_promotions(order_id, validated_promotions) {
     const valueExpressions = [];
     let queryValues = [order_id];
 
+    if (validated_promotions.length === 0) {
+        return [];
+    }
+
     for (const promo of validated_promotions) {
         queryValues.push(promo.product_id, promo.promotion_id, promo.promotion_price);
         valueExpressions.push(`($1, $${queryValues.length - 2},  $${queryValues.length - 1},  $${queryValues.length})`);
@@ -355,6 +360,10 @@ async function validate_coupons(product_coupon_pairs) {
 async function save_coupons(order_id, validated_coupons) {
     const valueExpressions = [];
     const queryValues = [order_id];
+
+    if (validated_coupons.length === 0) {
+        return [];
+    }
 
     for (const coupon of validated_coupons) {
         queryValues.push(coupon.product_id, coupon.coupon_id, coupon.coupon_code, coupon.pct_discount);

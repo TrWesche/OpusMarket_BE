@@ -16,12 +16,14 @@ const {
   SQUARE_PAYMENTS_PATH,
   SQUARE_VERSION
 } = require("../../config");
+const Order = require("../../models/order");
 
 const paymentRouter = new express.Router();
 
 paymentRouter.post('/process-payment', async (req, res) => {
   const request_params = req.body;
-  // console.log(req.body);
+
+  const order_details = await Order.get_order(request_params.order_id, req.user.id);
 
   const idempotency_key = uuidv4();
 
@@ -32,8 +34,7 @@ paymentRouter.post('/process-payment', async (req, res) => {
     autocomplete: true,
     location_id: SQUARE_LOC_ID,
     amount_money: {
-      // amount: request_params.order_total,
-      amount: 1000, // $10.00 charge
+      amount: order_details.order_total, // $10.00 charge
       currency: 'USD'
     },
     idempotency_key: idempotency_key

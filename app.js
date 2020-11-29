@@ -13,17 +13,21 @@ const { COOKIE_SIG, ORIGIN_FRONTEND } = require("./config");
 const { authenticateJWT } = require("./middleware/auth");
 const corsOptions = {
   origin: ORIGIN_FRONTEND,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'PATCH', 'POST', 'DELETE'],
+  preflightContinue: true,
+  credentials: true
 }
 
 app.use(express.json());
+app.use(cors(corsOptions));
 app.use(cookieParser(COOKIE_SIG));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: false
 }));
 app.use(authenticateJWT);
-app.use(cors(corsOptions))
+
 
 // add logging system
 app.use(morgan("tiny"));
