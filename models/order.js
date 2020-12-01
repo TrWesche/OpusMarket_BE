@@ -3,15 +3,18 @@ const {
     update_master_order,
     add_order_products, 
     add_order_status, 
-    validate_promotions, 
     save_promotions, 
-    validate_coupons, 
     save_coupons, 
     read_master_order, 
     validate_order_owner, 
     read_order_products, 
     delete_master_order, 
     validate_order_products} = require('../repositories/order.repository');
+const {
+    begin_transaction,
+    commit_transaction,
+    rollback_transaction} = require('../repositories/common.repository');
+
 const ExpressError = require("../helpers/expressError");
 
 
@@ -26,47 +29,42 @@ class Order {
 
     /** Create order with data. Returns new order data. */
     static async create_order(user_id, data) {
-        //TODO: Improve Create Order Function Flow - Transactions and Validity Checks.  Additional Notes below:
-                // - For validating in the orders this should be handled by the insert function checking for foreign key consistency
-
-                // - use Postgres transactions to handle order creation.  This allows for the database to rollback the operation easily without needing to add extra functionality.  This allows for the grouping of multiple queries.
-                // 	- Also good for serailization.  Each transaction can work autonomously
-
-                // - "BEGIN" -> "COMMIT" if fails "ROLLBACK"
-
+        // TODO: Potential later effort -> Disguise internal database ids?
         // Check the order has product contents
         if (data.products.length === 0) {
             const error = new ExpressError(`Error: Cannot create a order with no products`, 400);
             throw error;
         }
 
-        // Validate product information (product ids, modifier ids, and coupon ids)
-        const validated_products = await validate_order_products(data.products);
-
-        if (validated_products.length !== data.products.length) {
-            const error = new ExpressError(`Error: Invalid product id, modifier id, or coupon id provided`, 400);
-            throw error;
-        }
-
-        // Create master order
-        const order = await create_master_order(user_id);
-
-        if (!order) {
-            const error = new ExpressError(`Error: Could not create a new order`, 500);
-            throw error;
-        };
-       
         try {
-            // Validate promotions against backend and store details
-            const current_promotions = await validate_promotions(data.products);
-            const promotions = await save_promotions(order.id, current_promotions);
-    
-            // Validate coupons against backend and store details
-            const validated_coupons = await validate_coupons(data.products);
-            const coupons = await save_coupons(order.id, validated_coupons);            
+            // Open a new SQL Transaction
+            await begin_transaction();
+
+            // Consolidate and cross validate order information (products vs. modifiers, active coupons, and active promotions)
+            // This will serve as the source data for creating the order on the backend
+            const validated_products = await validate_order_products(data.products);
+                // If some of the source data is invalid throw an error and exit
+            if (validated_products.length !== data.products.length) {
+                const error = new ExpressError(`Error: Invalid product id, modifier id, or coupon id provided`, 400);
+                throw error;
+            }
+
+            // Create master order entry for data referencing;
+            const order = await create_master_order(user_id);
+                // If failed to make the master order throw an error and exit
+            if (!order) {
+                const error = new ExpressError(`Error: Could not create a new order`, 500);
+                throw error;
+            };
+        
+            // Store details on promotions and coupons applied to the purchase
+            await save_promotions(order.id, validated_products);
+            await save_coupons(order.id, validated_products);            
 
 
-            // TODO: Don't like this at all, another O(n^2) how can this be handled better?
+            // TODO: Have a better query strategy but it does not currently work due to what appears to be
+            // limitations of the pg library.  Will need to do additional research.  Query code stored in
+            // repository commented out.
             // Build data for order products table and calculate product and order totals
             let order_total = 0;
             for (const outputProduct of validated_products) {
@@ -77,27 +75,13 @@ class Order {
                     };
                 };
 
-                // Store promotion price details
-                for (const promotion of promotions) {
-                    if (outputProduct.id === promotion.product_id) {
-                        outputProduct.promotion_price = promotion.promotion_price;
-                    };
-                };
-
-                // Store coupon discount details
-                for (const coupon of coupons) {
-                    if (outputProduct.id === coupon.product_id) {
-                        outputProduct.coupon_discount = coupon.pct_discount;
-                    };
-                };
-
                 // Calculate total price
-                if (outputProduct.promotion_price && outputProduct.coupon_discount) {
-                    outputProduct.final_price = Math.floor((outputProduct.promotion_price * (1 - outputProduct.coupon_discount) * outputProduct.quantity));
+                if (outputProduct.promotion_price && outputProduct.pct_discount) {
+                    outputProduct.final_price = Math.floor((outputProduct.promotion_price * (1 - outputProduct.pct_discount) * outputProduct.quantity));
                 } else if (outputProduct.promotion_price) {
                     outputProduct.final_price = (outputProduct.promotion_price * outputProduct.quantity);
-                } else if (outputProduct.coupon_discount) {
-                    outputProduct.final_price = Math.floor((outputProduct.base_price * (1 - outputProduct.coupon_discount) * outputProduct.quantity));
+                } else if (outputProduct.pct_discount) {
+                    outputProduct.final_price = Math.floor((outputProduct.base_price * (1 - outputProduct.pct_discount) * outputProduct.quantity));
                 } else {
                     outputProduct.final_price = (outputProduct.base_price * outputProduct.quantity);
                 };
@@ -116,11 +100,15 @@ class Order {
             order.products = products;
 
             // Create a status update on the backend noting the order was created
-            const status = await add_order_status(order.id, {status: "created", notes: null});
+            await add_order_status(order.id, {status: "created", notes: null});
     
+            // Commit values to the database
+            await commit_transaction();
+
             return order;     
         } catch (error) {
-            const cleanup = await delete_master_order(order.id);
+            // Rollback SQL Transaction on failure
+            await rollback_transaction();
             throw new ExpressError(error.message, error.status);
         }
     }

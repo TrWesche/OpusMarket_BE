@@ -114,7 +114,9 @@ async function add_order_status(order_id, data) {
 
 async function validate_order_products(products) {
     const orExpressions = [];
-    const searchValues = [];
+    // const quantityValues = [];
+
+    const paramaterizedValues = [];
 
     for (const product of products) {
         const andExpressions = [];
@@ -124,22 +126,55 @@ async function validate_order_products(products) {
             continue;
         }
 
-        searchValues.push(product.id);
-        andExpressions.push(`products.id = $${searchValues.length}`);
+        // Add Data for product_quantaties table generation and LEFT JOIN
+        // paramaterizedValues.push(product.id);
+        // paramaterizedValues.push(product.quantity);
+        // quantityValues.push(`($${paramaterizedValues.length-1}, $${paramaterizedValues.length})`);
+
+        // Setup WHERE Query to validate product id vs modifiers, coupons, and promotions
+        paramaterizedValues.push(product.id);
+        andExpressions.push(`products.id = $${paramaterizedValues.length}`);
 
         if (product.modifier_id) {
-            searchValues.push(product.modifier_id);
-            andExpressions.push(`product_modifiers.id = $${searchValues.length}`);
+            paramaterizedValues.push(product.modifier_id);
+            andExpressions.push(`product_modifiers.id = $${paramaterizedValues.length}`);
         }
 
         if (product.coupon_id) {
-            searchValues.push(product.coupon_id);
-            andExpressions.push(`product_coupons.id = $${searchValues.length}`);
+            paramaterizedValues.push(product.coupon_id);
+            andExpressions.push(`product_coupons.id = $${paramaterizedValues.length}`);
             andExpressions.push(`product_coupons.active = true`);
         }
 
-        orExpressions.push(`( ${andExpressions.join(' AND ')}  )`)
+        orExpressions.push(`( ${andExpressions.join(' AND ')} )`)
     }
+
+
+    // const query = `
+    //     SELECT
+    //         DISTINCT ON (products.id)
+    //         products.id AS "id",
+    //         products.name AS "name",
+    //         products.base_price AS "base_price",
+    //         product_modifiers.id AS "modifier_id",
+    //         product_modifiers.name AS "modifier_name",
+    //         product_coupons.id AS "coupon_id",
+    //         product_coupons.code AS "coupon_code",
+    //         product_coupons.pct_discount AS "pct_discount",
+    //         product_promotions.promotion_price AS "promotion_price",
+    //         product_promotions.id AS "promotion_id",
+    //         product_quantities.quantity AS "quantity"
+    //     FROM products
+    //     FULL OUTER JOIN product_modifiers
+    //     ON products.id = product_modifiers.product_id
+    //     FULL OUTER JOIN product_coupons
+    //     ON products.id = product_coupons.product_id
+    //     FULL OUTER JOIN product_promotions
+    //     ON products.id = product_promotions.product_id
+    //     AND product_promotions.active = TRUE
+    //     LEFT JOIN (VALUES ${quantityValues.join(', ')}) AS product_quantities (product_id, quantity)
+    //     ON products.id = product_quantities.product_id
+    //     WHERE ${orExpressions.join(' OR ')}`;
 
     try {
         const result = await db.query(`
@@ -150,14 +185,22 @@ async function validate_order_products(products) {
                 products.base_price AS "base_price",
                 product_modifiers.id AS "modifier_id",
                 product_modifiers.name AS "modifier_name",
-                product_coupons.id AS "coupon_id"
+                product_coupons.id AS "coupon_id",
+                product_coupons.code AS "coupon_code",
+                product_coupons.pct_discount AS "pct_discount",
+                product_promotions.promotion_price AS "promotion_price",
+                product_promotions.id AS "promotion_id"
             FROM products
             FULL OUTER JOIN product_modifiers
             ON products.id = product_modifiers.product_id
             FULL OUTER JOIN product_coupons
             ON products.id = product_coupons.product_id
+            FULL OUTER JOIN product_promotions
+            ON products.id = product_promotions.product_id
+            AND product_promotions.active = TRUE
             WHERE ${orExpressions.join(' OR ')}`,
-        searchValues);
+        paramaterizedValues);
+
 
         return result.rows;
     } catch (error) {
@@ -173,7 +216,7 @@ async function add_order_products(order_id, products) {
 
     for (const product of products) {
         queryValues.push(product.id, product.name, product.quantity, product.base_price, product.promotion_price,
-                        product.coupon_discount, product.final_price, product.modifier_id, product.modifier_name);
+                        product.pct_discount, product.final_price, product.modifier_id, product.modifier_name);
         valueExpressions.push(`($1, $${queryValues.length - 8}, $${queryValues.length - 7}, $${queryValues.length - 6},
                                     $${queryValues.length - 5}, $${queryValues.length - 4}, $${queryValues.length - 3}, 
                                     $${queryValues.length - 2}, $${queryValues.length - 1}, $${queryValues.length})`);
@@ -250,54 +293,17 @@ async function delete_order_product(ordprod_id) {
     };
 };
 
-
-async function validate_promotions(products) {
-    // Find active promotions for each product
-    const searchValues = [];    
-    const searchExpressions = [];
-
-    for (const product of products) {
-        searchValues.push(product.id);
-        searchExpressions.push(`$${searchValues.length}`);
-    };
-
-    const searchExpression = searchExpressions.join(",");
-
-    try {
-        const result = await db.query(`
-            SELECT
-                products.id AS product_id,
-                product_promotions.id AS promotion_id,
-                product_promotions.promotion_price AS promotion_price,
-                product_promotions.active AS active
-            FROM
-                products
-            FULL OUTER JOIN
-                product_promotions
-            ON
-                products.id = product_promotions.product_id
-            WHERE
-                product_promotions.active = true AND products.id IN (${searchExpression})`,
-        searchValues)
-
-        return result.rows;
-    } catch (error) {
-        throw new ExpressError(`An Error Occured: Unable to find product promotions - ${error}`, 500);
-    };
-};
-
-
-async function save_promotions(order_id, validated_promotions) {
+async function save_promotions(order_id, order_products) {
     // Save active promotions at time of purchase for recall
     const valueExpressions = [];
     let queryValues = [order_id];
 
-    if (validated_promotions.length === 0) {
-        return [];
-    }
+    for (const product of order_products) {
+        if(product.promotion_id === null) {
+            continue;
+        }
 
-    for (const promo of validated_promotions) {
-        queryValues.push(promo.product_id, promo.promotion_id, promo.promotion_price);
+        queryValues.push(product.id, product.promotion_id, product.promotion_price);
         valueExpressions.push(`($1, $${queryValues.length - 2},  $${queryValues.length - 1},  $${queryValues.length})`);
     };
 
@@ -321,52 +327,16 @@ async function save_promotions(order_id, validated_promotions) {
     };
 };
 
-
-async function validate_coupons(product_coupon_pairs) {
-    const searchValues = [];    
-    const searchExpressions = [];
-
-    for (const pair of product_coupon_pairs) {
-        searchValues.push(pair.id, pair.coupon_id);
-        searchExpressions.push(`(products.id = $${searchValues.length - 1} AND product_coupons.id = $${searchValues.length})`);
-    };
-
-    const searchExpression = searchExpressions.join(" OR ");
-
-    try {
-        const result = await db.query(`
-            SELECT
-                products.id AS product_id,
-                product_coupons.id AS coupon_id,
-                product_coupons.code AS coupon_code,
-                product_coupons.pct_discount AS pct_discount
-            FROM
-                products
-            FULL OUTER JOIN
-                product_coupons
-            ON
-                products.id = product_coupons.product_id
-            WHERE
-                (product_coupons.active = true) AND (${searchExpression})`,
-        searchValues)
-
-        return result.rows;
-    } catch (error) {
-        throw new ExpressError(`An Error Occured: Unable to find product coupons - ${error}`, 500);
-    }
-}
-
-
-async function save_coupons(order_id, validated_coupons) {
+async function save_coupons(order_id, order_products) {
     const valueExpressions = [];
     const queryValues = [order_id];
 
-    if (validated_coupons.length === 0) {
-        return [];
-    }
+    for (const product of order_products) {
+        if(product.coupon_id === null) {
+            continue;
+        }
 
-    for (const coupon of validated_coupons) {
-        queryValues.push(coupon.product_id, coupon.coupon_id, coupon.coupon_code, coupon.pct_discount);
+        queryValues.push(product.id, product.coupon_id, product.coupon_code, product.pct_discount);
         valueExpressions.push(`($1, $${queryValues.length - 3}, $${queryValues.length - 2}, $${queryValues.length - 1}, $${queryValues.length})`);
     };
 
@@ -405,8 +375,6 @@ module.exports = {
     read_order_products,
     update_order_product,
     delete_order_product,
-    validate_promotions,
     save_promotions,
-    validate_coupons,
     save_coupons
 }
