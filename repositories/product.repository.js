@@ -198,7 +198,8 @@ async function create_product_review(product_id, user_id, review) {
 // ║║║╚╗║╚══╗║╔═╗║╔╝╚╝║
 // ╚╝╚═╝╚═══╝╚╝ ╚╝╚═══╝   
 
-async function fetch_product_by_id(id) {
+// Retrieve data by product id
+async function fetch_product_by_product_id(id) {
     try {
         const result = await db.query(
         `SELECT merchant_id, name, description, base_price, avg_rating
@@ -211,7 +212,7 @@ async function fetch_product_by_id(id) {
         throw new ExpressError(`An Error Occured: Unable to fetch product information - ${error}`, 500);
     }
 
-}
+};
 
 async function fetch_product_images_by_product_id(id) {
     try {
@@ -233,61 +234,101 @@ async function fetch_product_images_by_product_id(id) {
     } catch (error) {
         throw new ExpressError(`An Error Occured: Unable to fetch product images - ${error}`, 500);
     }
-}
+};
 
 async function fetch_product_promotions_by_product_id(id) {
     try {
         const result = await db.query(
-            `SELECT id, promotion_price
-                FROM product_promotions
-                WHERE product_id = $1 AND active = TRUE`,
-            [id]);
+            `SELECT 
+                product_promotions.id AS id, 
+                product_promotions.product_id AS product_id,
+                product_promotions.promotion_price AS promotion_price,
+                product_promotions.active AS active,
+                products.merchant_id AS merchant_id
+            FROM product_promotions
+            RIGHT JOIN products
+            ON product_id = products.id
+            WHERE product_id = $1`,
+        [id]);
 
         
         return result.rows;
     } catch (error) {
         throw new ExpressError(`An Error Occured: Unable to fetch product promotions - ${error}`, 500);
     }
-}
+};
+
+async function fetch_active_product_promotions_by_product_id(id) {
+    try {
+        const result = await db.query(
+            `SELECT 
+                product_promotions.id AS id, 
+                product_promotions.product_id AS product_id,
+                product_promotions.promotion_price AS promotion_price,
+                product_promotions.active AS active,
+                products.merchant_id AS merchant_id
+            FROM product_promotions
+            RIGHT JOIN products
+            ON product_id = products.id
+            WHERE product_id = $1 AND active = TRUE`,
+        [id]);
+
+        
+        return result.rows;
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to fetch product promotions - ${error}`, 500);
+    }
+};
 
 async function fetch_product_modifiers_by_product_id(id) {
     try {
-        const result = await db.query(
-            `SELECT id, name, description
-                FROM product_modifiers
-                WHERE product_id = $1`,
-            [id]);
+        const result = await db.query(`
+            SELECT 
+                product_modifiers.id AS id, 
+                product_modifiers.product_id AS product_id, 
+                product_modifiers.name AS name, 
+                product_modifiers.description AS description,
+                products.merchant_id AS merchant_id
+            FROM product_modifiers
+            RIGHT JOIN products
+            ON product_id = products.id
+            WHERE product_id = $1`,
+        [id]);
         
         return result.rows;
     } catch (error) {
         throw new ExpressError(`An Error Occured: Unable to fetch product modifiers - ${error}`, 500);
     }
-}
+};
 
 async function fetch_product_reviews_by_product_id(id) {
     try {
         const result = await db.query(
             `SELECT
                 product_reviews.id AS id,
+                product_reviews.product_id AS product_id,
                 users.first_name AS first_name,
                 product_reviews.rating AS rating,
                 product_reviews.title AS title,
                 product_reviews.body AS body,
-                product_reviews.review_dt AS review_dt
+                product_reviews.review_dt AS review_dt,
+                products.merchant_id AS merchant_id
             FROM product_reviews
-            LEFT JOIN users
+            FULL OUTER JOIN users
             ON product_reviews.user_id = users.id
+            RIGHT JOIN products
+            ON product_reviews.product_id = products.id
             WHERE product_reviews.product_id = $1
             ORDER BY review_dt DESC
             LIMIT 10
             OFFSET $2`,
-            [id, 0]);
+        [id, 0]);
         
         return result.rows;
     } catch (error) {
         throw new ExpressError(`An Error Occured: Unable to fetch product reviews - ${error}`, 500);
     }
-}
+};
 
 async function fetch_product_meta_data_by_product_id(id) {
     try {
@@ -308,8 +349,47 @@ async function fetch_product_meta_data_by_product_id(id) {
     } catch (error) {
         throw new ExpressError(`An Error Occured: Unable to fetch product meta data - ${error}`, 500);
     }
-}
+};
 
+async function fetch_product_coupons_by_product_id(id) {
+    try {
+        const result = await db.query(`
+            SELECT 
+                product_coupons.id AS id, 
+                product_coupons.product_id AS product_id, 
+                product_coupons.code AS code, 
+                product_coupons.pct_discount AS pct_discount, 
+                product_coupons.active AS active,
+                products.merchant_id AS merchant_id
+            FROM product_coupons
+            RIGHT JOIN products
+            ON product_id = products.id
+            WHERE product_id = $1`,
+        [prod_id]);
+
+        return result.rows;
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to fetch product coupons - ${error}`, 500);
+    }
+};
+
+async function fetch_product_coupon_by_coupon_code(product_id, coupon_code) {
+    try {
+        const result = await db.query(`
+            SELECT 
+                id, code, pct_discount
+            FROM product_coupons
+            WHERE product_id = $1 AND code = $2 AND active = true`,
+        [product_id, coupon_code]);
+
+        return result.rows[0];
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to fetch product coupon - ${error}`, 500);
+    }
+};
+
+
+// Retrieve list of products based on query parameters
 async function fetch_products_by_query_params(query) {
     let baseQuery = `
         SELECT 
@@ -391,8 +471,10 @@ async function fetch_products_by_query_params(query) {
         } catch (error) {
             throw new ExpressError(`An Error Occured: Unable to fetch product list - ${error}`, 500);
         }
-}
+};
 
+
+// Retrieve product element details based on element id
 async function fetch_product_image_by_image_id(id) {
     try {
         const result = await db.query(`
@@ -413,7 +495,7 @@ async function fetch_product_image_by_image_id(id) {
     } catch (error) {
         throw new ExpressError(`An Error Occured: Unable to fetch product image - ${error}`, 500);
     }
-}
+};
 
 async function fetch_product_meta_by_meta_id(id) {
     try {
@@ -434,7 +516,7 @@ async function fetch_product_meta_by_meta_id(id) {
     } catch (error) {
         throw new ExpressError(`An Error Occured: Unable to fetch product meta - ${error}`, 500);
     }
-}
+};
 
 async function fetch_product_promotion_by_promotion_id(id) {
     try {
@@ -455,7 +537,7 @@ async function fetch_product_promotion_by_promotion_id(id) {
     } catch (error) {
         throw new ExpressError(`An Error Occured: Unable to fetch product promotion - ${error}`, 500);
     }
-}
+};
 
 async function fetch_product_coupon_by_coupon_id(id) {
     try {
@@ -477,7 +559,77 @@ async function fetch_product_coupon_by_coupon_id(id) {
     } catch (error) {
         throw new ExpressError(`An Error Occured: Unable to fetch product coupon - ${error}`, 500);
     }
-}
+};
+
+async function fetch_product_modifier_by_modifier_id(id) {
+    try {
+        const result = await db.query(`
+            SELECT 
+                product_modifiers.id AS id, 
+                product_modifiers.product_id AS product_id, 
+                product_modifiers.name AS name, 
+                product_modifiers.description AS description,
+                products.merchant_id AS merchant_id
+            FROM product_modifiers
+            RIGHT JOIN products
+            ON product_id = products.id
+            WHERE product_modifiers.id = $1`,
+        [id]);
+
+        return result.rows[0];
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to fetch product modifier - ${error}`, 500);
+    }
+};
+
+async function fetch_product_review_by_review_id(id) {
+    try {
+        const result = await db.query(`
+            SELECT 
+                product_reviews.id AS id, 
+                product_reviews.product_id AS product_id, 
+                product_reviews.user_id AS user_id, 
+                product_reviews.rating AS rating, 
+                product_reviews.title AS title, 
+                product_reviews.body AS body, 
+                product_reviews.review_dt AS review_dt,
+                products.merchant_id AS merchant_id
+            FROM product_reviews
+            RIGHT JOIN products
+            ON product_id = products.id
+            WHERE product_reviews.id = $1`,
+        [id]);
+
+        return result.rows[0];
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to fetch product review - ${error}`, 500);
+    }
+};
+
+
+// Retrieve product reviews base on user id
+async function fetch_product_reviews_by_user_id(id) {
+    try {
+        const result = await db.query(`
+            SELECT 
+                product_reviews.id AS id, 
+                product_reviews.product_id AS product_id, 
+                product_reviews.user_id AS user_id, 
+                product_reviews.rating AS rating, 
+                product_reviews.title AS title, 
+                product_reviews.body AS body, 
+                product_reviews.review_dt AS review_dt,
+                products.merchant_id AS merchant_id
+            FROM product_reviews
+            RIGHT JOIN products
+            WHERE user_id = $1`,
+        [user_id]);
+
+        return result.rows; 
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to fetch user's reviews - ${error}`, 500);
+    }
+};
 
 
 // ╔╗ ╔╗╔═══╗╔═══╗╔═══╗╔════╗╔═══╗
@@ -487,6 +639,128 @@ async function fetch_product_coupon_by_coupon_id(id) {
 // ║╚═╝║║║   ╔╝╚╝║║╔═╗║ ╔╝╚╗ ║╚══╗
 // ╚═══╝╚╝   ╚═══╝╚╝ ╚╝ ╚══╝ ╚═══╝
 
+// Core Updates
+async function update_master_product(product_id, data) {
+    try {
+        // Partial Update: table name, payload data, lookup column name, lookup key
+        let {query, values} = partialUpdate(
+            "products",
+            data,
+            "id",
+            product_id
+        );
+        
+        const result = await db.query(query, values);
+        return result.rows[0];
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to update product - ${error}`, 500);
+    }
+};
+
+async function update_product_image(image_id, data) {
+    try {
+        // Partial Update: table name, payload data, lookup column name, lookup key
+        let {query, values} = partialUpdate(
+            "product_images",
+            data,
+            "id",
+            image_id
+        );
+        
+        const result = await db.query(query, values);
+        return result.rows[0];
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to update product image - ${error}`, 500);
+    }
+};
+
+async function update_product_meta(meta_id, data) {
+    try {
+        // Partial Update: table name, payload data, lookup column name, lookup key
+        let {query, values} = partialUpdate(
+            "product_meta",
+            data,
+            "id",
+            meta_id
+        );
+        
+        const result = await db.query(query, values);
+        return result.rows[0];
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to update product meta data - ${error}`, 500);
+    }
+};
+
+async function update_product_promotion(promotion_id, data) {
+    try {
+        // Partial Update: table name, payload data, lookup column name, lookup key
+        let {query, values} = partialUpdate(
+            "product_promotions",
+            data,
+            "id",
+            promotion_id
+        );
+        
+        const result = await db.query(query, values);
+        return result.rows[0];
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to update product promotion - ${error}`, 500);
+    } 
+};
+
+async function update_product_coupon(coupon_id, data) {
+    try {
+        // Partial Update: table name, payload data, lookup column name, lookup key
+        let {query, values} = partialUpdate(
+            "product_coupons",
+            data,
+            "id",
+            coupon_id
+        );
+        
+        const result = await db.query(query, values);
+        return result.rows[0];
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to update product coupon - ${error}`, 500);
+    } 
+};
+
+async function update_product_modifier(modifier_id, data) {
+    try {
+        // Partial Update: table name, payload data, lookup column name, lookup key
+        let {query, values} = partialUpdate(
+            "product_modifiers",
+            data,
+            "id",
+            modifier_id
+        );
+        
+        const result = await db.query(query, values);
+        return result.rows[0];
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to update product modifier - ${error}`, 500);
+    } 
+};
+
+async function update_product_review(review_id, data) {
+    try {
+        // Partial Update: table name, payload data, lookup column name, lookup key
+        let {query, values} = partialUpdate(
+            "product_reviews",
+            data,
+            "id",
+            review_id
+        );
+        
+        const result = await db.query(query, values);
+        return result.rows[0];
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to update product review - ${error}`, 500);
+    } 
+};
+
+
+// Side Effects
 async function update_product_rating(product_id, rating, add_rem) {
     let plus_or_minus;
     
@@ -526,19 +800,152 @@ async function update_product_views(product_id) {
     }
 };
 
+async function update_product_purchases(product_id) {
+    try {
+        await db.query(`
+            UPDATE products
+            SET qty_purchases = qty_purchases + 1
+            WHERE id = $1`,
+            [product_id]);
+        return {message: "Product purchases updated"};
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to update product purchases - ${error}`, 500);
+    }
+};
+
+async function update_product_returns(product_id) {
+    try {
+        await db.query(`
+            UPDATE products
+            SET qty_returns = qty_returns + 1
+            WHERE id = $1`,
+            [product_id]);
+        return {message: "Product returns updated"};
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to update product returns - ${error}`, 500);
+    }
+};
+
 async function update_promotion_active_status(product_id) {
     try {
         await db.query(`
             UPDATE product_promotions
             SET active = false
-            WHERE id = $1`,
+            WHERE product_id = $1`,
             [product_id]);
 
         return {message: "Product promotions updated to inactive"};
     } catch (error) {
         throw new ExpressError(`An Error Occured: Unable to update product promotions - ${error}`, 500);
     }
-}
+};
+
+
+// ╔═══╗╔═══╗╔╗   ╔═══╗╔════╗╔═══╗
+// ╚╗╔╗║║╔══╝║║   ║╔══╝║╔╗╔╗║║╔══╝
+//  ║║║║║╚══╗║║   ║╚══╗╚╝║║╚╝║╚══╗
+//  ║║║║║╔══╝║║ ╔╗║╔══╝  ║║  ║╔══╝
+// ╔╝╚╝║║╚══╗║╚═╝║║╚══╗ ╔╝╚╗ ║╚══╗
+// ╚═══╝╚═══╝╚═══╝╚═══╝ ╚══╝ ╚═══╝
+
+async function delete_master_product(product_id) {
+    try {
+        const result = await db.query(`
+            DELETE FROM products 
+            WHERE id = $1
+            RETURNING id`,
+        [product_id]);
+
+        return result.rows[0];
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to delete product - ${error}`, 500);
+    }
+};
+
+async function delete_product_image(image_id) {
+    try {
+        const result = await db.query(`
+            DELETE FROM product_images 
+            WHERE id = $1
+            RETURNING id`,
+        [image_id]);
+
+        return result.rows[0];
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to delete product image - ${error}`, 500);
+    }
+};
+
+async function delete_product_meta(meta_id) {
+    try {
+        const result = await db.query(`
+            DELETE FROM product_meta 
+            WHERE id = $1
+            RETURNING id`,
+        [meta_id]);
+
+        return result.rows[0];
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to delete product meta data - ${error}`, 500);
+    }
+};
+
+async function delete_product_promotion(promotion_id) {
+    try {
+        const result = await db.query(`
+            DELETE FROM product_promotions 
+            WHERE id = $1
+            RETURNING id`,
+        [promotion_id]);
+
+        return result.rows[0];
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to delete product promotion - ${error}`, 500);
+    }
+};
+
+async function delete_product_coupon(coupon_id) {
+    try {
+        const result = await db.query(`
+            DELETE FROM product_coupons 
+            WHERE id = $1
+            RETURNING id`,
+        [coupon_id]);
+
+        return result.rows[0];
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to delete product coupon - ${error}`, 500);
+    }
+};
+
+async function delete_product_modifier(modifier_id) {
+    try {
+        const result = await db.query(`
+            DELETE FROM product_modifiers 
+            WHERE id = $1
+            RETURNING id`,
+        [modifier_id]);
+
+        return result.rows[0];
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to delete product modifier - ${error}`, 500);
+    }
+};
+
+async function delete_product_review(review_id) {
+    try {
+        const result = await db.query(`
+            DELETE FROM product_reviews 
+            WHERE id = $1
+            RETURNING id`,
+        [review_id]);
+
+        return result.rows[0];
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to delete product review - ${error}`, 500);
+    }
+};
+
 
 module.exports = {
     create_master_products,
@@ -549,20 +956,46 @@ module.exports = {
     create_product_modifiers,
     create_product_review,
 
-    fetch_product_by_id,
+    fetch_product_by_product_id,
     fetch_product_images_by_product_id,
     fetch_product_promotions_by_product_id,
+    fetch_active_product_promotions_by_product_id,
     fetch_product_modifiers_by_product_id,
     fetch_product_reviews_by_product_id,
     fetch_product_meta_data_by_product_id,
+    fetch_product_coupons_by_product_id,
+
     fetch_products_by_query_params,
     
     fetch_product_image_by_image_id,
     fetch_product_meta_by_meta_id,
     fetch_product_promotion_by_promotion_id,
     fetch_product_coupon_by_coupon_id,
+    fetch_product_coupon_by_coupon_code,
+    fetch_product_modifier_by_modifier_id,
+    fetch_product_review_by_review_id,
+
+    fetch_product_reviews_by_user_id,
     
+    update_master_product,
+    update_product_image,
+    update_product_meta,
+    update_product_promotion,
+    update_product_coupon,
+    update_product_modifier,
+    update_product_review,
+
     update_product_rating,
     update_product_views,
-    update_promotion_active_status
+    update_product_purchases,
+    update_product_returns,
+    update_promotion_active_status,
+
+    delete_master_product,
+    delete_product_image,
+    delete_product_meta,
+    delete_product_promotion,
+    delete_product_coupon,
+    delete_product_modifier,
+    delete_product_review
 }

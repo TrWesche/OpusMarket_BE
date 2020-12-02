@@ -1,5 +1,3 @@
-const db = require("../db");
-const partialUpdate = require("../helpers/partialUpdate");
 const { 
     create_master_products,
     create_product_images,
@@ -9,22 +7,46 @@ const {
     create_product_modifiers,
     create_product_review,
 
-    fetch_product_by_id,
+    fetch_product_by_product_id,
     fetch_product_images_by_product_id,
     fetch_product_promotions_by_product_id,
+    fetch_active_product_promotions_by_product_id,
     fetch_product_modifiers_by_product_id,
     fetch_product_reviews_by_product_id,
     fetch_product_meta_data_by_product_id,
+    fetch_product_coupons_by_product_id,
+
     fetch_products_by_query_params,
     
     fetch_product_image_by_image_id,
     fetch_product_meta_by_meta_id,
     fetch_product_promotion_by_promotion_id,
     fetch_product_coupon_by_coupon_id,
+    fetch_product_coupon_by_coupon_code,
+    fetch_product_modifier_by_modifier_id,
+    fetch_product_review_by_review_id,
     
+    fetch_product_reviews_by_user_id,
+    
+    update_master_product,
+    update_product_image,
+    update_product_meta,
+    update_product_promotion,
+    update_product_coupon,
+    update_product_modifier,
+    update_product_review,
+
     update_product_rating,
     update_product_views,
-    update_promotion_active_status
+    update_promotion_active_status,
+    
+    delete_master_product,
+    delete_product_image,
+    delete_product_meta,
+    delete_product_promotion,
+    delete_product_coupon,
+    delete_product_modifier,
+    delete_product_review
  } = require('../repositories/product.repository');
 
  const {
@@ -45,7 +67,7 @@ class Product {
     // ╚═══╝╚╝╚═╝╚═══╝╚╝ ╚╝ ╚══╝ ╚═══╝
 
     /** Create product with data. Returns new product data. */
-    static async create_products(merchant_id, products) {
+    static async add_products(merchant_id, products) {
         const result = await create_master_products(merchant_id, products);
         return result;
     }
@@ -64,20 +86,26 @@ class Product {
 
     /** Adds a promotion to a product.  Returns promotion data. */
     static async add_product_promotion(prod_id, promotion) {
-        // Check promotion price does not exceed the current product base price
-        const product = await fetch_product_by_id(prod_id);
-        if (promotion.promotion_price >= product.base_price) {
-            throw new ExpressError(`Cannot create a promotion with price >= the base price`);
+        try {
+            await begin_transaction();
+            // Check promotion price does not exceed the current product base price
+            const product = await fetch_product_by_product_id(prod_id);
+            if (promotion.promotion_price >= product.base_price) {
+                throw new ExpressError(`Cannot create a promotion with price >= the base price`);
+            }
+            
+            // If updated promotion is active set all other promotions to inactive
+            if (promotion.active) {
+                await update_promotion_active_status(prod_id);
+            }
+                    
+            const new_promotion = await create_product_promotion(prod_id, promotion);
+
+            await commit_transaction();
+            return new_promotion;
+        } catch (error) {
+            await rollback_transaction();
         }
-        
-        // If new promotion is active check if any other promotions are currently active
-        if (promotion.active) {
-            await update_promotion_active_status(prod_id);
-            console.log("Setting all other promotions on target product to inactive");
-        }
-                
-        const new_promo = await create_product_promotion(prod_id, promotion);
-        return new_promo;
     }
 
     /** Creates a coupon for a product.  Returns coupon data. */
@@ -114,9 +142,11 @@ class Product {
     // ║║║╚╗║╚══╗║╔═╗║╔╝╚╝║
     // ╚╝╚═╝╚═══╝╚╝ ╚╝╚═══╝   
 
+    // --------------------------------------------------------------------------------
+    // Data Retrievals by associated product id
     /** Retreive data on a single product */
-    static async retrieve_single_product(id) {
-        const result = fetch_product_by_id(id);
+    static async retrieve_single_product_by_product_id(product_id) {
+        const result = fetch_product_by_product_id(product_id);
 
         if (!result) {
             throw new ExpressError(`We're sorry, we couldn't find the page you're looking for`, 404)
@@ -125,22 +155,22 @@ class Product {
     }
 
     /** Retreive data on a single product */
-    static async retrieve_product_details(id) {
+    static async retrieve_product_details_by_product_id(product_id) {
         try {
             await begin_transaction();
 
-            const product = await fetch_product_by_id(id);
+            const product = await fetch_product_by_product_id(product_id);
     
             if (!product) {
                 throw new ExpressError(`We're sorry, we couldn't find the page you're looking for`, 404)
             }
     
-            product.images = await fetch_product_images_by_product_id(id);
-            product.promotion = await fetch_product_promotions_by_product_id(id);
-            product.modifiers = await fetch_product_modifiers_by_product_id(id);
-            product.reviews = await fetch_product_reviews_by_product_id(id);
+            product.images = await fetch_product_images_by_product_id(product_id);
+            product.promotion = await fetch_active_product_promotions_by_product_id(product_id);
+            product.modifiers = await fetch_product_modifiers_by_product_id(product_id);
+            product.reviews = await fetch_product_reviews_by_product_id(product_id);
     
-            await update_product_views(id);
+            await update_product_views(product_id);
 
             await commit_transaction();
             return product;
@@ -150,15 +180,69 @@ class Product {
         }
     }
 
+    /** Retreive product images -- NOT IN USE */
+    static async retrieve_product_images_by_product_id(product_id) {
+        const images = await fetch_product_images_by_product_id(product_id);
+        return images;
+    }
+
+    /** Retreive product metas -- NOT IN USE */
+    static async retrieve_product_metas_by_product_id(product_id) {
+        const meta_data = await fetch_product_meta_data_by_product_id(product_id);
+        return meta_data;
+    }
+
+    /** Retreive product promotions -- NOT IN USE */
+    static async retrieve_product_promotions_by_product_id(product_id) {
+        const promotions = await fetch_product_promotions_by_product_id(product_id);
+        return promotions;
+    }
+
+    /** Retreive product coupons -- NOT IN USE */
+    static async retrieve_product_coupons_by_product_id(product_id) {
+        const coupons = await fetch_product_coupons_by_product_id(product_id);
+        return coupons;
+    }
+ 
+    /** Retrieve product modifiers -- NOT IN USE  */
+    static async retrieve_product_modifiers_by_product_id(product_id) {
+        const modifiers = await fetch_product_modifiers_by_product_id(product_id);
+        return modifiers;
+    }
+
+    /** Retrieve product reviews -- NOT IN USE  */
+    static async retrieve_product_reviews_by_product_id(product_id) {
+        const reviews = fetch_product_reviews_by_product_id(product_id);
+        return reviews;
+    }
+
+    /** Retreive product coupon by coupon code and product id */
+    static async retrieve_product_coupon_by_code(product_id, coupon_code) {
+        const coupon = await fetch_product_coupon_by_coupon_code(product_id, coupon_code);
+
+        if (!coupon) {
+            throw new ExpressError(`We're sorry, we could not find a valid coupon under that code`, 404);
+        }
+        return coupon;
+    }
+    // --------------------------------------------------------------------------------
+
+
+    // --------------------------------------------------------------------------------
+    // Data Retrieval for product borwsing
     /** Retreive data on multiple products by category, can expand filters later */
     static async retrieve_filtered_products(query) {
         const result = fetch_products_by_query_params(query);
         return result;
     }  
+    // --------------------------------------------------------------------------------
 
+
+    // --------------------------------------------------------------------------------
+    // Data Retrieval for Product Elements based on Element Identifiers
     /** Retrieve single product image  */
-    static async retrieve_single_product_image(id) {
-        const image = await fetch_product_image_by_image_id(id);
+    static async retrieve_product_image_by_image_id(image_id) {
+        const image = await fetch_product_image_by_image_id(image_id);
 
         if (!image) {
             throw new ExpressError(`We're sorry, we couldn't find the image you're looking for`, 404);
@@ -167,25 +251,18 @@ class Product {
     }
 
     /** Retrieve single product meta  */
-    static async retrieve_single_product_meta(id) {
-        const meta = await fetch_product_meta_by_meta_id(id);
+    static async retrieve_product_meta_by_meta_id(meta_id) {
+        const meta = await fetch_product_meta_by_meta_id(meta_id);
 
         if (!meta) {
-            throw new ExpressError(`We're sorry, we couldn't find the meta data you're looking for`, 404);
+            throw new ExpressError(`We're sorry, we could not find the meta data you're looking for`, 404);
         }
         return meta;
     }
 
-    /** Retreive product metas */
-    static async retrieve_product_metas(prod_id) {
-        const meta_data = await fetch_product_meta_data_by_product_id(prod_id);
-
-        return meta_data;
-    }
-
     /** Retrieve product promotion */
-    static async retrieve_product_promotion(id) {
-        const promotion = fetch_product_promotion_by_promotion_id(id);
+    static async retrieve_product_promotion_by_promotion_id(promotion_id) {
+        const promotion = fetch_product_promotion_by_promotion_id(promotion_id);
 
         if (!promotion) {
             throw new ExpressError(`We're sorry, we couldn't find the promotion you're looking for`, 404);
@@ -194,168 +271,46 @@ class Product {
     }
 
     /** Retreive single product coupon */
-    static async retrieve_single_product_coupon(id) {
-        const coupon = await fetch_product_coupon_by_coupon_id(id);
+    static async retrieve_product_coupon_by_coupon_id(coupon_id) {
+        const coupon = await fetch_product_coupon_by_coupon_id(coupon_id);
 
         if (!coupon) {
-            throw new ExpressError(`We're sorry, we couldn't find the coupon you're looking for`, 404);
+            throw new ExpressError(`We're sorry, we could not find the coupon you're looking for`, 404);
         }
         return coupon;
     }
-
-    /** Retreive product coupon by coupon code and product id */
-    static async retrieve_product_coupon_by_code(product_id, coupon_code) {
-        const result = await db.query(`
-            SELECT 
-                id, code, pct_discount
-            FROM product_coupons
-            WHERE product_id = $1 AND code = $2 AND active = true`,
-        [product_id, coupon_code]);
-
-        const coupon = result.rows[0];
-
-        if (!coupon) {
-            const error = new Error(`Unable to find valid coupon with code, ${coupon_code}`);
-            error.status = 404;
-            throw error;
-        }
-
-        return coupon;
-    }
-
-    /** Retrieve product coupons */
-    static async retrieve_product_coupons(prod_id) {
-        const result = await db.query(`
-            SELECT 
-                product_coupons.id AS id, 
-                product_coupons.product_id AS product_id, 
-                product_coupons.code AS code, 
-                product_coupons.pct_discount AS pct_discount, 
-                product_coupons.active AS active,
-                products.merchant_id AS merchant_id
-            FROM product_coupons
-            RIGHT JOIN products
-            ON product_id = products.id
-            WHERE product_id = $1`,
-        [prod_id]);
-
-        return result.rows;
-    }
-
 
     /** Retrieve single modifier */
-    static async retrieve_single_product_modifier(id) {
-        const result = await db.query(`
-            SELECT 
-                product_modifiers.id AS id, 
-                product_modifiers.product_id AS product_id, 
-                product_modifiers.name AS name, 
-                product_modifiers.description AS description,
-                products.merchant_id AS merchant_id
-            FROM product_modifiers
-            RIGHT JOIN products
-            ON product_id = products.id
-            WHERE product_modifiers.id = $1`,
-        [id]);
-
-        const modifier = result.rows[0];
+    static async retrieve_product_modifier_by_modifier_id(modifier_id) {
+        const modifier = await fetch_product_modifier_by_modifier_id(modifier_id);
 
         if (!modifier) {
-            const error = new Error(`Unable to find coupon with id, ${id}`);
-            error.status = 404;
-            throw error;
+            throw new ExpressError(`We're sorry, we could not find the modifier you're looking for`, 404);
         }
-
         return modifier;
     }
 
-    /** Retrieve product modifiers */
-    static async retrieve_product_modifiers(prod_id) {
-        const result = await db.query(`
-            SELECT 
-                product_modifiers.id AS id, 
-                product_modifiers.product_id AS product_id, 
-                product_modifiers.name AS name, 
-                product_modifiers.description AS description,
-                products.merchant_id AS merchant_id
-            FROM product_modifiers
-            RIGHT JOIN products
-            ON product_id = products.id
-            WHERE product_id = $1`,
-        [prod_id]);
-
-        return result.rows;
-    }
-
-
     /** Retrieve single review */
-    static async retrieve_single_product_review(id) {
-        const result = await db.query(`
-            SELECT 
-                product_reviews.id AS id, 
-                product_reviews.product_id AS product_id, 
-                product_reviews.user_id AS user_id, 
-                product_reviews.rating AS rating, 
-                product_reviews.title AS title, 
-                product_reviews.body AS body, 
-                product_reviews.review_dt AS review_dt,
-                products.merchant_id AS merchant_id
-            FROM product_reviews
-            RIGHT JOIN products
-            ON product_id = products.id
-            WHERE product_reviews.id = $1`,
-        [id]);
-
-        const review = result.rows[0];
+    static async retrieve_product_review_by_review_id(review_id) {
+        const review = await fetch_product_review_by_review_id(review_id);
 
         if (!review) {
-            const error = new Error(`Unable to find review with id, ${id}`);
-            error.status = 404;
-            throw error;
+            throw new ExpressError(`We're sorry, we could not find the review you're looking for`, 404);
         }
-
         return review;
     }
+    // --------------------------------------------------------------------------------
 
-    /** Retrieve product reviews */
-    static async retrieve_product_reviews(prod_id) {
-        const result = await db.query(`
-            SELECT 
-                product_reviews.id AS id, 
-                product_reviews.product_id AS product_id, 
-                product_reviews.user_id AS user_id, 
-                product_reviews.rating AS rating, 
-                product_reviews.title AS title, 
-                product_reviews.body AS body, 
-                product_reviews.review_dt AS review_dt,
-                products.merchant_id AS merchant_id
-            FROM product_reviews
-            RIGHT JOIN products
-            WHERE product_id = $1`,
-        [prod_id]);
 
-        return result.rows;
-    }
-
+    // --------------------------------------------------------------------------------
+    // Data Retrieval for Product Elements based on user id
     /** Retreive user reviews */
     static async retrieve_user_reviews(user_id) {
-        const result = await db.query(`
-            SELECT 
-                product_reviews.id AS id, 
-                product_reviews.product_id AS product_id, 
-                product_reviews.user_id AS user_id, 
-                product_reviews.rating AS rating, 
-                product_reviews.title AS title, 
-                product_reviews.body AS body, 
-                product_reviews.review_dt AS review_dt,
-                products.merchant_id AS merchant_id
-            FROM product_reviews
-            RIGHT JOIN products
-            WHERE user_id = $1`,
-        [user_id]);
-
-        return result.rows;
+        const reviews = fetch_product_reviews_by_user_id(user_id);
+        return reviews;
     }
+    // --------------------------------------------------------------------------------
+
 
     // ╔╗ ╔╗╔═══╗╔═══╗╔═══╗╔════╗╔═══╗
     // ║║ ║║║╔═╗║╚╗╔╗║║╔═╗║║╔╗╔╗║║╔══╝
@@ -373,290 +328,158 @@ class Product {
      *
      */
   
-     // TODO: There is alot of repetition in update product, consider how to minimize.
-    static async update_product(id, data) {
-        // Partial Update: table name, payload data, lookup column name, lookup key
-        let {query, values} = partialUpdate(
-            "products",
-            data,
-            "id",
-            id
-        );
-    
-        const result = await db.query(query, values);
-        const product = result.rows[0];
+    static async modify_product(product_id, data) {
+        const product = await update_master_product(product_id, data);
     
         if (!product) {
-            let notFound = new Error(`An error occured, could not perform the update to product '${id}'`);
-            notFound.status = 404;
-            throw notFound;
+            throw new ExpressError(`Unable to find the target product for update.`, 404);
         }
-    
         return result.rows[0];
     }
   
-    // TODO: Statistical Update Routes
-    // static async update_product_stats_ratings() {
+    static async modify_product_image(image_id, data) {
+        const product_image = await update_product_image(image_id, data);
 
-    // }
-
-    // static async update_product_stats_views() {
-
-    // }
-
-    // static async update_product_stats_purchases() {
-
-    // }
-
-    // static async update_product_states_returns() {
-
-    // }
-
-    static async update_product_image(id, data) {
-        // Partial Update: table name, payload data, lookup column name, lookup key
-        let {query, values} = partialUpdate(
-            "product_images",
-            data,
-            "id",
-            id
-        );
-
-        const result = await db.query(query, values);
-        const product = result.rows[0];
-
-        if (!product) {
-            let notFound = new Error(`An error occured, could not perform the update to product '${id}'`);
-            notFound.status = 404;
-            throw notFound;
+        if (!product_image) {
+            throw new ExpressError(`Unable to find the target image for update.`, 404);
         }
+        return product_image;
+    }
 
+    static async modify_product_meta(meta_id, data) {
+        const product_meta = await update_product_meta(meta_id, data);
+
+        if (!product_meta) {
+            throw new ExpressError(`Unable to find the target meta data for update.`, 404);
+        }
         return result.rows[0];
     }
 
-    static async update_product_meta(id, data) {
-        // Partial Update: table name, payload data, lookup column name, lookup key
-        let {query, values} = partialUpdate(
-            "product_meta",
-            data,
-            "id",
-            id
-        );
-
-        const result = await db.query(query, values);
-        const product = result.rows[0];
-
-        if (!product) {
-            let notFound = new Error(`An error occured, could not perform the update to product '${id}'`);
-            notFound.status = 404;
-            throw notFound;
+    static async modify_product_promotion(product_id, data) {
+        try {
+            await begin_transaction();
+            // Check promotion price does not exceed the current product base price
+            const product = await fetch_product_by_product_id(product_id);
+            if (data.promotion_price >= product.base_price) {
+                throw new ExpressError(`Cannot update promotion, promotion price >= base price`, 400);
+            }
+            
+            // If updated promotion is active set all other promotions to inactive
+            if (data.active) {
+                await update_promotion_active_status(product_id);
+            }
+                    
+            const updated_promotion = await update_product_promotion(product_id, data);
+    
+            if (!updated_promotion) {
+                throw new ExpressError(`Unable to find the target promotion for update.`, 404);
+            }
+    
+            await commit_transaction();
+            return updated_promotion;
+        } catch (error) {
+            await rollback_transaction();
         }
-
-        return result.rows[0];
     }
 
-    static async update_product_promotion(id, data) {
-        // TODO: Functionality here should be expanded with business rules:
-        // I.e.
-        // - Only 1 promotion active at a time -> setting 1 active has a side effect
-        // of deactivating others
-        // - Promotion value cannot be higher then the regular list price
+    static async modify_product_coupon(coupon_id, data) {
+        const product_coupon = await update_product_coupon(coupon_id, data);
 
-        // Partial Update: table name, payload data, lookup column name, lookup key
-        let {query, values} = partialUpdate(
-            "product_promotions",
-            data,
-            "id",
-            id
-        );
-
-        const result = await db.query(query, values);
-        const product = result.rows[0];
-
-        if (!product) {
-            let notFound = new Error(`An error occured, could not perform the update to product '${id}'`);
-            notFound.status = 404;
-            throw notFound;
+        if (!product_coupon) {
+            throw new ExpressError(`Unable to find the target coupon for update.`, 404);
         }
-
-        return result.rows[0];
+        return product_coupon;
     }
 
-    static async update_product_coupon(id, data) {
-        // Partial Update: table name, payload data, lookup column name, lookup key
-        let {query, values} = partialUpdate(
-            "product_coupons",
-            data,
-            "id",
-            id
-        );
+    static async modify_product_modifier(modifier_id, data) {
+        const product_modifier = await update_product_modifier(modifier_id, data);
 
-        const result = await db.query(query, values);
-        const product = result.rows[0];
-
-        if (!product) {
-            let notFound = new Error(`An error occured, could not perform the update to product '${id}'`);
-            notFound.status = 404;
-            throw notFound;
+        if (!product_modifier) {
+            throw new ExpressError(`Unable to find the target modifier for update.`, 404);
         }
-
-        return result.rows[0];
+        return product_modifier;
     }
 
-    static async update_product_modifier(id, data) {
-        // Partial Update: table name, payload data, lookup column name, lookup key
-        let {query, values} = partialUpdate(
-            "product_modifiers",
-            data,
-            "id",
-            id
-        );
+    static async modify_product_review(review_id, data) {
+        const product_review = await update_product_review(review_id, data);
 
-        const result = await db.query(query, values);
-        const product = result.rows[0];
-
-        if (!product) {
-            let notFound = new Error(`An error occured, could not perform the update to product '${id}'`);
-            notFound.status = 404;
-            throw notFound;
+        if (!product_review) {
+            throw new ExpressError(`Unable to find the target review for update.`, 404);
         }
-
-        return result.rows[0];
+        return product_review;
     }
 
-    static async update_product_review(id, data) {
-        // Partial Update: table name, payload data, lookup column name, lookup key
-        let {query, values} = partialUpdate(
-            "product_reviews",
-            data,
-            "id",
-            id
-        );
 
-        const result = await db.query(query, values);
-        const product = result.rows[0];
-
-        if (!product) {
-            let notFound = new Error(`An error occured, could not perform the update to product '${id}'`);
-            notFound.status = 404;
-            throw notFound;
-        }
-
-        return result.rows[0];
-    }
-
+    // ╔═══╗╔═══╗╔╗   ╔═══╗╔════╗╔═══╗
+    // ╚╗╔╗║║╔══╝║║   ║╔══╝║╔╗╔╗║║╔══╝
+    //  ║║║║║╚══╗║║   ║╚══╗╚╝║║╚╝║╚══╗
+    //  ║║║║║╔══╝║║ ╔╗║╔══╝  ║║  ║╔══╝
+    // ╔╝╚╝║║╚══╗║╚═╝║║╚══╗ ╔╝╚╗ ║╚══╗
+    // ╚═══╝╚═══╝╚═══╝╚═══╝ ╚══╝ ╚═══╝
 
     /** Delete target product from database; returns undefined. */
     // TODO: There is alot of repetition in delete routes, can this be minimized?
-    static async delete_product(id) {
-        let result = await db.query(
-                `DELETE FROM products 
-                  WHERE id = $1
-                  RETURNING id`,
-                [id]);
-  
-        if (result.rows.length === 0) {
-            let notFound = new Error(`Delete failed, unable to locate product '${id}'`);
-            notFound.status = 404;
-            throw notFound;
-        }
+    static async remove_product(product_id) {
+        const result = await delete_master_product(product_id);
 
-        return result.rows[0];
+        if (!result.id) {
+            throw new ExpressError(`Unable to find the target product for deletion.`, 404);
+        }
+        return result;
     }
 
-    static async delete_product_image(id) {
-        let result = await db.query(
-            `DELETE FROM product_images 
-              WHERE id = $1
-              RETURNING id`,
-            [id]);
+    static async remove_product_image(image_id) {
+        const result = await delete_product_image(image_id);
 
-        if (result.rows.length === 0) {
-            let notFound = new Error(`Delete failed, unable to locate product image '${id}'`);
-            notFound.status = 404;
-            throw notFound;
+        if (!result.id) {
+            throw new ExpressError(`Unable to find the target product image for deletion.`, 404);
         }
-
-        return result.rows[0];
+        return result;
     }
 
-    static async delete_product_meta(id) {
-        let result = await db.query(
-            `DELETE FROM product_meta 
-              WHERE id = $1
-              RETURNING id`,
-            [id]);
+    static async remove_product_meta(meta_id) {
+        const result = await delete_product_meta(meta_id);
 
-        if (result.rows.length === 0) {
-            let notFound = new Error(`Delete failed, unable to locate product meta '${id}'`);
-            notFound.status = 404;
-            throw notFound;
+        if (!result.id) {
+            throw new ExpressError(`Unable to find the target product meta data for deletion.`, 404);
         }
-
-        return result.rows[0];
+        return result;
     }
 
-    static async delete_product_promotion(id, data) {
-        let result = await db.query(
-            `DELETE FROM product_promotions 
-              WHERE id = $1
-              RETURNING id`,
-            [id]);
+    static async remove_product_promotion(promotion_id) {
+        const result = await delete_product_promotion(promotion_id);
 
-        if (result.rows.length === 0) {
-            let notFound = new Error(`Delete failed, unable to locate product promotion '${id}'`);
-            notFound.status = 404;
-            throw notFound;
+        if (!result.id) {
+            throw new ExpressError(`Unable to find the target product promotion for deletion.`, 404);
         }
-
-        return result.rows[0];
+        return result;
     }
 
-    static async delete_product_coupon(id, data) {
-        let result = await db.query(
-            `DELETE FROM product_coupons 
-              WHERE id = $1
-              RETURNING id`,
-            [id]);
+    static async remove_product_coupon(coupon_id) {
+        const result = await delete_product_coupon(coupon_id);
 
-        if (result.rows.length === 0) {
-            let notFound = new Error(`Delete failed, unable to locate product coupon '${id}'`);
-            notFound.status = 404;
-            throw notFound;
+        if (!result.id) {
+            throw new ExpressError(`Unable to find the target product coupon for deletion.`, 404);
         }
-
-        return result.rows[0];
+        return result;
     }
 
-    static async delete_product_modifier(id, data) {
-        let result = await db.query(
-            `DELETE FROM product_modifiers 
-              WHERE id = $1
-              RETURNING id`,
-            [id]);
+    static async remove_product_modifier(modifier_id) {
+        const result = await delete_product_modifier(modifier_id);
 
-        if (result.rows.length === 0) {
-            let notFound = new Error(`Delete failed, unable to locate product modifier '${id}'`);
-            notFound.status = 404;
-            throw notFound;
+        if (!result.id) {
+            throw new ExpressError(`Unable to find the target product modifier for deletion.`, 404);
         }
-
-        return result.rows[0];
+        return result;
     }
 
-    static async delete_product_review(id, data) {
-        let result = await db.query(
-            `DELETE FROM product_reviews 
-              WHERE id = $1
-              RETURNING id`,
-            [id]);
+    static async remove_product_review(review_id) {
+        const result = await delete_product_modifier(review_id);
 
-        if (result.rows.length === 0) {
-            let notFound = new Error(`Delete failed, unable to locate product review '${id}'`);
-            notFound.status = 404;
-            throw notFound;
+        if (!result.id) {
+            throw new ExpressError(`Unable to find the target product review for deletion.`, 404);
         }
-
-        return result.rows[0];
+        return result;
     }
 }
   

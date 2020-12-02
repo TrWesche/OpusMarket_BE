@@ -52,7 +52,7 @@ productRouter.post('/new', ensureLoggedIn, ensureIsMerchant, async(req, res, nex
             throw new ExpressError(`Unable to create a new Product: ${listOfErrors}`, 400);
         }
 
-        const result = await Product.create_products(req.user.id, req.body.products);
+        const result = await Product.add_products(req.user.id, req.body.products);
 
         return res.json({ "product": result })
     } catch (error) {
@@ -65,7 +65,7 @@ productRouter.post('/new', ensureLoggedIn, ensureIsMerchant, async(req, res, nex
 productRouter.post('/:prod_id/new/img', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for incorrect merchant or product with id not in database
-        const ownerCheck = await Product.retrieve_single_product(req.params.prod_id);
+        const ownerCheck = await Product.retrieve_single_product_by_product_id(req.params.prod_id);
         if(!ownerCheck.merchant_id || ownerCheck.merchant_id !== req.user.id) {
             throw new ExpressError(`Unauthorized`, 401);
         }
@@ -89,7 +89,7 @@ productRouter.post('/:prod_id/new/img', ensureIsMerchant, async(req, res, next) 
 productRouter.post('/:prod_id/new/meta', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for incorrect merchant or product with id not in database
-        const ownerCheck = await Product.retrieve_single_product(req.params.prod_id);
+        const ownerCheck = await Product.retrieve_single_product_by_product_id(req.params.prod_id);
         if(!ownerCheck.merchant_id || ownerCheck.merchant_id !== req.user.id) {
             throw new ExpressError(`Unauthorized`, 401);
         }
@@ -119,7 +119,7 @@ productRouter.post('/:prod_id/new/promotion', ensureIsMerchant, async(req, res, 
         // - Promotion value cannot be higher then the regular list price
 
         // Check for incorrect merchant or product with id not in database
-        const ownerCheck = await Product.retrieve_single_product(req.params.prod_id);
+        const ownerCheck = await Product.retrieve_single_product_by_product_id(req.params.prod_id);
         if(!ownerCheck.merchant_id || ownerCheck.merchant_id !== req.user.id) {
             throw new ExpressError(`Unauthorized`, 401);
         }
@@ -143,7 +143,7 @@ productRouter.post('/:prod_id/new/promotion', ensureIsMerchant, async(req, res, 
 productRouter.post('/:prod_id/new/modifier', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for incorrect merchant or product with id not in database
-        const ownerCheck = await Product.retrieve_single_product(req.params.prod_id);
+        const ownerCheck = await Product.retrieve_single_product_by_product_id(req.params.prod_id);
         if(!ownerCheck.merchant_id || ownerCheck.merchant_id !== req.user.id) {
             throw new ExpressError(`Unauthorized`, 401);
         }
@@ -167,7 +167,7 @@ productRouter.post('/:prod_id/new/modifier', ensureIsMerchant, async(req, res, n
 productRouter.post("/:prod_id/new/coupon", ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for incorrect merchant or product with id not in database
-        const ownerCheck = await Product.retrieve_single_product(req.params.prod_id);
+        const ownerCheck = await Product.retrieve_single_product_by_product_id(req.params.prod_id);
         if(!ownerCheck.merchant_id || ownerCheck.merchant_id !== req.user.id) {
             throw new ExpressError(`Unauthorized`, 401);
         }
@@ -237,7 +237,7 @@ productRouter.get('/catalog', async(req, res, next) => {
 productRouter.get('/catalog/:prod_id', async(req, res, next) => {
     try {
         // Check for product with id not in database
-        const result = await Product.retrieve_product_details(req.params.prod_id);
+        const result = await Product.retrieve_product_details_by_product_id(req.params.prod_id);
         if(!result) {
             throw new ExpressError(`The requested product could not be found`, 404);
         }
@@ -279,7 +279,7 @@ productRouter.get('/:prod_id/coupon/:coupon_code', async(req, res, next) => {
 productRouter.patch('/:prod_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
-        const oldData = await Product.retrieve_single_product(req.params.prod_id);
+        const oldData = await Product.retrieve_single_product_by_product_id(req.params.prod_id);
         if(!oldData.merchant_id) {
             throw new ExpressError("Product not found", 404);
         } else if(oldData.merchant_id !== req.user.id) {
@@ -312,7 +312,7 @@ productRouter.patch('/:prod_id', ensureIsMerchant, async(req, res, next) => {
         }
 
         // If changes update product and return updated data
-        const result = await Product.update_product(req.params.prod_id, itemsList);
+        const result = await Product.modify_product(req.params.prod_id, itemsList);
         return res.json({ "product": result })
     } catch (error) {
         console.log(error.code);
@@ -325,7 +325,7 @@ productRouter.patch('/:prod_id', ensureIsMerchant, async(req, res, next) => {
 productRouter.patch('/:prod_id/img/:img_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
-        const oldData = await Product.retrieve_single_product_image(req.params.img_id);
+        const oldData = await Product.retrieve_product_image_by_image_id(req.params.img_id);
         if(!oldData.merchant_id) {
             throw new ExpressError("Product not found", 404);
         } else if(oldData.merchant_id !== req.user.id) {
@@ -358,7 +358,7 @@ productRouter.patch('/:prod_id/img/:img_id', ensureIsMerchant, async(req, res, n
         }
 
         // If changes update product and return updated data
-        const result = await Product.update_product_image(req.params.img_id, itemsList);
+        const result = await Product.modify_product_image(req.params.img_id, itemsList);
         return res.json({ "product_image": result })
     } catch (error) {
         console.log(error.code);
@@ -371,7 +371,7 @@ productRouter.patch('/:prod_id/img/:img_id', ensureIsMerchant, async(req, res, n
 productRouter.patch('/:prod_id/meta/:meta_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
-        const oldData = await Product.retrieve_single_product_meta(req.params.meta_id);
+        const oldData = await Product.retrieve_product_meta_by_meta_id(req.params.meta_id);
         if(!oldData.merchant_id) {
             throw new ExpressError("Product not found", 404);
         } else if(oldData.merchant_id !== req.user.id) {
@@ -404,7 +404,7 @@ productRouter.patch('/:prod_id/meta/:meta_id', ensureIsMerchant, async(req, res,
         }
 
         // If changes update product and return updated data
-        const result = await Product.update_product_meta(req.params.meta_id, itemsList);
+        const result = await Product.modify_product_meta(req.params.meta_id, itemsList);
         return res.json({ "product_meta": result })
     } catch (error) {
         console.log(error.code);
@@ -417,7 +417,7 @@ productRouter.patch('/:prod_id/meta/:meta_id', ensureIsMerchant, async(req, res,
 productRouter.patch('/:prod_id/promotion/:promotion_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
-        const oldData = await Product.retrieve_product_promotion(req.params.promotion_id);
+        const oldData = await Product.retrieve_product_promotion_by_promotion_id(req.params.promotion_id);
         if(!oldData.merchant_id) {
             throw new ExpressError("Product not found", 404);
         } else if(oldData.merchant_id !== req.user.id) {
@@ -450,7 +450,7 @@ productRouter.patch('/:prod_id/promotion/:promotion_id', ensureIsMerchant, async
         }
 
         // If changes update product and return updated data
-        const result = await Product.update_product_promotion(req.params.promotion_id, itemsList);
+        const result = await Product.modify_product_promotion(req.params.promotion_id, itemsList);
         return res.json({ "product_promotion": result })
     } catch (error) {
         console.log(error.code);
@@ -463,7 +463,7 @@ productRouter.patch('/:prod_id/promotion/:promotion_id', ensureIsMerchant, async
 productRouter.patch('/:prod_id/coupon/:coupon_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
-        const oldData = await Product.retrieve_single_product_coupon(req.params.coupon_id);
+        const oldData = await Product.retrieve_product_coupon_by_coupon_id(req.params.coupon_id);
         if(!oldData.merchant_id) {
             throw new ExpressError("Coupon not found", 404);
         } else if(oldData.merchant_id !== req.user.id) {
@@ -496,7 +496,7 @@ productRouter.patch('/:prod_id/coupon/:coupon_id', ensureIsMerchant, async(req, 
         }
 
         // If changes update product and return updated data
-        const result = await Product.update_product_coupon(req.params.coupon_id, itemsList);
+        const result = await Product.modify_product_coupon(req.params.coupon_id, itemsList);
         return res.json({ "product_coupon": result })
     } catch (error) {
         console.log(error.code);
@@ -509,7 +509,7 @@ productRouter.patch('/:prod_id/coupon/:coupon_id', ensureIsMerchant, async(req, 
 productRouter.patch('/:prod_id/modifier/:modifier_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
-        const oldData = await Product.retrieve_single_product_modifier(req.params.modifier_id);
+        const oldData = await Product.retrieve_product_modifier_by_modifier_id(req.params.modifier_id);
         if(!oldData.merchant_id) {
             throw new ExpressError("Modifier not found", 404);
         } else if(oldData.merchant_id !== req.user.id) {
@@ -542,7 +542,7 @@ productRouter.patch('/:prod_id/modifier/:modifier_id', ensureIsMerchant, async(r
         }
 
         // If changes update product and return updated data
-        const result = await Product.update_product_modifier(req.params.modifier_id, itemsList);
+        const result = await Product.modify_product_modifier(req.params.modifier_id, itemsList);
         return res.json({ "product_modifier": result })
     } catch (error) {
         console.log(error.code);
@@ -555,7 +555,7 @@ productRouter.patch('/:prod_id/modifier/:modifier_id', ensureIsMerchant, async(r
 productRouter.patch('/:prod_id/review/:review_id', ensureIsUser, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
-        const oldData = await Product.retrieve_single_product_review(req.params.review_id);
+        const oldData = await Product.retrieve_product_review_by_review_id(req.params.review_id);
         if(!oldData.user_id) {
             throw new ExpressError("Modifier not found", 404);
         } else if(oldData.user_id !== req.user.id) {
@@ -588,7 +588,7 @@ productRouter.patch('/:prod_id/review/:review_id', ensureIsUser, async(req, res,
         }
 
         // If changes update product and return updated data
-        const result = await Product.update_product_review(req.params.review_id, itemsList);
+        const result = await Product.modify_product_review(req.params.review_id, itemsList);
         return res.json({ "product_review": result })
     } catch (error) {
         console.log(error.code);
@@ -609,14 +609,14 @@ productRouter.patch('/:prod_id/review/:review_id', ensureIsUser, async(req, res,
 productRouter.delete("/:prod_id", ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
-        const product = await Product.retrieve_single_product(req.params.prod_id);
+        const product = await Product.retrieve_single_product_by_product_id(req.params.prod_id);
         if(!product.merchant_id) {
             throw new ExpressError("Product not found", 404);
         } else if(product.merchant_id !== req.user.id) {
             throw new ExpressError(`Unauthorized`, 401);
         }
 
-        await Product.delete_product(req.params.prod_id);
+        await Product.remove_product(req.params.prod_id);
 
         return res.json({"message": "Product deleted"})
     } catch (error) {
@@ -630,14 +630,14 @@ productRouter.delete("/:prod_id", ensureIsMerchant, async(req, res, next) => {
 productRouter.delete("/:prod_id/img/:img_id", ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
-        const image = await Product.retrieve_single_product_image(req.params.img_id);
+        const image = await Product.retrieve_product_image_by_image_id(req.params.img_id);
         if(!image.merchant_id) {
             throw new ExpressError("Image not found", 404);
         } else if(image.merchant_id !== req.user.id) {
             throw new ExpressError(`Unauthorized`, 401);
         }
 
-        await Product.delete_product_image(req.params.img_id);
+        await Product.remove_product_image(req.params.img_id);
 
         return res.json({"message": "Product Image deleted"})
     } catch (error) {
@@ -651,14 +651,14 @@ productRouter.delete("/:prod_id/img/:img_id", ensureIsMerchant, async(req, res, 
 productRouter.delete('/:prod_id/meta/:meta_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
-        const meta = await Product.retrieve_single_product_meta(req.params.meta_id);
+        const meta = await Product.retrieve_product_meta_by_meta_id(req.params.meta_id);
         if(!meta.merchant_id) {
             throw new ExpressError("Product not found", 404);
         } else if(meta.merchant_id !== req.user.id) {
             throw new ExpressError(`Unauthorized`, 401);
         }
 
-        await Product.delete_product_meta(req.params.meta_id);
+        await Product.remove_product_meta(req.params.meta_id);
 
         return res.json({"message": "Product Meta deleted"})
     } catch (error) {
@@ -672,14 +672,14 @@ productRouter.delete('/:prod_id/meta/:meta_id', ensureIsMerchant, async(req, res
 productRouter.delete('/:prod_id/promotion/:promotion_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
-        const promo = await Product.retrieve_product_promotion(req.params.promotion_id);
+        const promo = await Product.retrieve_product_promotion_by_promotion_id(req.params.promotion_id);
         if(!promo.merchant_id) {
             throw new ExpressError("Promotion not found", 404);
         } else if(promo.merchant_id !== req.user.id) {
             throw new ExpressError(`Unauthorized`, 401);
         }
 
-        await Product.delete_product_promotion(req.params.promotion_id);
+        await Product.remove_product_promotion(req.params.promotion_id);
 
         return res.json({"message": "Product Promotion deleted"})
     } catch (error) {
@@ -693,14 +693,14 @@ productRouter.delete('/:prod_id/promotion/:promotion_id', ensureIsMerchant, asyn
 productRouter.delete('/:prod_id/coupon/:coupon_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
-        const coupon = await Product.retrieve_single_product_coupon(req.params.coupon_id);
+        const coupon = await Product.retrieve_product_coupon_by_coupon_id(req.params.coupon_id);
         if(!coupon.merchant_id) {
             throw new ExpressError("Coupon not found", 404);
         } else if(coupon.merchant_id !== req.user.id) {
             throw new ExpressError(`Unauthorized`, 401);
         }
 
-        await Product.delete_product_coupon(req.params.coupon_id);
+        await Product.remove_product_coupon(req.params.coupon_id);
 
         return res.json({"message": "Product Coupon deleted"})
     } catch (error) {
@@ -714,14 +714,14 @@ productRouter.delete('/:prod_id/coupon/:coupon_id', ensureIsMerchant, async(req,
 productRouter.delete('/:prod_id/modifier/:modifier_id', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
-        const modifier = await Product.retrieve_single_product_modifier(req.params.modifier_id);
+        const modifier = await Product.retrieve_product_modifier_by_modifier_id(req.params.modifier_id);
         if(!modifier.merchant_id) {
             throw new ExpressError("Modifier not found", 404);
         } else if(modifier.merchant_id !== req.user.id) {
             throw new ExpressError(`Unauthorized`, 401);
         }
 
-        await Product.delete_product_modifier(req.params.modifier_id);
+        await Product.remove_product_modifier(req.params.modifier_id);
 
         return res.json({"message": "Product Modifier deleted"})
     } catch (error) {
@@ -735,14 +735,14 @@ productRouter.delete('/:prod_id/modifier/:modifier_id', ensureIsMerchant, async(
 productRouter.delete('/:prod_id/review/:review_id', ensureIsUser, async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner
-        const review = await Product.retrieve_single_product_review(req.params.review_id);
+        const review = await Product.retrieve_product_review_by_review_id(req.params.review_id);
         if(!review.user_id) {
             throw new ExpressError("Modifier not found", 404);
         } else if(review.user_id !== req.user.id) {
             throw new ExpressError(`Unauthorized`, 401);
         }
 
-        await Product.delete_product_review(req.params.review_id);
+        await Product.remove_product_review(req.params.review_id);
 
         return res.json({"message": "Product Review deleted"})
     } catch (error) {
