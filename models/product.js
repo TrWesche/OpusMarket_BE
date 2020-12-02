@@ -474,7 +474,7 @@ class Product {
     }
 
     static async remove_product_review(review_id) {
-        const result = await delete_product_modifier(review_id);
+        const result = await delete_product_review(review_id);
 
         if (!result.id) {
             throw new ExpressError(`Unable to find the target product review for deletion.`, 404);
