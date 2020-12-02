@@ -52,7 +52,7 @@ productRouter.post('/new', ensureLoggedIn, ensureIsMerchant, async(req, res, nex
             throw new ExpressError(`Unable to create a new Product: ${listOfErrors}`, 400);
         }
 
-        const result = await Product.create_product(req.user.id, req.body.products);
+        const result = await Product.create_products(req.user.id, req.body.products);
 
         return res.json({ "product": result })
     } catch (error) {
@@ -78,7 +78,7 @@ productRouter.post('/:prod_id/new/img', ensureIsMerchant, async(req, res, next) 
             throw new ExpressError(`Unable to add a new Product Image: ${listOfErrors}`, 400)
         }
 
-        const result = await Product.create_product_image(+req.params.prod_id, req.body.images);
+        const result = await Product.add_product_images(+req.params.prod_id, req.body.images);
 
         return res.json({"product_images": result})
     } catch (error) {
@@ -102,7 +102,7 @@ productRouter.post('/:prod_id/new/meta', ensureIsMerchant, async(req, res, next)
             throw new ExpressError(`Unable to add new Product Metadata: ${listOfErrors}`, 400)
         }
 
-        const result = await Product.create_product_meta(+req.params.prod_id, req.body.metas);
+        const result = await Product.add_product_metadata(+req.params.prod_id, req.body.metas);
 
         return res.json({"product_metas": result})
     } catch (error) {
@@ -132,7 +132,7 @@ productRouter.post('/:prod_id/new/promotion', ensureIsMerchant, async(req, res, 
             throw new ExpressError(`Unable to add new Product Promotion: ${listOfErrors}`, 400)
         }
 
-        const result = await Product.create_product_promotion(+req.params.prod_id, req.body.promotion);
+        const result = await Product.add_product_promotion(+req.params.prod_id, req.body.promotion);
 
         return res.json({"product_promotions": result})
     } catch (error) {
@@ -156,7 +156,7 @@ productRouter.post('/:prod_id/new/modifier', ensureIsMerchant, async(req, res, n
             throw new ExpressError(`Unable to add new Product Modifier: ${listOfErrors}`, 400)
         }
 
-        const result = await Product.create_product_modifier(+req.params.prod_id, req.body.modifiers);
+        const result = await Product.add_product_modifiers(+req.params.prod_id, req.body.modifiers);
 
         return res.json({"product_modifiers": result})
     } catch (error) {
@@ -180,7 +180,7 @@ productRouter.post("/:prod_id/new/coupon", ensureIsMerchant, async(req, res, nex
             throw new ExpressError(`Unable to add new Product Modifier: ${listOfErrors}`, 400)
         }
 
-        const result = await Product.create_product_coupon(+req.params.prod_id, req.body.coupons);
+        const result = await Product.add_product_coupons(+req.params.prod_id, req.body.coupons);
 
         return res.json({"product_coupons": result})
     } catch (error) {
@@ -198,7 +198,7 @@ productRouter.post('/:prod_id/new/review', ensureIsUser, async(req, res, next) =
             throw new ExpressError(`Unable to add new Product Review: ${listOfErrors}`, 400)
         }
 
-        const result = await Product.create_product_review(+req.params.prod_id, req.user.id, req.body.review);
+        const result = await Product.add_product_review(+req.params.prod_id, req.user.id, req.body.review);
 
         return res.json({"product_reviews": result})
     } catch (error) {
