@@ -33,7 +33,7 @@ orderRoutes.post('/new', ensureIsUser, async(req, res, next) => {
             throw new ExpressError(`Unable to create a new Order: ${listOfErrors}`, 400);
         }
 
-        const result = await Order.create_order(req.user.id, req.body.order);
+        const result = await Order.add_order(req.user.id, req.body.order);
 
         return res.json({"order": result});
     } catch (error) {
@@ -52,7 +52,7 @@ orderRoutes.post('/new', ensureIsUser, async(req, res, next) => {
 // ╚╝╚═╝╚═══╝╚╝ ╚╝╚═══╝  
 orderRoutes.get('/:order_id', ensureIsUser, async(req, res, next) => {
     try {
-        const order = await Order.get_order_details(+req.params.order_id, req.user.id);
+        const order = await Order.retrieve_order_by_order_id(+req.params.order_id, req.user.id);
 
         return res.json({"order": order});
     } catch (error) {
@@ -72,11 +72,10 @@ orderRoutes.get('/:order_id', ensureIsUser, async(req, res, next) => {
 
 orderRoutes.patch('/:order_id/pay', ensureIsUser, async(req, res, next) => {
     try {
-        // TODO: Square API integration
-        // res.redirect()
+        // TODO: Square API integration - Need to capture the order data from the Square API in the database
         const payment_id = 0;
 
-        const result = await Order.record_payment(+req.params.order_id, payment_id);
+        await Order.modify_order_record_payment(+req.params.order_id, payment_id);
 
         return res.json({ "message": "Payment successful" })
     } catch (error) {
@@ -97,7 +96,7 @@ orderRoutes.delete('/:order_id/delete', ensureIsUser, async(req, res, next) => {
     try {
         // TODO: User check does not make sense, this should be a private internal route.
         // Need to think more on how to implement
-        const result = Order.delete_order(+req.params.order_id);
+        const result = Order.remove_order(+req.params.order_id);
 
         return res.json({"message": "Order deleted"})
     } catch (error) {

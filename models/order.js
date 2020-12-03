@@ -1,14 +1,18 @@
 const { 
     create_master_order,
+    create_order_status,
+    create_order_products,
+    create_order_product_promotions,
+    create_order_product_coupons,
+
+    fetch_order_by_order_id,
+    fetch_order_products_by_order_id,
+    fetch_orders_by_user_id,
+    fetch_orders_by_merchant_id,
+
     update_master_order,
-    add_order_products, 
-    add_order_status, 
-    save_promotions, 
-    save_coupons, 
-    read_master_order, 
-    validate_order_owner, 
-    read_order_products, 
-    delete_master_order, 
+    delete_master_order,
+    validate_order_owner,
     validate_order_products} = require('../repositories/order.repository');
 const {
     begin_transaction,
@@ -28,7 +32,7 @@ class Order {
     // ╚═══╝╚╝╚═╝╚═══╝╚╝ ╚╝ ╚══╝ ╚═══╝
 
     /** Create order with data. Returns new order data. */
-    static async create_order(user_id, data) {
+    static async add_order(user_id, data) {
         // TODO: Potential later effort -> Disguise internal database ids?
         // Check the order has product contents
         if (data.products.length === 0) {
@@ -58,23 +62,12 @@ class Order {
             };
         
             // Store details on promotions and coupons applied to the purchase
-            await save_promotions(order.id, validated_products);
-            await save_coupons(order.id, validated_products);            
+            await create_order_product_promotions(order.id, validated_products);
+            await create_order_product_coupons(order.id, validated_products);            
 
-
-            // TODO: Have a better query strategy but it does not currently work due to what appears to be
-            // limitations of the pg library.  Will need to do additional research.  Query code stored in
-            // repository commented out.
-            // Build data for order products table and calculate product and order totals
+            // Calculate product and order totals
             let order_total = 0;
             for (const outputProduct of validated_products) {
-                // Store quantity details
-                for (const inputProduct of data.products) {
-                    if (outputProduct.id === inputProduct.id) {
-                        outputProduct.quantity = inputProduct.quantity;
-                    };
-                };
-
                 // Calculate total price
                 if (outputProduct.promotion_price && outputProduct.pct_discount) {
                     outputProduct.final_price = Math.floor((outputProduct.promotion_price * (1 - outputProduct.pct_discount) * outputProduct.quantity));
@@ -90,7 +83,7 @@ class Order {
             
 
             // After master order created and source data calculated add products to database
-            const products = await add_order_products(order.id, validated_products);
+            const products = await create_order_products(order.id, validated_products);
     
             // Save master order total to database
             await update_master_order(order.id, {order_total: order_total});
@@ -100,7 +93,7 @@ class Order {
             order.products = products;
 
             // Create a status update on the backend noting the order was created
-            await add_order_status(order.id, {status: "created", notes: null});
+            await create_order_status(order.id, {status: "created", notes: null});
     
             // Commit values to the database
             await commit_transaction();
@@ -122,51 +115,33 @@ class Order {
     // ╚╝╚═╝╚═══╝╚╝ ╚╝╚═══╝  
 
     /** Read order details */
-
-    static async get_order(id, user_id) {
+    static async retrieve_order_by_order_id(id, user_id) {
         const check = await validate_order_owner(id, user_id);
         if (!check) {
             throw new ExpressError(`Unauthorized`, 401)
         }
 
-        const order = await read_master_order(id);
-        if (!order) {
-            throw new ExpressError(`An error occured, could not find an order with the specified id`, 404);
-        }
-        return order;
-    }
-
-
-    static async get_order_details(id, user_id) {
-        const check = await validate_order_owner(id, user_id);
-        if (!check) {
-            throw new ExpressError(`Unauthorized`, 401)
-        }
-
-        const order = await read_master_order(id);
+        const order = await fetch_order_by_order_id(id);
         if (!order) {
             throw new ExpressError(`An error occured, could not find an order with the specified id`, 404);
         }
 
-        const products = await read_order_products(id);
-
-        // TODO: Need to append applied promotions & coupon data
-
+        const products = await fetch_order_products_by_order_id(id);
         order.products = products;
         return order;
     }
 
-    // TODO
-    // static async get_user_orders(user_id) {
+    /** Retrieve all orders made by target user */
+    static async retrieve_orders_by_user_id(user_id) {
+        const orders = await fetch_orders_by_user_id(user_id);
+        return orders;
+    }
 
-    // }
-
-    // TODO
-    // This may take some additional thinking.  Hopefully can be accomplished
-    // without changing db structure
-    // static async get_merchant_orders(merchant_id) {
-
-    // }
+    /** Retrieve all orders to be fulfilled by target merchant */
+    static async retrieve_orders_by_merchant_id(merchant_id) {
+        const orders = await fetch_orders_by_merchant_id(merchant_id);
+        return orders;
+    }
 
     // ╔╗ ╔╗╔═══╗╔═══╗╔═══╗╔════╗╔═══╗
     // ║║ ║║║╔═╗║╚╗╔╗║║╔═╗║║╔╗╔╗║║╔══╝
@@ -176,7 +151,9 @@ class Order {
     // ╚═══╝╚╝   ╚═══╝╚╝ ╚╝ ╚══╝ ╚═══╝
 
     /** Record payment details. */
-    static async record_payment(id, data) {
+    static async modify_order_record_payment(id, data) {
+        // TODO: Currently not updating order with payment details - Return to this once back to working with Square
+        // May not be implmented here -> Look to integrations\Square\paymentRouter.js
         const check = await validate_order_owner(id, req.user.id);
         if (!check) {
             throw new ExpressError(`Unauthorized`, 401)
@@ -185,13 +162,6 @@ class Order {
         const result = await update_master_order(id, data);
         return result;
     }
-
-
-    /** Update a product in the order */
-    // Is there a usecase for this route?
-
-    // static async update_order_product(orderProd_id, data) {
-    // };
 
 
     // ╔═══╗╔═══╗╔╗   ╔═══╗╔════╗╔═══╗
@@ -203,15 +173,8 @@ class Order {
 
     /** Delete master order and associated product entries. */
 
-    /** Delete a product in the order */
-    // Is there a usecase for this route?
-
-    // static async delete_order_product(orderProd_id, data) {
-    // };
-
-
     // This should only be available as a cleanup route for the system, not a user route
-    static async delete_order(id) {
+    static async remove_order(id) {
         const result = await delete_master_order(id);
         return result;
     }

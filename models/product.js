@@ -47,13 +47,13 @@ const {
     delete_product_coupon,
     delete_product_modifier,
     delete_product_review
- } = require('../repositories/product.repository');
+} = require('../repositories/product.repository');
 
- const {
+const {
     begin_transaction,
     commit_transaction,
     rollback_transaction
- } = require('../repositories/common.repository');
+} = require('../repositories/common.repository');
 const ExpressError = require("../helpers/expressError");
 
 /** Product Management Class */
