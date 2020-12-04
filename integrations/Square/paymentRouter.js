@@ -23,7 +23,7 @@ const paymentRouter = new express.Router();
 paymentRouter.post('/process-payment', async (req, res) => {
   const request_params = req.body;
 
-  const order_details = await Order.get_order(request_params.order_id, req.user.id);
+  const order_details = await Order.retrieve_order_by_order_id(request_params.order_id, req.user.id);
 
   const idempotency_key = uuidv4();
 
