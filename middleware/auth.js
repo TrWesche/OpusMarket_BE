@@ -45,7 +45,6 @@ function ensureCorrectUser(req, res, next) {
 
 function ensureIsUser(req, res, next) {
   try {
-    console.log(req.user)
     if (req.user.type === "user") {
       return next();
     }

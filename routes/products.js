@@ -112,12 +112,6 @@ productRouter.post('/:prod_id/new/meta', ensureIsMerchant, async(req, res, next)
 
 productRouter.post('/:prod_id/new/promotion', ensureIsMerchant, async(req, res, next) => {
     try {
-        // TODO: Functionality here should be expanded with business rules:
-        // I.e.
-        // - Only 1 promotion active at a time -> setting 1 active has a side effect
-        // of deactivating others
-        // - Promotion value cannot be higher then the regular list price
-
         // Check for incorrect merchant or product with id not in database
         const ownerCheck = await Product.retrieve_single_product_by_product_id(req.params.prod_id);
         if(!ownerCheck.merchant_id || ownerCheck.merchant_id !== req.user.id) {
@@ -250,7 +244,6 @@ productRouter.get('/catalog/:prod_id', async(req, res, next) => {
 
 
 /** Get Product Coupon Details */
-// TODO: In the future should require user to be logged in
 productRouter.get('/:prod_id/coupon/:coupon_code', async(req, res, next) => {
     try {
         // Check for product with id not in database or an incorrect owner

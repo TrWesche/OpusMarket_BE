@@ -125,8 +125,6 @@ class Gathering {
             throw error;
         }
 
-        // TODO: Implement these parallel calls with a Promise wrapper
-
         const gathering_merchantsRes = await db.query(`
             SELECT id, merchant_id
             FROM gathering_merchants

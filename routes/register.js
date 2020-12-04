@@ -27,7 +27,6 @@ const regRouter = new express.Router()
  *
  **/
 regRouter.post("/user", async (req, res, next) => {
-    // TODO: Should use Schemas to Verify Registration Data
     try {
         // Validate authentication parameters in request
         const validate = jsonschema.validate(req.body, userRegisterSchema);
@@ -52,7 +51,6 @@ regRouter.post("/user", async (req, res, next) => {
  *
  **/
 regRouter.post("/merchant", async (req, res, next) => {
-    // TODO: Should use Schemas to Verify Registration Data
     try {
         // Validate authentication parameters in request
         const validate = jsonschema.validate(req.body, merchantRegisterSchema);

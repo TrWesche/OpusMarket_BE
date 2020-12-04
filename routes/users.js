@@ -1,7 +1,6 @@
 // Library Imports
 const express = require("express");
 const jsonschema = require("jsonschema");
-const {DateTime} = require("luxon");
 
 // Helper Function Imports
 const ExpressError = require("../helpers/expressError");
@@ -30,7 +29,7 @@ const userRouter = new express.Router();
 // details, conducting purchases, etc.
 userRouter.get("/details", ensureIsUser, async (req, res, next) => {
     try {
-        const result = await User.get(req.user.id);
+        const result = await User.retrieve_user_by_user_id(req.user.id);
 
         if(!result) {
             throw new ExpressError("Unable to find target user", 404);
@@ -57,7 +56,7 @@ userRouter.get("/details", ensureIsUser, async (req, res, next) => {
 userRouter.patch("/update", ensureIsUser, async (req, res, next) => {
     try {
         // Get old user data
-        const oldData = await User.get(req.user.id);
+        const oldData = await User.retrieve_user_by_user_id(req.user.id);
         if(!oldData) {
             throw new ExpressError("Unable to find target user", 404);
         }
@@ -91,7 +90,7 @@ userRouter.patch("/update", ensureIsUser, async (req, res, next) => {
         }
 
         // Update the user data with the itemsList information
-        const newData = await User.update(req.user.id, itemsList);
+        const newData = await User.modify_user(req.user.id, itemsList);
         return res.json({user: newData})
     } catch (error) {
         return next(error);
@@ -112,12 +111,13 @@ userRouter.patch("/update", ensureIsUser, async (req, res, next) => {
 // details, conducting purchases, etc.
 userRouter.delete("/delete", ensureIsUser, async (req, res, next) => {
     try {
-        const result = await User.delete(req.user.id);
+        const result = await User.delete_user(req.user.id);
         if(!result) {
             throw new ExpressError("Unable to delete target user account", 404);
         }
 
         res.clearCookie('sid');
+        res.clearCookie('_sid');
 
         return res.json({message: "Your account has been deleted."})
     } catch (error) {

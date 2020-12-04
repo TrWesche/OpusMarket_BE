@@ -1,4 +1,3 @@
-// TODO: If makes sense encapsulate cookie expiration functionality in this function.
 // See user/merchant routes.
 const jwt = require("jsonwebtoken");
 const { PRIVATE_KEY } = require("../config");

@@ -1,4 +1,6 @@
 // file: createKey.js
+
+// Code Adopted From:
 // https://github.com/zachgoll/making-sense-of-public-key-cryptography/blob/master/createKey.js
 const crypto = require('crypto');
 const fs = require('fs');
