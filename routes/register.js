@@ -1,13 +1,10 @@
 // Library Imports
 const express = require("express");
-const jwt = require("jsonwebtoken");
 const jsonschema = require('jsonschema');
 
 // Helper Function Imports
 const ExpressError = require("../helpers/expressError");
-
-// Environment Variable Imports
-const { SECRET_KEY } = require("../config");
+const AuthHandling = require("../helpers/authHandling");
 
 // Schema Imports
 const userRegisterSchema = require("../schemas/register/userRegisterSchema.json");
@@ -43,9 +40,7 @@ regRouter.post("/user", async (req, res, next) => {
         // Process Registration
         const queryData = await User.register(req.body);    
 
-        // Return JSON Web Token
-        const token = jwt.sign(queryData, SECRET_KEY);
-        res.cookie("sid", token, {httpOnly: true, signed: true, maxAge: 86400000}) // 24 hour signed cookie
+        AuthHandling.generateCookies(res, queryData);
         return res.json({message: "Registration successful." })
     } catch (error) {
         next(error)
@@ -70,9 +65,7 @@ regRouter.post("/merchant", async (req, res, next) => {
         // Process Registration
         const queryData = await Merchant.register(req.body);
 
-        // Return JSON Web Token
-        const token = jwt.sign(queryData, SECRET_KEY);
-        res.cookie("sid", token, {httpOnly: true, signed: true, maxAge: 86400000}) // 24 hour signed cookie
+        AuthHandling.generateCookies(res, queryData);
         return res.json({message: "Registration successful." })
     } catch (error) {
         next(error)

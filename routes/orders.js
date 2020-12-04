@@ -94,7 +94,8 @@ orderRoutes.patch('/:order_id/pay', ensureIsUser, async(req, res, next) => {
 
 orderRoutes.delete('/:order_id/delete', ensureIsUser, async(req, res, next) => {
     try {
-        // TODO: User check does not make sense, this should be a private internal route.
+        // TODO: This may be better served by a process completely separate from the normal flow which performs
+        // an asynchronous data cleansing operation which will remove abandoned orders from the database.
         // Need to think more on how to implement
         const result = Order.remove_order(+req.params.order_id);
 

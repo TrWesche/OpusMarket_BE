@@ -1,17 +1,11 @@
 /** Middleware for handling req authorization for routes. */
-
-const jwt = require("jsonwebtoken");
-const { SECRET_KEY } = require("../config");
+const AuthHandling = require("../helpers/authHandling");
 
 /** Middleware: Authenticate user. */
 
 function authenticateJWT(req, res, next) {
   try {
-    // console.log(req.headers);
-    // console.log(req.signedCookies);
-    // console.log(req.cookies);
-    const authenticationToken = req.signedCookies.sid;
-    const payload = jwt.verify(authenticationToken, SECRET_KEY);
+    const payload = AuthHandling.validateCookies(req);
     req.user = payload; // create a current user
     return next();
   } catch (err) {
@@ -51,6 +45,7 @@ function ensureCorrectUser(req, res, next) {
 
 function ensureIsUser(req, res, next) {
   try {
+    console.log(req.user)
     if (req.user.type === "user") {
       return next();
     }

@@ -2,8 +2,6 @@
 
 require("dotenv").config();
 
-const SECRET_KEY = process.env.SECRET_KEY || "test";
-
 const COOKIE_SIG = process.env.COOKIE_SIG || "test";
 
 const PORT = +process.env.PORT || 5000;
@@ -26,6 +24,8 @@ const SQUARE_PAYMENTS_PATH = process.env.SQUARE_PAYMENTS_PATH;
 
 const ORIGIN_FRONTEND = process.env.ORIGIN_FRONTEND;
 
+const PRIVATE_KEY = process.env.PRIVATE_KEY;
+
 // database is:
 //
 // - on Heroku, get from env var DATABASE_URL
@@ -41,7 +41,6 @@ if (process.env.NODE_ENV === "test") {
 }
 
 module.exports = {
-  SECRET_KEY,
   COOKIE_SIG,
   PORT,
   DB_URI,
@@ -53,5 +52,6 @@ module.exports = {
   SQUARE_API_BASEPATH,
   SQUARE_PAYMENT_FORM_PATH,
   SQUARE_PAYMENTS_PATH,
-  ORIGIN_FRONTEND
+  ORIGIN_FRONTEND,
+  PRIVATE_KEY
 };

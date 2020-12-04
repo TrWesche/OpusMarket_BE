@@ -418,7 +418,6 @@ class Product {
     // ╚═══╝╚═══╝╚═══╝╚═══╝ ╚══╝ ╚═══╝
 
     /** Delete target product from database; returns undefined. */
-    // TODO: There is alot of repetition in delete routes, can this be minimized?
     static async remove_product(product_id) {
         const result = await delete_master_product(product_id);
 

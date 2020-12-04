@@ -1,13 +1,10 @@
 // Library Imports
 const express = require("express");
-const jwt = require("jsonwebtoken");
 const jsonschema = require('jsonschema');
 
 // Helper Function Imports
 const ExpressError = require("../helpers/expressError");
-
-// Environment Variable Imports
-const { SECRET_KEY } = require("../config");
+const AuthHandling = require("../helpers/authHandling");
 
 // Schema Imports
 const userAuthSchema = require("../schemas/auth/userAuthSchema.json");
@@ -16,6 +13,7 @@ const merchantAuthSchema = require("../schemas/auth/merchantAuthSchema.json");
 // Model Imports
 const User = require("../models/user");
 const Merchant = require("../models/merchant");
+
 
 const authRouter = new express.Router()
 
@@ -39,10 +37,7 @@ authRouter.post("/user", async (req, res, next) => {
             throw new ExpressError("Invalid Email/Password", 400);
         }
 
-        // Return JSON Web Token
-        const token = jwt.sign(queryData, SECRET_KEY);
-        // res.cookie("sid", token, {signed: true, maxAge: 86400000}) // 24 hour signed cookie
-        res.cookie("sid", token, {httpOnly: true, signed: true, maxAge: 86400000}) // 24 hour signed cookie
+        AuthHandling.generateCookies(res, queryData);
         return res.json({ "message": "Login successful." })
     } catch (error) {
         next(error)
@@ -70,10 +65,7 @@ authRouter.post("/merchant", async (req, res, next) => {
             throw new ExpressError("Invalid Email/Password", 400);
         }
 
-        // Return JSON Web Token
-        const token = jwt.sign(queryData, SECRET_KEY);
-        // res.cookie("sid", token, {signed: true, maxAge: 86400000}) // 24 hour signed cookie
-        res.cookie("sid", token, {httpOnly: true, signed: true, maxAge: 86400000}) // 24 hour signed cookie
+        AuthHandling.generateCookies(res, queryData);
         return res.json({ "message": "Login successful." })
     } catch (error) {
         next(error)
