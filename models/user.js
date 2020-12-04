@@ -10,9 +10,7 @@ const {
   delete_user_by_user_id
 } = require("../repositories/user.repository");
 
-
 /** Standard User Creation & Authentication */
-
 class User {
   /** Authenticate user with email & password. Returns user or throws error. */
   static async authenticate(data) {
@@ -37,7 +35,7 @@ class User {
     const duplicateCheck = await fetch_user_by_user_email(data.email);
 
     if (duplicateCheck) {
-      throw new ExpressError("A user already exists with that email", 409);
+      throw new ExpressError("A user already exists with that email", 400);
     };
 
     const hashedPassword = await bcrypt.hash(data.password, BCRYPT_WORK_FACTOR);

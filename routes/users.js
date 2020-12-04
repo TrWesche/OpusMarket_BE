@@ -12,7 +12,7 @@ const userUpdateSchema = require("../schemas/user/userUpdateSchema.json");
 const User = require("../models/user");
 
 // Middleware Imports
-const { ensureCorrectUser, ensureIsUser } = require("../middleware/auth");
+const { ensureIsUser } = require("../middleware/auth");
 
 
 const userRouter = new express.Router();
@@ -24,13 +24,9 @@ const userRouter = new express.Router();
 // ║║║╚╗║╚══╗║╔═╗║╔╝╚╝║
 // ╚╝╚═╝╚═══╝╚╝ ╚╝╚═══╝   
 
-// Updated Version Only Using Cookie -- Ideally this would be split to using 2 cookies in the future
-// One with a longer life for tracking and a second for critical activities for example modifying user
-// details, conducting purchases, etc.
 userRouter.get("/details", ensureIsUser, async (req, res, next) => {
     try {
         const result = await User.retrieve_user_by_user_id(req.user.id);
-
         if(!result) {
             throw new ExpressError("Unable to find target user", 404);
         }
@@ -41,17 +37,12 @@ userRouter.get("/details", ensureIsUser, async (req, res, next) => {
     }
 })
 
-
 // ╔╗ ╔╗╔═══╗╔═══╗╔═══╗╔════╗╔═══╗
 // ║║ ║║║╔═╗║╚╗╔╗║║╔═╗║║╔╗╔╗║║╔══╝
 // ║║ ║║║╚═╝║ ║║║║║║ ║║╚╝║║╚╝║╚══╗
 // ║║ ║║║╔══╝ ║║║║║╚═╝║  ║║  ║╔══╝
 // ║╚═╝║║║   ╔╝╚╝║║╔═╗║ ╔╝╚╗ ║╚══╗
 // ╚═══╝╚╝   ╚═══╝╚╝ ╚╝ ╚══╝ ╚═══╝
-
-// Updated Version Only Using Cookie -- Ideally this would be split to using 2 cookies in the future
-// One with a longer life for tracking and a second for critical activities for example modifying user
-// details, conducting purchases, etc.
 
 userRouter.patch("/update", ensureIsUser, async (req, res, next) => {
     try {
@@ -97,8 +88,6 @@ userRouter.patch("/update", ensureIsUser, async (req, res, next) => {
     }
 })
 
-
-
 // ╔═══╗╔═══╗╔╗   ╔═══╗╔════╗╔═══╗
 // ╚╗╔╗║║╔══╝║║   ║╔══╝║╔╗╔╗║║╔══╝
 //  ║║║║║╚══╗║║   ║╚══╗╚╝║║╚╝║╚══╗
@@ -106,9 +95,6 @@ userRouter.patch("/update", ensureIsUser, async (req, res, next) => {
 // ╔╝╚╝║║╚══╗║╚═╝║║╚══╗ ╔╝╚╗ ║╚══╗
 // ╚═══╝╚═══╝╚═══╝╚═══╝ ╚══╝ ╚═══╝
 
-// Updated Version Only Using Cookie -- Ideally this would be split to using 2 cookies in the future
-// One with a longer life for tracking and a second for critical activities for example modifying user
-// details, conducting purchases, etc.
 userRouter.delete("/delete", ensureIsUser, async (req, res, next) => {
     try {
         const result = await User.delete_user(req.user.id);
@@ -118,7 +104,6 @@ userRouter.delete("/delete", ensureIsUser, async (req, res, next) => {
 
         res.clearCookie('sid');
         res.clearCookie('_sid');
-
         return res.json({message: "Your account has been deleted."})
     } catch (error) {
         return next(error);
@@ -135,6 +120,7 @@ userRouter.delete("/delete", ensureIsUser, async (req, res, next) => {
 userRouter.get("/logout", async (req, res, next) => {
     try {
         res.clearCookie('sid');
+        res.clearCookie('_sid');
 
         return res.json({"message": "Logout successful."})
     } catch (error) {

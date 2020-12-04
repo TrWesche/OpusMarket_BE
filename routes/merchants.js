@@ -1,7 +1,6 @@
 // Library Imports
 const express = require("express");
 const jsonschema = require("jsonschema");
-const { DateTime } = require("luxon");
 
 // Helper Function imports
 const ExpressError = require("../helpers/expressError");
@@ -13,7 +12,7 @@ const merchantUpdateSchema = require("../schemas/merchant/merchantUpdateSchema.j
 const Merchant = require("../models/merchant");
 
 // Middleware Imports
-const { ensureCorrectMerchant, ensureIsMerchant } = require("../middleware/auth");
+const { ensureIsMerchant } = require("../middleware/auth");
 
 
 const merchantRouter = new express.Router();
@@ -25,13 +24,9 @@ const merchantRouter = new express.Router();
 // ║║║╚╗║╚══╗║╔═╗║╔╝╚╝║
 // ╚╝╚═╝╚═══╝╚╝ ╚╝╚═══╝   
 
-// Updated Version Only Using Cookie -- Ideally this would be split to using 2 cookies in the future
-// One with a longer life for tracking and a second for critical activities for example modifying user
-// details, conducting purchases, etc.
 merchantRouter.get("/details", ensureIsMerchant, async (req, res, next) => {
     try {
-        const result = await Merchant.get(req.user.id);
-
+        const result = await Merchant.retrieve_merchant_by_merchant_id(req.user.id);
         if(!result) {
             throw new ExpressError("Unable to find target merchant", 404);
         }
@@ -42,20 +37,6 @@ merchantRouter.get("/details", ensureIsMerchant, async (req, res, next) => {
     }
 })
 
-// merchantRouter.get("/:id", ensureCorrectMerchant, async (req, res, next) => {
-//     try {
-//         const result = await Merchant.get(req.params.id);
-
-//         if(!result) {
-//             throw new ExpressError("Unable to find target merchant", 404);
-//         }
-
-//         return res.json({merchant: result});
-//     } catch (error) {
-//         return next(error);
-//     }
-// })
-
 // ╔╗ ╔╗╔═══╗╔═══╗╔═══╗╔════╗╔═══╗
 // ║║ ║║║╔═╗║╚╗╔╗║║╔═╗║║╔╗╔╗║║╔══╝
 // ║║ ║║║╚═╝║ ║║║║║║ ║║╚╝║║╚╝║╚══╗
@@ -63,13 +44,10 @@ merchantRouter.get("/details", ensureIsMerchant, async (req, res, next) => {
 // ║╚═╝║║║   ╔╝╚╝║║╔═╗║ ╔╝╚╗ ║╚══╗
 // ╚═══╝╚╝   ╚═══╝╚╝ ╚╝ ╚══╝ ╚═══╝
 
-// Updated Version Only Using Cookie -- Ideally this would be split to using 2 cookies in the future
-// One with a longer life for tracking and a second for critical activities for example modifying user
-// details, conducting purchases, etc.
 merchantRouter.patch("/update", ensureIsMerchant, async (req, res, next) => {
     try {
         // Get old user data
-        const oldData = await Merchant.get(req.user.id);
+        const oldData = await Merchant.retrieve_merchant_by_merchant_id(req.user.id);
         if(!oldData) {
             throw new ExpressError("Unable to find target merchant", 404);
         }
@@ -92,7 +70,6 @@ merchantRouter.patch("/update", ensureIsMerchant, async (req, res, next) => {
             }
         })
 
-
         // If body has password this is a special case and should be added to the itemsList separately
         if (req.body.hasOwnProperty("password")) {
             itemsList["password"] = req.body.password;
@@ -104,57 +81,12 @@ merchantRouter.patch("/update", ensureIsMerchant, async (req, res, next) => {
         }
 
         // Update the user data with the itemsList information
-        const newData = await Merchant.update(req.user.id, itemsList);
+        const newData = await Merchant.modify_merchant(req.user.id, itemsList);
         return res.json({merchant: newData})
     } catch (error) {
         return next(error);
     }
 })
-
-// merchantRouter.patch("/:id/update", ensureCorrectMerchant, async (req, res, next) => {
-//     try {
-//         // Get old user data
-//         const oldData = await Merchant.get(req.params.id);
-//         if(!oldData) {
-//             throw new ExpressError("Unable to find target merchant", 404);
-//         }
-
-//         // Validate request data
-//         const validate = jsonschema.validate(req.body, merchantUpdateSchema);
-//         if (!validate.valid) {
-//             const listOfErrors = validate.errors.map(e => e.stack);
-//             throw new ExpressError(`Unable to update User: ${listOfErrors}`, 400)
-//         }
-
-//         // Build update list for patch query
-//         let itemsList = {};
-//         const newKeys = Object.keys(req.body);
-//         newKeys.map(key => {
-//             if((req.body.hasOwnProperty(key) && oldData.hasOwnProperty(key) && merchantUpdateSchema.properties.hasOwnProperty(key))
-//                 && (req.body[key] != oldData[key])) {
-
-//                 itemsList[key] = req.body[key];
-//             }
-//         })
-
-
-//         // If body has password this is a special case and should be added to the itemsList separately
-//         if (req.body.hasOwnProperty("password")) {
-//             itemsList["password"] = req.body.password;
-//         }
-
-//         // If no changes return original data
-//         if(Object.keys(itemsList).length === 0) {
-//             return res.json({merchant: oldData});
-//         }
-
-//         // Update the user data with the itemsList information
-//         const newData = await Merchant.update(req.params.id, itemsList);
-//         return res.json({merchant: newData})
-//     } catch (error) {
-//         return next(error);
-//     }
-// })
 
 // ╔═══╗╔═══╗╔╗   ╔═══╗╔════╗╔═══╗
 // ╚╗╔╗║║╔══╝║║   ║╔══╝║╔╗╔╗║║╔══╝
@@ -163,38 +95,20 @@ merchantRouter.patch("/update", ensureIsMerchant, async (req, res, next) => {
 // ╔╝╚╝║║╚══╗║╚═╝║║╚══╗ ╔╝╚╗ ║╚══╗
 // ╚═══╝╚═══╝╚═══╝╚═══╝ ╚══╝ ╚═══╝
 
-// Updated Version Only Using Cookie -- Ideally this would be split to using 2 cookies in the future
-// One with a longer life for tracking and a second for critical activities for example modifying user
-// details, conducting purchases, etc.
 merchantRouter.delete("/delete", ensureIsMerchant, async (req, res, next) => {
     try {
-        const result = await Merchant.delete(req.user.id);
+        const result = await Merchant.delete_merchant(req.user.id);
         if(!result) {
             throw new ExpressError("Unable to delete target user account", 404);
         }
 
         res.clearCookie('sid');
-
+        res.clearCookie('_sid');
         return res.json({message: "Your account has been deleted."})
     } catch (error) {
         return next(error);
     }
 })
-
-// merchantRouter.delete("/:id/delete", ensureCorrectMerchant, async (req, res, next) => {
-//     try {
-//         const result = await Merchant.delete(req.params.id);
-//         if(!result) {
-//             throw new ExpressError("Unable to delete target user account", 404);
-//         }
-
-//         res.clearCookie('sid');
-
-//         return res.json({message: "Your account has been deleted."})
-//     } catch (error) {
-//         return next(error);
-//     }
-// })
 
 // ╔╗   ╔═══╗╔═══╗╔═══╗╔╗ ╔╗╔════╗
 // ║║   ║╔═╗║║╔═╗║║╔═╗║║║ ║║║╔╗╔╗║
@@ -206,6 +120,7 @@ merchantRouter.delete("/delete", ensureIsMerchant, async (req, res, next) => {
 merchantRouter.get("/logout", async (req, res, next) => {
     try {
         res.clearCookie('sid');
+        res.clearCookie('_sid');
 
         return res.json({"message": "Logout successful."})    
     } catch (error) {
@@ -213,15 +128,5 @@ merchantRouter.get("/logout", async (req, res, next) => {
     }
 })
 
-
-// merchantRouter.get("/:id/logout", async (req, res, next) => {
-//     try {
-//         res.clearCookie('sid');
-
-//         return res.json({"message": "Logout successful."})    
-//     } catch (error) {
-//         return next(error);
-//     }
-// })
 
 module.exports = merchantRouter;
