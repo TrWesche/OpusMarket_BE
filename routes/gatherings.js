@@ -41,8 +41,8 @@ gatheringRouter.post('/new', ensureIsMerchant, async(req, res, next) => {
         }
         // console.log("Schema Passed"); 
 
-        const gathering = await Gathering.create_gathering(req.user.id, req.body);
-        const merchants = await Gathering.create_gathering_merchants(gathering.id, {"merchants": [{"id": req.user.id}]})
+        const gathering = await Gathering.add_gathering(req.user.id, req.body);
+        const merchants = await Gathering.add_gathering_merchants(gathering.id, {"merchants": [{"id": req.user.id}]})
 
         gathering.merchants = merchants;
 
@@ -61,6 +61,8 @@ gatheringRouter.post('/new', ensureIsMerchant, async(req, res, next) => {
 gatheringRouter.post('/:gathering_id/new/merchant', ensureIsMerchant, async(req, res, next) => {
     try {
         // Check for incorrect merchant or gathering with id not in database
+
+        // TODO: Needs to check for duplicates and remove in case a duplicate is found
         const ownerCheck = await Gathering.retrieve_single_gathering(req.params.gathering_id);
         if(!ownerCheck.merchant_id || ownerCheck.merchant_id !== req.user.id) {
             throw new ExpressError(`Unauthorized`, 401);
@@ -74,7 +76,7 @@ gatheringRouter.post('/:gathering_id/new/merchant', ensureIsMerchant, async(req,
             throw new ExpressError(`Unable to create a new Gathering Merchant: ${listOfErrors}`, 400);
         }
 
-        const merchants = await Gathering.create_gathering_merchants(req.params.gathering_id, req.body);
+        const merchants = await Gathering.add_gathering_merchants(req.params.gathering_id, req.body);
 
         return res.json({ "gathering_merchants": merchants })
     } catch (error) {
@@ -101,7 +103,7 @@ gatheringRouter.post('/:gathering_id/new/img', ensureIsMerchant, async(req, res,
             throw new ExpressError(`Unable to create a new Gathering Image: ${listOfErrors}`, 400);
         }
 
-        const images = await Gathering.create_gathering_images(req.params.gathering_id, req.body);
+        const images = await Gathering.add_gathering_images(req.params.gathering_id, req.body);
 
         return res.json({ "gathering_images": images })
     } catch (error) {
@@ -189,7 +191,7 @@ gatheringRouter.patch('/:gathering_id', ensureIsMerchant, async(req, res, next) 
         }
 
         // If changes update product and return updated data
-        const result = await Gathering.update_gathering(req.params.gathering_id, itemsList);
+        const result = await Gathering.modify_gathering(req.params.gathering_id, itemsList);
         return res.json({ "gathering": result })
 
     } catch (error) {
@@ -218,13 +220,11 @@ gatheringRouter.delete('/:gathering_id', ensureIsMerchant, async(req, res, next)
             throw new ExpressError(`Unauthorized`, 401);
         }
 
-        // If changes update product and return updated data
-        const result = await Gathering.delete_gathering(req.params.gathering_id);
+        await Gathering.remove_gathering(req.params.gathering_id);
         return res.json({ "message": `Gathering removed.` })
 
     } catch (error) {
         console.log(error.code);
-
         return next(error);
     }
 });
@@ -240,12 +240,11 @@ gatheringRouter.delete('/:gathering_id/merchant/:participant_id', ensureIsMercha
             throw new ExpressError(`Unauthorized`, 401);
         }
 
-        const result = await Gathering.delete_gathering_merchant(req.params.participant_id);
+        await Gathering.remove_gathering_merchant(req.params.gathering_id, req.params.participant_id);
         return res.json({ "message": `Gathering Participant removed.` })
 
     } catch (error) {
         console.log(error.code);
-
         return next(error);
     }
 });
@@ -261,12 +260,11 @@ gatheringRouter.delete('/:gathering_id/img/:img_id', ensureIsMerchant, async(req
             throw new ExpressError(`Unauthorized`, 401);
         }
 
-        const result = await Gathering.delete_gathering_image(req.params.img_id);
+        const result = await Gathering.remove_gathering_image(req.params.gathering_id, req.params.img_id);
         return res.json({ "message": `Gathering Image removed.` })
 
     } catch (error) {
         console.log(error.code);
-
         return next(error);
     }
 });
