@@ -24,7 +24,7 @@ const SQUARE_PAYMENTS_PATH = process.env.SQUARE_PAYMENTS_PATH;
 
 const ORIGIN_FRONTEND = process.env.ORIGIN_FRONTEND;
 
-const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const PRIVATE_KEY = process.env.PRIVATE_KEY.replace(/\\n/g, '\n');
 
 // database is:
 //
