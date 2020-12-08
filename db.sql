@@ -138,6 +138,14 @@ CREATE TABLE "product_reviews" (
   "review_dt" TIMESTAMP WITH TIME ZONE
 );
 
+CREATE TABLE "products_featured" (
+  "id" SERIAL PRIMARY KEY,
+  "product_id" int REFERENCES "products" ("id") ON DELETE CASCADE,
+  "merchant_id" int REFERENCES "merchants" ("id") ON DELETE CASCADE,
+  "feature_set" text NOT NULL,
+  "site_wide" boolean DEFAULT FALSE
+);
+
 
 CREATE TABLE "order_products" (
   "id" SERIAL PRIMARY KEY,

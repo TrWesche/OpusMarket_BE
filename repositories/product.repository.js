@@ -388,127 +388,104 @@ async function fetch_product_coupon_by_coupon_code(product_id, coupon_code) {
     }
 };
 
-// TODO: Work in progress - Creating a new query strategy for finding products
-// rather than finding the first match and returning it this will instead sum up the
-// quantity of matches found with the query parameters provided and order the output by that value
-// Additionally a new table needs to be added for marking products as "featured" to be
-// used in the join statement to populate the featured box.
-// async function fetch_products_by_query_params(query) {
-//     let filterInserts = `
-//         product_meta data is to be OR'd together
-//         WHERE (product_meta.title = 'grey') OR (product_meta.title = 'shirt') 
-//         rating and name to stay the same
-//         AND (products.avg_rating > 4) AND (products.name ILIKE '%product1%')
-//     `
 
-//     let baseQuery = `
-//         SELECT
-//             products.id,
-//             products.name AS name,
-//             products.description AS description,
-//             products.base_price AS base_price,
-//             products.avg_rating AS avg_rating,
-//             products.qty_purchases AS qty_purchases,
-//             COUNT(products.id) AS qty_matches
-//         FROM products
-//         FULL OUTER JOIN product_meta
-//         ON products.id = product_meta.product_id
-//         ${filterInserts}
-//         GROUP BY products.id
-//         ORDER BY qty_matches DESC
-//     `
-//
-//          TODO: For featured products section search
-//          RIGHT JOIN products_featured
-//          ON products.id = products_featured.product_id
-//
 //          TODO: For best sellers add addition ORDER BY
 //          ORDER BY qty_matches, qty_purchases DESC
-// }
 
-
-// Retrieve list of products based on query parameters
+// Retrieve featured products
 async function fetch_products_by_query_params(query) {
-    let baseQuery = `
-        SELECT 
-            DISTINCT ON (products.id)
+    // Build query parameters
+    const orExpressions = [];
+    const andExpressions = [];
+    const queryValues = [];
+    const tableJoins = [];
+
+    // Collect product name search values
+    if (query.s) {
+        const searchArray = query.s.split(" ");
+
+        for (const searchVal of searchArray) {
+            queryValues.push('%'+ searchVal + '%');
+            orExpressions.push(`products.name ILIKE $${queryValues.length}`);
+        }
+
+        const resQuery = `(${orExpressions.join(" OR ")})`;
+        andExpressions.push(resQuery);
+        orExpressions.length = 0;
+    }
+
+
+    // Collect meta tag search values
+    if (query.t) {
+        tableJoins.push(`
+            FULL OUTER JOIN product_meta
+            ON products.id = product_meta.product_id
+        `)
+
+        const searchArray = query.t.split(" ");
+
+        for (const searchVal of searchArray) {
+            queryValues.push('%'+ searchVal + '%');
+            orExpressions.push(`product_meta.title ILIKE $${queryValues.length}`);
+        }
+
+        const resQuery = `(${orExpressions.join(" OR ")})`;
+        andExpressions.push(resQuery);
+        orExpressions.length = 0;
+    }
+
+
+    if (query.featured) {
+        tableJoins.push(`
+            RIGHT JOIN products_featured
+            ON products.id = products_featured.product_id
+        `)
+        // If it is not a site_wide query it is for a particular merchant.  Filter results by merchant id.
+        if (!query.site_wide) {
+            queryValues.push(query.mid)
+            andExpressions.push(`(products_featured.merchant_id = $${queryValues.length})`);
+        } else {
+        // If it is a site_wide query this is managed external to the merchants so the merchant_id must be null.
+            andExpressions.push(`(products_featured.merchant_id IS NULL)`);
+        }
+    }
+
+
+    // Add rating filter value
+    if (query.r) {
+        queryValues.push(query.r)
+        orExpressions.push(`products.avg_rating >= $${queryValues.length}`)
+
+        const resQuery = `(${orExpressions.join(" OR ")})`;
+        andExpressions.push(resQuery);
+        orExpressions.length = 0;
+    }
+
+    // Finalize query and return results
+    const queryFilters = `WHERE ${andExpressions.join(" AND ")}`;
+
+    const executeQuery = `
+        SELECT
             products.id,
-            product_meta.title AS meta_title, 
-            product_meta.description AS meta_description,
             products.name AS name,
             products.description AS description,
             products.base_price AS base_price,
-            product_promotions.promotion_price AS promotion_price,
             products.avg_rating AS avg_rating,
-            product_images.url AS img_url,
-            product_modifiers.id AS modifier_id
+            products.qty_purchases AS qty_purchases,
+            COUNT(products.id) AS qty_matches
         FROM products
-        FULL OUTER JOIN product_meta
-        ON products.id = product_meta.product_id
-        FULL OUTER JOIN product_images
-        ON products.id = product_images.product_id
-        FULL OUTER JOIN product_modifiers
-        ON products.id = product_modifiers.product_id
-        LEFT JOIN product_promotions
-        ON products.id = product_promotions.product_id
-        AND product_promotions.active = true`;
+        ${tableJoins.join(" ")}
+        ${queryFilters}
+        GROUP BY products.id
+        ORDER BY qty_matches DESC
+    `;
 
-
-        let orExpressions = [];
-        let andExpressions = [];
-        let queryValues = [];
-
-        // Collect product name search values
-        if (query.s) {
-            const searchArray = query.s.split(" ");
-
-            for (const searchVal of searchArray) {
-                queryValues.push('%'+ searchVal + '%');
-                orExpressions.push(`products.name ILIKE $${queryValues.length}`);
-            }
-
-            const resQuery = `(${orExpressions.join(" OR ")})`;
-            andExpressions.push(resQuery);
-            orExpressions = [];
-        }
-
-        // Collect meta tag search values
-        if (query.t) {
-            const searchArray = query.t.split(" ");
-
-            for (const searchVal of searchArray) {
-                queryValues.push('%'+ searchVal + '%');
-                orExpressions.push(`product_meta.title ILIKE $${queryValues.length}`);
-            }
-
-            const resQuery = `(${orExpressions.join(" OR ")})`;
-            andExpressions.push(resQuery);
-            orExpressions = [];
-        }
-
-        // Add rating filter value
-        if (query.r) {
-            queryValues.push(query.r)
-            orExpressions.push(`products.avg_rating >= $${queryValues.length}`)
-
-            const resQuery = `(${orExpressions.join(" OR ")})`;
-            andExpressions.push(resQuery);
-            orExpressions = []
-        }
-
-        if (andExpressions.length > 0) {
-            baseQuery += " WHERE ";
-        }
-
-        // Finalize query and return results
-        let finalQuery = baseQuery + andExpressions.join(" AND ");
-
-        try {
-            const result = await db.query(finalQuery, queryValues);
-            return result.rows;
-        } catch (error) {
-            throw new ExpressError(`An Error Occured: Unable to fetch product list - ${error}`, 500);
-        }
+    try {
+        const result = await db.query(executeQuery, queryValues);
+        return result.rows;
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to fetch product list - ${error}`, 500);
+    }
 };
 
 
