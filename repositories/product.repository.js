@@ -389,9 +389,6 @@ async function fetch_product_coupon_by_coupon_code(product_id, coupon_code) {
 };
 
 
-//          TODO: For best sellers add addition ORDER BY
-//          ORDER BY qty_matches, qty_purchases DESC
-
 // Retrieve featured products
 async function fetch_products_by_query_params(query) {
     // Build query parameters
@@ -399,6 +396,8 @@ async function fetch_products_by_query_params(query) {
     const andExpressions = [];
     const queryValues = [];
     const tableJoins = [];
+    const orderBys = [`ORDER BY qty_matches DESC`];
+    const rowLimit = [];
 
     // Collect product name search values
     if (query.s) {
@@ -462,7 +461,27 @@ async function fetch_products_by_query_params(query) {
     }
 
     // Finalize query and return results
-    const queryFilters = `WHERE ${andExpressions.join(" AND ")}`;
+    const queryFilters = (andExpressions.length > 0) ? `WHERE ${andExpressions.join(" AND ")}` : "";
+
+    // If sort is requested return data with requested sort type
+    if (query.sort) {
+        // Look to expand for additional sorts if necessary.  May be able to handle this on the frontend.
+        switch(query.sort) {
+            case "purchases-desc":
+                orderBys.push(
+                    `qty_purchases DESC`
+                );
+                break;
+        }
+    }
+
+    // If custom limit is imposed return data with requested limit otherwise default limit
+    if (query.limit) {
+        queryValues.push(query.limit);
+        rowLimit.push(`LIMIT $${queryValues.length}`);
+    } else {
+        rowLimit.push(`LIMIT 10`);
+    }
 
     const executeQuery = `
         SELECT
@@ -477,7 +496,8 @@ async function fetch_products_by_query_params(query) {
         ${tableJoins.join(" ")}
         ${queryFilters}
         GROUP BY products.id
-        ORDER BY qty_matches DESC
+        ${orderBys.join(", ")}
+        ${rowLimit}
     `;
 
     try {
