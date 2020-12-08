@@ -491,14 +491,42 @@ async function fetch_products_by_query_params(query) {
             products.base_price AS base_price,
             products.avg_rating AS avg_rating,
             products.qty_purchases AS qty_purchases,
+            array_agg(product_images.url) AS img_urls,
+            max(active_promotion.promotion_price) AS promotion_price,
             COUNT(products.id) AS qty_matches
         FROM products
+        FULL OUTER JOIN product_images
+        ON products.id = product_images.product_id
+        FULL OUTER JOIN (
+            SELECT product_promotions.product_id AS product_id, product_promotions.promotion_price AS promotion_price
+            FROM product_promotions
+            WHERE product_promotions.active = true
+            LIMIT 1
+        ) active_promotion
+        ON products.id = active_promotion.product_id
         ${tableJoins.join(" ")}
         ${queryFilters}
         GROUP BY products.id
         ${orderBys.join(", ")}
         ${rowLimit}
-    `;
+    `
+
+    // const executeQuery = `
+    //     SELECT
+    //         products.id,
+    //         products.name AS name,
+    //         products.description AS description,
+    //         products.base_price AS base_price,
+    //         products.avg_rating AS avg_rating,
+    //         products.qty_purchases AS qty_purchases,
+    //         COUNT(products.id) AS qty_matches
+    //     FROM products
+    //     ${tableJoins.join(" ")}
+    //     ${queryFilters}
+    //     GROUP BY products.id
+    //     ${orderBys.join(", ")}
+    //     ${rowLimit}
+    // `;
 
     try {
         const result = await db.query(executeQuery, queryValues);
