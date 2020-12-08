@@ -1,7 +1,5 @@
 const db = require("../db");
-const partialUpdate = require("../helpers/partialUpdate");
 const ExpressError = require("../helpers/expressError");
-const { DateTime } = require('luxon');
 
 const { 
     create_new_master_gathering,

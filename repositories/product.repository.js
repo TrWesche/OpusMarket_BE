@@ -388,6 +388,44 @@ async function fetch_product_coupon_by_coupon_code(product_id, coupon_code) {
     }
 };
 
+// TODO: Work in progress - Creating a new query strategy for finding products
+// rather than finding the first match and returning it this will instead sum up the
+// quantity of matches found with the query parameters provided and order the output by that value
+// Additionally a new table needs to be added for marking products as "featured" to be
+// used in the join statement to populate the featured box.
+// async function fetch_products_by_query_params(query) {
+//     let filterInserts = `
+//         product_meta data is to be OR'd together
+//         WHERE (product_meta.title = 'grey') OR (product_meta.title = 'shirt') 
+//         rating and name to stay the same
+//         AND (products.avg_rating > 4) AND (products.name ILIKE '%product1%')
+//     `
+
+//     let baseQuery = `
+//         SELECT
+//             products.id,
+//             products.name AS name,
+//             products.description AS description,
+//             products.base_price AS base_price,
+//             products.avg_rating AS avg_rating,
+//             products.qty_purchases AS qty_purchases,
+//             COUNT(products.id) AS qty_matches
+//         FROM products
+//         FULL OUTER JOIN product_meta
+//         ON products.id = product_meta.product_id
+//         ${filterInserts}
+//         GROUP BY products.id
+//         ORDER BY qty_matches DESC
+//     `
+//
+//          TODO: For featured products section search
+//          RIGHT JOIN products_featured
+//          ON products.id = products_featured.product_id
+//
+//          TODO: For best sellers add addition ORDER BY
+//          ORDER BY qty_matches, qty_purchases DESC
+// }
+
 
 // Retrieve list of products based on query parameters
 async function fetch_products_by_query_params(query) {
