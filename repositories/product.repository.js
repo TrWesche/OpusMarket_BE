@@ -365,7 +365,7 @@ async function fetch_product_coupons_by_product_id(id) {
             RIGHT JOIN products
             ON product_id = products.id
             WHERE product_id = $1`,
-        [prod_id]);
+        [id]);
 
         return result.rows;
     } catch (error) {
@@ -537,6 +537,51 @@ async function fetch_products_by_query_params(query) {
 };
 
 
+async function fetch_grouped_product_meta_by_product_ids(ids) {
+    try {
+        const queryKeys = [];
+        for (let i = 1; i <= ids.length; i++) {
+            queryKeys.push(`$${i}`);
+        }
+
+        const result = await db.query(`
+            SELECT
+                product_meta.title AS title,
+                COUNT(product_meta.title) AS meta_frequency
+            FROM products
+            FULL OUTER JOIN product_meta
+            ON products.id = product_meta.product_id
+            WHERE products.id IN (${queryKeys.join(", ")})
+            GROUP BY product_meta.title
+            ORDER BY meta_frequency DESC`,
+        ids);
+
+        return result.rows;
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to fetch meta data for product list - ${error}`, 500);
+    }
+};
+
+async function fetch_featured_products_by_product_ids(ids) {
+    try {
+        const queryKeys = [];
+        for (let i = 1; i <= ids.length; i++) {
+            queryKeys.push(`$${i}`);
+        }
+
+        const result = await db.query(
+            `SELECT id
+            FROM products_featured
+            WHERE product_id IN (${queryKeys.join(", ")}) AND merchant_id IS null`,
+        ids)
+
+        return result.rows;
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to fetch featured results for product list - ${error}`, 500);
+    };
+};
+
+
 // Retrieve product element details based on element id
 async function fetch_product_image_by_image_id(id) {
     try {
@@ -686,7 +731,7 @@ async function fetch_product_reviews_by_user_id(id) {
             FROM product_reviews
             RIGHT JOIN products
             WHERE user_id = $1`,
-        [user_id]);
+        [id]);
 
         return result.rows; 
     } catch (error) {
@@ -1029,7 +1074,9 @@ module.exports = {
     fetch_product_coupons_by_product_id,
 
     fetch_products_by_query_params,
-    
+    fetch_grouped_product_meta_by_product_ids,
+    fetch_featured_products_by_product_ids,
+
     fetch_product_image_by_image_id,
     fetch_product_meta_by_meta_id,
     fetch_product_promotion_by_promotion_id,

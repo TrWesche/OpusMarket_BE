@@ -17,6 +17,8 @@ const {
     fetch_product_coupons_by_product_id,
 
     fetch_products_by_query_params,
+    fetch_grouped_product_meta_by_product_ids,
+    fetch_featured_products_by_product_ids,
     
     fetch_product_image_by_image_id,
     fetch_product_meta_by_meta_id,
@@ -46,7 +48,8 @@ const {
     delete_product_promotion,
     delete_product_coupon,
     delete_product_modifier,
-    delete_product_review
+    delete_product_review,
+    
 } = require('../repositories/product.repository');
 
 const {
@@ -229,11 +232,31 @@ class Product {
 
 
     // --------------------------------------------------------------------------------
-    // Data Retrieval for product borwsing
-    /** Retreive data on multiple products by category, can expand filters later */
+    // Data Retrieval for product browsing
+    /** Retreive data on multiple products by name, meta data, featured, or ratings */
     static async retrieve_filtered_products(query) {
-        const result = fetch_products_by_query_params(query);
-        return result;
+        const products = await fetch_products_by_query_params(query);
+        const metas = [];
+        const features = [];
+        
+        if (products.length > 0) {
+            const productIdList = [];
+            products.forEach(product => {
+                productIdList.push(product.id);
+            });
+
+            const metaResult = await fetch_grouped_product_meta_by_product_ids(productIdList);
+            metaResult.forEach(result => {
+                metas.push(result);
+            });
+
+            const featuredResult = await fetch_featured_products_by_product_ids(productIdList);
+            featuredResult.forEach(result => {
+                features.push(result);
+            });
+        };        
+
+        return {products, metas, features};
     }  
     // --------------------------------------------------------------------------------
 

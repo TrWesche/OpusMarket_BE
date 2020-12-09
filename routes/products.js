@@ -212,17 +212,13 @@ productRouter.get('/catalog', async(req, res, next) => {
     try {
         let queryData;
         // Check for query params validity - search = s, tag = t, rating = r
-        // TODO: Add category search? - c = category?
-
-        // TODO: Is a schema on the search query string necessary?
-        // if (Object.keys(req.query).length && jsonschema.validate(req.query, catalogSearchSchema).valid) {
         if (Object.keys(req.query).length) {
             queryData = await Product.retrieve_filtered_products(req.query);
         } else {
             queryData = await Product.retrieve_filtered_products({});
         }
 
-        return res.json({"products": queryData})
+        return res.json({"products": queryData.products, "metas": queryData.metas, "features": queryData.features})
     } catch (error) {
         return next(error);
     }
