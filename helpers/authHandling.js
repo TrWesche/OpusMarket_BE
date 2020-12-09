@@ -26,11 +26,16 @@ class AuthHandling {
         const privateToken = queryReq.cookies._sid;
         const split_publicToken = queryReq.cookies.sid.split(".");
 
-
         // Reconstruct Check Token
         const verificationToken = `${split_publicToken[0]}.${split_publicToken[1]}.${privateToken}`;
 
-        const verifyResult = jwt.verify(verificationToken, PRIVATE_KEY);
+        let verifyResult;
+        try {
+            verifyResult = jwt.verify(verificationToken, PRIVATE_KEY, {algorithms: ['RS256']}); 
+        } catch (error) {
+            console.log("Verification Error Occured:", error)
+        }
+
         return verifyResult;
     }
 }
