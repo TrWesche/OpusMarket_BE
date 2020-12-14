@@ -24,6 +24,24 @@ const merchantRouter = new express.Router();
 // ║║║╚╗║╚══╗║╔═╗║╔╝╚╝║
 // ╚╝╚═╝╚═══╝╚╝ ╚╝╚═══╝   
 
+// TODO: Merchant browse routes need to be built out
+merchantRouter.get('/:merchant_id', async(req, res, next) => {
+    try {
+        // Check for product with id not in database
+        const result = await Merchant.retrieve_merchant_by_merchant_id(+req.params.merchant_id);
+        if(!result) {
+            throw new ExpressError(`Unable to find target merchant`, 404);
+        }
+
+        return res.json({merchant: result});
+    } catch (error) {
+        return next(error);
+    };
+})
+
+
+
+
 merchantRouter.get("/details", ensureIsMerchant, async (req, res, next) => {
     try {
         const result = await Merchant.retrieve_merchant_by_merchant_id(req.user.id);
