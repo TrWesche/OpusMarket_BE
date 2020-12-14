@@ -6,9 +6,24 @@ const {
   create_new_merchant,
   fetch_merchant_by_merchant_email,
   fetch_merchant_by_merchant_id,
+  fetch_merchant_public_profile_by_merchant_id,
   update_merchant_by_merchant_id,
   delete_merchant_by_merchant_id,
 } = require("../repositories/merchant.repository");
+
+const {
+  fetch_products_by_merchant_id
+} = require("../repositories/product.repository");
+
+const {
+  fetch_gatherings_by_merchant_id
+} = require("../repositories/gathering.repository");
+
+const {
+  begin_transaction,
+  commit_transaction,
+  rollback_transaction
+} = require("../repositories/common.repository");
 
 /** Standard Merchant Creation & Authentication */
 class Merchant {
@@ -45,8 +60,45 @@ class Merchant {
     return merchant;
   }
   
-  /** Get merchant data by id */
+  /** --- Public --- 
+   * Get merchant data by id for display to site users
+   * who wish to know more about a merchant or to browse their
+   * wares.
+   */
   static async retrieve_merchant_by_merchant_id(id) {
+    try {
+      await begin_transaction();
+
+      // Try fetching merchant
+      const merchant = await fetch_merchant_public_profile_by_merchant_id(id);
+      if (!merchant) {
+        throw new ExpressError("Unable to locate target merchant", 404);
+      }
+
+      // Retrieve merchant products
+      const products = await fetch_products_by_merchant_id(id, false);
+      merchant.products = products;
+
+      // Retrieve featured products
+      const featured_products = await fetch_products_by_merchant_id(id, true);
+      merchant.featured_products = featured_products;
+
+      // Retrieve merchant gatherings
+      const gatherings = await fetch_gatherings_by_merchant_id(id);
+      merchant.gatherings = gatherings;
+
+      return merchant;
+    } catch (error) {
+      console.log(error);
+      await rollback_transaction();
+    }
+  };
+
+  /** --- Private ---
+   *  Get merchant profile by merchant id.  Calling route should
+   *  validate merchant information using the authentication cookie.
+  */
+  static async retrieve_merchant_profile_by_merchant_id(id) {
     const merchant = await fetch_merchant_by_merchant_id(id);
 
     if (!merchant) {
@@ -54,6 +106,7 @@ class Merchant {
     }
     return merchant;
   }
+
 
   /** Update merchant data with `data`. */
   static async modify_merchant(id, data) {

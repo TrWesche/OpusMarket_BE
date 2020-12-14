@@ -54,6 +54,33 @@ async function fetch_merchant_by_merchant_id(merchantId) {
     }
 };
 
+async function fetch_merchant_public_profile_by_merchant_id(merchantId) {
+    try {
+        const result = await db.query(`
+            SELECT 
+                merchants.id AS id,    
+                merchants.display_name AS display_name,
+                json_agg(json_build_object('headline', merchant_about.headline, 'about', merchant_about.about)) AS about,
+                json_agg(json_build_object('name', merchant_bios.name, 'bio', merchant_bios.bio, 'image', merchant_bios.images)) AS bios,
+                json_agg(json_build_object('url', merchant_images.url, 'alt_text', merchant_images.alt_text)) AS images
+            FROM merchants
+            FULL OUTER JOIN merchant_about
+            ON merchant_about.merchant_id = merchants.id
+            FULL OUTER JOIN merchant_bios
+            ON merchant_bios.merchant_id = merchants.id
+            FULL OUTER JOIN merchant_images
+            ON merchant_images.merchant_id = merchants.id
+            WHERE merchants.id = $1
+            GROUP BY merchants.id`,
+        [merchantId]);
+
+        return result.rows[0];
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to locate merchant - ${error}`, 500);
+    }
+}
+
+
 async function update_merchant_by_merchant_id(merchantId, data) {
     try {
         // Parital Update: table name, payload data, lookup column name, lookup key
@@ -90,6 +117,7 @@ module.exports = {
     create_new_merchant,
     fetch_merchant_by_merchant_email,
     fetch_merchant_by_merchant_id,
+    fetch_merchant_public_profile_by_merchant_id,
     update_merchant_by_merchant_id,
     delete_merchant_by_merchant_id
 }

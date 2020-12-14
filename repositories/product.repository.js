@@ -388,7 +388,6 @@ async function fetch_product_coupon_by_coupon_code(product_id, coupon_code) {
     }
 };
 
-
 // Retrieve featured products
 async function fetch_products_by_query_params(query) {
     // Build query parameters
@@ -536,6 +535,55 @@ async function fetch_products_by_query_params(query) {
     }
 };
 
+async function fetch_products_by_merchant_id(merchant_id, featured) {
+    // Build query parameters
+    const andExpressions = [`products.merchant_id = $1`];
+    const queryValues = [merchant_id];
+    const tableJoins = [];
+
+    if (featured) {
+        tableJoins.push(`
+            RIGHT JOIN products_featured
+            ON products.id = products_featured.product_id
+        `)
+    }
+
+    // Finalize query and return results
+    const queryFilters = (andExpressions.length > 0) ? `WHERE ${andExpressions.join(" AND ")}` : "";
+
+    const executeQuery = `
+        SELECT
+            products.id,
+            products.name AS name,
+            products.description AS description,
+            products.base_price AS base_price,
+            products.avg_rating AS avg_rating,
+            products.qty_purchases AS qty_purchases,
+            array_agg(product_images.url) AS img_urls,
+            max(active_promotion.promotion_price) AS promotion_price,
+            COUNT(products.id) AS qty_matches
+        FROM products
+        FULL OUTER JOIN product_images
+        ON products.id = product_images.product_id
+        FULL OUTER JOIN (
+            SELECT product_promotions.product_id AS product_id, product_promotions.promotion_price AS promotion_price
+            FROM product_promotions
+            WHERE product_promotions.active = true
+            LIMIT 1
+        ) active_promotion
+        ON products.id = active_promotion.product_id
+        ${tableJoins.join(" ")}
+        ${queryFilters}
+        GROUP BY products.id
+    `
+
+    try {
+        const result = await db.query(executeQuery, queryValues);
+        return result.rows;
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to fetch merchant product list - ${error}`, 500);
+    }
+};
 
 async function fetch_grouped_product_meta_by_product_ids(ids) {
     try {
@@ -580,7 +628,6 @@ async function fetch_featured_products_by_product_ids(ids) {
         throw new ExpressError(`An Error Occured: Unable to fetch featured results for product list - ${error}`, 500);
     };
 };
-
 
 // Retrieve product element details based on element id
 async function fetch_product_image_by_image_id(id) {
@@ -714,7 +761,6 @@ async function fetch_product_review_by_review_id(id) {
     }
 };
 
-
 // Retrieve product reviews base on user id
 async function fetch_product_reviews_by_user_id(id) {
     try {
@@ -738,6 +784,8 @@ async function fetch_product_reviews_by_user_id(id) {
         throw new ExpressError(`An Error Occured: Unable to fetch user's reviews - ${error}`, 500);
     }
 };
+
+
 
 
 // ╔╗ ╔╗╔═══╗╔═══╗╔═══╗╔════╗╔═══╗
@@ -1074,6 +1122,8 @@ module.exports = {
     fetch_product_coupons_by_product_id,
 
     fetch_products_by_query_params,
+    fetch_products_by_merchant_id, 
+
     fetch_grouped_product_meta_by_product_ids,
     fetch_featured_products_by_product_ids,
 
