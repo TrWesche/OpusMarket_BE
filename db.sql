@@ -52,7 +52,9 @@ CREATE TABLE "merchant_about" (
   "id" SERIAL PRIMARY KEY,
   "merchant_id" int NOT NULL REFERENCES "merchants" ("id") ON DELETE CASCADE,
   "headline" text,
-  "about" text
+  "about" text,
+  "logo_wide_url" text,
+  "logo_narrow_url" text
 );
 
 CREATE TABLE "merchant_images" (
@@ -67,16 +69,9 @@ CREATE TABLE "merchant_bios" (
   "merchant_id" int NOT NULL REFERENCES "merchants" ("id") ON DELETE CASCADE,
   "name" text NOT NULL,
   "bio" text NOT NULL,
-  "images" int
-);
-
-CREATE TABLE "bio_images" (
-  "id" SERIAL PRIMARY KEY,
-  "bio_id" int NOT NULL REFERENCES "merchant_bios" ("id") ON DELETE CASCADE,
-  "url" text NOT NULL,
+  "image_url" text,
   "alt_text" text
 );
-
 
 CREATE TABLE "gathering_merchants" (
   "id" SERIAL PRIMARY KEY,
@@ -88,7 +83,8 @@ CREATE TABLE "gathering_images" (
   "id" SERIAL PRIMARY KEY,
   "gathering_id" int NOT NULL REFERENCES "gatherings" ("id") ON DELETE CASCADE,
   "url" text NOT NULL,
-  "alt_text" text
+  "alt_text" text,
+  "weight" int
 );
                  
 CREATE TABLE "product_images" (

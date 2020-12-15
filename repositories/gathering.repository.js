@@ -114,18 +114,53 @@ async function fetch_gathering_images_by_gathering_id(gatheringId) {
     }
 };
 
+// Old version of the function - check to see if anything broke
+// async function fetch_gatherings_by_merchant_id(merchantId) {
+//     try {
+//         const result = await db.query(`
+//             SELECT 
+//                 gathering_merchants.merchant_id AS merchant_id, 
+//                 gathering_merchants.gathering_id AS gathering_id, 
+//                 gatherings.title AS title, 
+//                 gatherings.description AS description, 
+//                 gatherings.link AS link
+//             FROM gathering_merchants
+//             LEFT JOIN gatherings
+//             ON gathering_merchants.gathering_id = gatherings.id
+//             WHERE gathering_merchants.merchant_id = $1`,
+//         [merchantId]);
+
+//         return result.rows;
+//     } catch (error) {
+//         throw new ExpressError(`An Error Occured: Unable to fetch merchant gatherings - ${error}`, 500);
+//     }
+// };
+
 async function fetch_gatherings_by_merchant_id(merchantId) {
     try {
         const result = await db.query(`
-            SELECT 
+            SELECT
+                DISTINCT ON (gathering_merchants.gathering_id)
+                gathering_merchants.gathering_id AS gathering_id,
                 gathering_merchants.merchant_id AS merchant_id, 
-                gathering_merchants.gathering_id AS gathering_id, 
-                gatherings.title AS title, 
-                gatherings.description AS description, 
-                gatherings.link AS link
+                gathering_details.title AS title,
+                gathering_details.description AS description,
+                gathering_details.gathering_link AS gathering_link,
+                gathering_details.images AS images
             FROM gathering_merchants
-            LEFT JOIN gatherings
-            ON gathering_merchants.gathering_id = gatherings.id
+            LEFT JOIN (
+                SELECT 
+                    gatherings.id AS id,	
+                    gatherings.title AS title, 
+                    gatherings.description AS description, 
+                    gatherings.link AS gathering_link,
+                    json_agg(json_build_object('url', gathering_images.url, 'alt_text', gathering_images.alt_text, 'weight', gathering_images.weight)) AS images
+                FROM gatherings
+                FULL OUTER JOIN gathering_images
+                ON gatherings.id = gathering_images.gathering_id
+                GROUP BY gatherings.id
+            ) AS gathering_details
+            ON gathering_merchants.gathering_id = gathering_details.id
             WHERE gathering_merchants.merchant_id = $1`,
         [merchantId]);
 
@@ -133,7 +168,8 @@ async function fetch_gatherings_by_merchant_id(merchantId) {
     } catch (error) {
         throw new ExpressError(`An Error Occured: Unable to fetch merchant gatherings - ${error}`, 500);
     }
-};
+}
+
 
 async function fetch_gathering_merchant_by_participant_id(participantId) {
     try {

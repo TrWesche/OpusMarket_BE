@@ -22,6 +22,8 @@ async function create_new_merchant(merchantData, hashedPassword) {
     }
 };
 
+// TODO: Routes for creating, reading, updating, deleting entries for merchant_about and merchant_bios.
+
 async function fetch_merchant_by_merchant_email(merchantEmail) {
     try {
         const result = await db.query(
@@ -60,8 +62,8 @@ async function fetch_merchant_public_profile_by_merchant_id(merchantId) {
             SELECT 
                 merchants.id AS id,    
                 merchants.display_name AS display_name,
-                json_agg(json_build_object('headline', merchant_about.headline, 'about', merchant_about.about)) AS about,
-                json_agg(json_build_object('name', merchant_bios.name, 'bio', merchant_bios.bio, 'image', merchant_bios.images)) AS bios,
+                json_agg(json_build_object('headline', merchant_about.headline, 'about', merchant_about.about, 'logo_wide_url', merchant_about.logo_wide_url, 'logo_narrow_url', merchant_about.logo_narrow_url)) AS about,
+                json_agg(json_build_object('name', merchant_bios.name, 'bio', merchant_bios.bio, 'image_url', merchant_bios.image_url, 'alt_text', merchant_bios.alt_text)) AS bios,
                 json_agg(json_build_object('url', merchant_images.url, 'alt_text', merchant_images.alt_text)) AS images
             FROM merchants
             FULL OUTER JOIN merchant_about
