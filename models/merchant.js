@@ -4,6 +4,7 @@ const ExpressError = require("../helpers/expressError");
 
 const {
   create_new_merchant,
+  fetch_merchants_by_query_params,
   fetch_merchant_by_merchant_email,
   fetch_merchant_by_merchant_id,
   fetch_merchant_public_profile_by_merchant_id,
@@ -12,9 +13,9 @@ const {
 } = require("../repositories/merchant.repository");
 
 const {
-  fetch_products_by_merchant_id,
   fetch_grouped_product_meta_by_product_ids,
-  fetch_featured_products_by_product_ids
+  fetch_featured_products_by_product_ids,
+  fetch_products_by_query_params
 } = require("../repositories/product.repository");
 
 const {
@@ -78,18 +79,18 @@ class Merchant {
       }
 
       // Retrieve merchant products
-      const products = await fetch_products_by_merchant_id(id, {featured: false, limit: 18});
+      const products = await fetch_products_by_query_params({mid: id, featured: false, limit: 18});
       merchant.products = products;
 
       // Retrieve featured products
-      const featured_products = await fetch_products_by_merchant_id(id, {featured: true});
-      
+      const featured_products = await fetch_products_by_query_params({mid: id, featured: true, site_wide: false});
       merchant.featured_products = featured_products;
 
       // Retrieve merchant gatherings
       const gatherings = await fetch_gatherings_by_merchant_id(id);
       merchant.gatherings = gatherings;
 
+      await commit_transaction();
       return merchant;
     } catch (error) {
       console.log(error);
@@ -99,10 +100,10 @@ class Merchant {
 
 
   // --------------------------------------------------------------------------------
-  // Data Retrieval for product browsing
+  // Data Retrieval for merchant product browsing
   /** Retreive data on multiple products by name, meta data, featured, or ratings */
   static async retrieve_merchant_products(id, query) {
-    const products = await fetch_products_by_merchant_id(id, query);
+    const products = await fetch_products_by_query_params({...query, mid: id});
     const metas = [];
     const features = [];
     
@@ -124,6 +125,20 @@ class Merchant {
     };        
 
     return {products, metas, features};
+  }  
+  // --------------------------------------------------------------------------------
+
+
+  // --------------------------------------------------------------------------------
+  // Data Retrieval for merchant browsing
+  /** Retreive data on multiple merchants by name, id, or featured */
+  static async retrieve_merchant_list(query) {
+    try {
+      const merchants = await fetch_merchants_by_query_params(query);  
+      return merchants;
+    } catch (error) {
+      console.log(error);
+    }
   }  
   // --------------------------------------------------------------------------------
 

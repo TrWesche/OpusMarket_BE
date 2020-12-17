@@ -24,6 +24,22 @@ const merchantRouter = new express.Router();
 // ║║║╚╗║╚══╗║╔═╗║╔╝╚╝║
 // ╚╝╚═╝╚═══╝╚╝ ╚╝╚═══╝   
 
+merchantRouter.get('/', async(req, res, next) => {
+    try {
+        let queryData;
+        // Check for query params validity - search = s, tag = t, rating = r
+        if (Object.keys(req.query).length) {
+            queryData = await Merchant.retrieve_merchant_list(req.query);
+        } else {
+            queryData = await Merchant.retrieve_merchant_list({});
+        }
+
+        return res.json({"merchants": queryData})
+    } catch (error) {
+        return next(error);
+    }
+})
+
 
 merchantRouter.get('/:merchant_id', async(req, res, next) => {
     try {

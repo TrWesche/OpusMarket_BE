@@ -22,6 +22,88 @@ async function create_new_merchant(merchantData, hashedPassword) {
     }
 };
 
+async function fetch_merchants_by_query_params(query) {
+    // Build query parameters
+    const orExpressions = [];
+    const andExpressions = [];
+    const queryValues = [];
+    const tableJoins = [];
+    const rowLimit = [];
+
+    // Collect product name search values
+    if (query.s) {
+        const searchArray = query.s.split(" ");
+
+        for (const searchVal of searchArray) {
+            queryValues.push('%'+ searchVal + '%');
+            orExpressions.push(`merchants.display_name ILIKE $${queryValues.length}`);
+        }
+
+        const resQuery = `(${orExpressions.join(" OR ")})`;
+        andExpressions.push(resQuery);
+        orExpressions.length = 0;
+    }
+
+    // Collect merchant id search values
+    if (query.mid) {
+        if (typeof query.mid === 'number') {
+            queryValues.push(query.mid);
+            andExpressions.push(`merchants.id = $${queryValues.length}`);
+        } else {
+            const midArray = query.mid.split(" ");
+
+            for (const midVal of midArray) {
+                queryValues.push(midVal);
+                orExpressions.push(`merchants.id = $${queryValues.length}`);
+            }
+
+            const resQuery = `(${orExpressions.join(" OR ")})`;
+            andExpressions.push(resQuery);
+            orExpressions.length = 0;
+        }
+    }
+
+    if (query.featured) {
+        tableJoins.push(`
+            RIGHT JOIN merchants_featured
+            ON merchants.id = merchants_featured.merchant_id
+        `)
+    }
+
+    // Finalize query and return results
+    const queryFilters = (andExpressions.length > 0) ? `WHERE ${andExpressions.join(" AND ")}` : "";
+
+    // If custom limit is imposed return data with requested limit otherwise default limit
+    if (query.limit) {
+        queryValues.push(query.limit);
+        rowLimit.push(`LIMIT $${queryValues.length}`);
+    } else {
+        rowLimit.push(`LIMIT 100`);
+    }
+
+    const executeQuery = `
+        SELECT
+            DISTINCT ON (merchants.id)
+            merchants.id AS id,
+            merchants.display_name AS display_name,
+            merchant_about.headline AS headline,
+            merchant_about.logo_narrow_url AS logo
+        FROM merchants
+        FULL OUTER JOIN merchant_about
+        ON merchants.id = merchant_about.merchant_id
+        ${tableJoins.join(" ")}
+        ${queryFilters}
+        ${rowLimit}
+    `;
+
+    try {
+        const result = await db.query(executeQuery, queryValues);
+        return result.rows;
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to fetch product list - ${error}`, 500);
+    }
+}
+
 // TODO: Routes for creating, reading, updating, deleting entries for merchant_about and merchant_bios.
 
 async function fetch_merchant_by_merchant_email(merchantEmail) {
@@ -117,6 +199,7 @@ async function delete_merchant_by_merchant_id(merchantId) {
 
 module.exports = {
     create_new_merchant,
+    fetch_merchants_by_query_params,
     fetch_merchant_by_merchant_email,
     fetch_merchant_by_merchant_id,
     fetch_merchant_public_profile_by_merchant_id,

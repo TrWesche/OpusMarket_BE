@@ -412,6 +412,24 @@ async function fetch_products_by_query_params(query) {
         orExpressions.length = 0;
     }
 
+    // Collect merchant id search values
+    if (query.mid) {
+        if (typeof query.mid === 'number') {
+            queryValues.push(query.mid);
+            andExpressions.push(`products.merchant_id = $${queryValues.length}`);
+        } else {
+            const midArray = query.mid.split(" ");
+
+            for (const midVal of midArray) {
+                queryValues.push(midVal);
+                orExpressions.push(`products.merchant_id = $${queryValues.length}`);
+            }
+    
+            const resQuery = `(${orExpressions.join(" OR ")})`;
+            andExpressions.push(resQuery);
+            orExpressions.length = 0;
+        }
+    }
 
     // Collect meta tag search values
     if (query.t) {
@@ -431,6 +449,7 @@ async function fetch_products_by_query_params(query) {
         andExpressions.push(resQuery);
         orExpressions.length = 0;
     }
+
 
 
     if (query.featured) {
@@ -508,125 +527,8 @@ async function fetch_products_by_query_params(query) {
         GROUP BY products.id
         ${orderBys.join(", ")}
         ${rowLimit}
-    `
+    `;
 
-    try {
-        const result = await db.query(executeQuery, queryValues);
-        return result.rows;
-    } catch (error) {
-        throw new ExpressError(`An Error Occured: Unable to fetch product list - ${error}`, 500);
-    }
-};
-
-// Retrieve merchant products with query filters
-async function fetch_products_by_merchant_id(merchant_id, query) {
-    // Build query parameters
-    const orExpressions = [];
-    const andExpressions = [`products.merchant_id = $1`];
-    const queryValues = [merchant_id];
-    const tableJoins = [];
-    const orderBys = [`ORDER BY qty_matches DESC`];
-
-    // Collect product name search values
-    if (query.s) {
-        const searchArray = query.s.split(" ");
-
-        for (const searchVal of searchArray) {
-            queryValues.push('%'+ searchVal + '%');
-            orExpressions.push(`products.name ILIKE $${queryValues.length}`);
-        }
-
-        const resQuery = `(${orExpressions.join(" OR ")})`;
-        andExpressions.push(resQuery);
-        orExpressions.length = 0;
-    }
-
-
-    // Collect meta tag search values
-    if (query.t) {
-        tableJoins.push(`
-            FULL OUTER JOIN product_meta
-            ON products.id = product_meta.product_id
-        `)
-
-        const searchArray = query.t.split(" ");
-
-        for (const searchVal of searchArray) {
-            queryValues.push('%'+ searchVal + '%');
-            orExpressions.push(`product_meta.title ILIKE $${queryValues.length}`);
-        }
-
-        const resQuery = `(${orExpressions.join(" OR ")})`;
-        andExpressions.push(resQuery);
-        orExpressions.length = 0;
-    }
-
-
-    if (query.featured) {
-        tableJoins.push(`
-            RIGHT JOIN products_featured
-            ON products.id = products_featured.product_id
-        `)
-        queryValues.push(merchant_id)
-        andExpressions.push(`(products_featured.merchant_id = $${queryValues.length})`);
-    }
-
-
-    // Add rating filter value
-    if (query.r) {
-        queryValues.push(query.r)
-        orExpressions.push(`products.avg_rating >= $${queryValues.length}`)
-
-        const resQuery = `(${orExpressions.join(" OR ")})`;
-        andExpressions.push(resQuery);
-        orExpressions.length = 0;
-    }
-
-    // Finalize query and return results
-    const queryFilters = (andExpressions.length > 0) ? `WHERE ${andExpressions.join(" AND ")}` : "";
-
-    // If sort is requested return data with requested sort type
-    if (query.sort) {
-        // Look to expand for additional sorts if necessary.  May be able to handle this on the frontend.
-        switch(query.sort) {
-            case "purchases-desc":
-                orderBys.push(
-                    `qty_purchases DESC`
-                );
-                break;
-        }
-    }
-
-    // If custom limit is imposed return data with requested limit otherwise default limit
-    const limitQuery = (query.limit) ? `LIMIT ${query.limit}` : '';
-
-    const executeQuery = `
-        SELECT
-            products.id,
-            products.name AS name,
-            products.description AS description,
-            products.base_price AS base_price,
-            products.avg_rating AS avg_rating,
-            products.qty_purchases AS qty_purchases,
-            array_agg(product_images.url) AS img_urls,
-            max(active_promotion.promotion_price) AS promotion_price,
-            COUNT(products.id) AS qty_matches
-        FROM products
-        FULL OUTER JOIN product_images
-        ON products.id = product_images.product_id
-        FULL OUTER JOIN (
-            SELECT product_promotions.product_id AS product_id, product_promotions.promotion_price AS promotion_price
-            FROM product_promotions
-            WHERE product_promotions.active = true
-            LIMIT 1
-        ) active_promotion
-        ON products.id = active_promotion.product_id
-        ${tableJoins.join(" ")}
-        ${queryFilters}
-        GROUP BY products.id
-        ${orderBys.join(", ")}
-        ${limitQuery}
-    `
 
     try {
         const result = await db.query(executeQuery, queryValues);
@@ -1173,7 +1075,6 @@ module.exports = {
     fetch_product_coupons_by_product_id,
 
     fetch_products_by_query_params,
-    fetch_products_by_merchant_id, 
 
     fetch_grouped_product_meta_by_product_ids,
     fetch_featured_products_by_product_ids,

@@ -73,6 +73,12 @@ CREATE TABLE "merchant_bios" (
   "alt_text" text
 );
 
+CREATE TABLE "merchants_featured" (
+  "id" SERIAL PRIMARY KEY,
+  "merchant_id" int NOT NULL REFERENCES "merchants" ("id") ON DELETE CASCADE,
+  "feature_set" text NOT NULL
+);
+
 CREATE TABLE "gathering_merchants" (
   "id" SERIAL PRIMARY KEY,
   "gathering_id" int NOT NULL REFERENCES "gatherings" ("id") ON DELETE CASCADE,
