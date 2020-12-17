@@ -24,7 +24,7 @@ const merchantRouter = new express.Router();
 // ║║║╚╗║╚══╗║╔═╗║╔╝╚╝║
 // ╚╝╚═╝╚═══╝╚╝ ╚╝╚═══╝   
 
-// TODO: Merchant browse routes need to be built out
+
 merchantRouter.get('/:merchant_id', async(req, res, next) => {
     try {
         // Check for product with id not in database
@@ -37,9 +37,23 @@ merchantRouter.get('/:merchant_id', async(req, res, next) => {
     } catch (error) {
         return next(error);
     };
-})
+});
 
+merchantRouter.get('/:merchant_id/store', async(req, res, next) => {
+    try {
+        let queryData;
+        // Check for query params validity - search = s, tag = t, rating = r
+        if (Object.keys(req.query).length) {
+            queryData = await Merchant.retrieve_merchant_products(+req.params.merchant_id, req.query);
+        } else {
+            queryData = await Merchant.retrieve_merchant_products(+req.params.merchant_id, {});
+        }
 
+        return res.json({"products": queryData.products, "metas": queryData.metas, "features": queryData.features})
+    } catch (error) {
+        return next(error);
+    }
+});
 
 
 merchantRouter.get("/profile", ensureIsMerchant, async (req, res, next) => {
@@ -53,7 +67,7 @@ merchantRouter.get("/profile", ensureIsMerchant, async (req, res, next) => {
     } catch (error) {
         return next(error);
     }
-})
+});
 
 // ╔╗ ╔╗╔═══╗╔═══╗╔═══╗╔════╗╔═══╗
 // ║║ ║║║╔═╗║╚╗╔╗║║╔═╗║║╔╗╔╗║║╔══╝

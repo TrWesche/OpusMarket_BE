@@ -510,23 +510,6 @@ async function fetch_products_by_query_params(query) {
         ${rowLimit}
     `
 
-    // const executeQuery = `
-    //     SELECT
-    //         products.id,
-    //         products.name AS name,
-    //         products.description AS description,
-    //         products.base_price AS base_price,
-    //         products.avg_rating AS avg_rating,
-    //         products.qty_purchases AS qty_purchases,
-    //         COUNT(products.id) AS qty_matches
-    //     FROM products
-    //     ${tableJoins.join(" ")}
-    //     ${queryFilters}
-    //     GROUP BY products.id
-    //     ${orderBys.join(", ")}
-    //     ${rowLimit}
-    // `;
-
     try {
         const result = await db.query(executeQuery, queryValues);
         return result.rows;
@@ -535,21 +518,87 @@ async function fetch_products_by_query_params(query) {
     }
 };
 
-async function fetch_products_by_merchant_id(merchant_id, featured) {
+// Retrieve merchant products with query filters
+async function fetch_products_by_merchant_id(merchant_id, query) {
     // Build query parameters
+    const orExpressions = [];
     const andExpressions = [`products.merchant_id = $1`];
     const queryValues = [merchant_id];
     const tableJoins = [];
+    const orderBys = [`ORDER BY qty_matches DESC`];
 
-    if (featured) {
+    // Collect product name search values
+    if (query.s) {
+        const searchArray = query.s.split(" ");
+
+        for (const searchVal of searchArray) {
+            queryValues.push('%'+ searchVal + '%');
+            orExpressions.push(`products.name ILIKE $${queryValues.length}`);
+        }
+
+        const resQuery = `(${orExpressions.join(" OR ")})`;
+        andExpressions.push(resQuery);
+        orExpressions.length = 0;
+    }
+
+
+    // Collect meta tag search values
+    if (query.t) {
+        tableJoins.push(`
+            FULL OUTER JOIN product_meta
+            ON products.id = product_meta.product_id
+        `)
+
+        const searchArray = query.t.split(" ");
+
+        for (const searchVal of searchArray) {
+            queryValues.push('%'+ searchVal + '%');
+            orExpressions.push(`product_meta.title ILIKE $${queryValues.length}`);
+        }
+
+        const resQuery = `(${orExpressions.join(" OR ")})`;
+        andExpressions.push(resQuery);
+        orExpressions.length = 0;
+    }
+
+
+    if (query.featured) {
         tableJoins.push(`
             RIGHT JOIN products_featured
             ON products.id = products_featured.product_id
         `)
+        queryValues.push(merchant_id)
+        andExpressions.push(`(products_featured.merchant_id = $${queryValues.length})`);
+    }
+
+
+    // Add rating filter value
+    if (query.r) {
+        queryValues.push(query.r)
+        orExpressions.push(`products.avg_rating >= $${queryValues.length}`)
+
+        const resQuery = `(${orExpressions.join(" OR ")})`;
+        andExpressions.push(resQuery);
+        orExpressions.length = 0;
     }
 
     // Finalize query and return results
     const queryFilters = (andExpressions.length > 0) ? `WHERE ${andExpressions.join(" AND ")}` : "";
+
+    // If sort is requested return data with requested sort type
+    if (query.sort) {
+        // Look to expand for additional sorts if necessary.  May be able to handle this on the frontend.
+        switch(query.sort) {
+            case "purchases-desc":
+                orderBys.push(
+                    `qty_purchases DESC`
+                );
+                break;
+        }
+    }
+
+    // If custom limit is imposed return data with requested limit otherwise default limit
+    const limitQuery = (query.limit) ? `LIMIT ${query.limit}` : '';
 
     const executeQuery = `
         SELECT
@@ -575,13 +624,15 @@ async function fetch_products_by_merchant_id(merchant_id, featured) {
         ${tableJoins.join(" ")}
         ${queryFilters}
         GROUP BY products.id
+        ${orderBys.join(", ")}
+        ${limitQuery}
     `
 
     try {
         const result = await db.query(executeQuery, queryValues);
         return result.rows;
     } catch (error) {
-        throw new ExpressError(`An Error Occured: Unable to fetch merchant product list - ${error}`, 500);
+        throw new ExpressError(`An Error Occured: Unable to fetch product list - ${error}`, 500);
     }
 };
 

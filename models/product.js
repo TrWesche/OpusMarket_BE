@@ -49,6 +49,7 @@ const {
     delete_product_coupon,
     delete_product_modifier,
     delete_product_review,
+    fetch_products_by_merchant_id,
     
 } = require('../repositories/product.repository');
 

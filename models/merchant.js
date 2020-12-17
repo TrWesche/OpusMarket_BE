@@ -12,7 +12,9 @@ const {
 } = require("../repositories/merchant.repository");
 
 const {
-  fetch_products_by_merchant_id
+  fetch_products_by_merchant_id,
+  fetch_grouped_product_meta_by_product_ids,
+  fetch_featured_products_by_product_ids
 } = require("../repositories/product.repository");
 
 const {
@@ -76,11 +78,12 @@ class Merchant {
       }
 
       // Retrieve merchant products
-      const products = await fetch_products_by_merchant_id(id, false);
+      const products = await fetch_products_by_merchant_id(id, {featured: false, limit: 18});
       merchant.products = products;
 
       // Retrieve featured products
-      const featured_products = await fetch_products_by_merchant_id(id, true);
+      const featured_products = await fetch_products_by_merchant_id(id, {featured: true});
+      
       merchant.featured_products = featured_products;
 
       // Retrieve merchant gatherings
@@ -93,6 +96,36 @@ class Merchant {
       await rollback_transaction();
     }
   };
+
+
+  // --------------------------------------------------------------------------------
+  // Data Retrieval for product browsing
+  /** Retreive data on multiple products by name, meta data, featured, or ratings */
+  static async retrieve_merchant_products(id, query) {
+    const products = await fetch_products_by_merchant_id(id, query);
+    const metas = [];
+    const features = [];
+    
+    if (products.length > 0) {
+        const productIdList = [];
+        products.forEach(product => {
+            productIdList.push(product.id);
+        });
+
+        const metaResult = await fetch_grouped_product_meta_by_product_ids(productIdList);
+        metaResult.forEach(result => {
+            metas.push(result);
+        });
+
+        const featuredResult = await fetch_featured_products_by_product_ids(productIdList);
+        featuredResult.forEach(result => {
+            features.push(result);
+        });
+    };        
+
+    return {products, metas, features};
+  }  
+  // --------------------------------------------------------------------------------
 
   /** --- Private ---
    *  Get merchant profile by merchant id.  Calling route should
