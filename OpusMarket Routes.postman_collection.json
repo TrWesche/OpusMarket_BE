@@ -1,0 +1,1468 @@
+{
+	"info": {
+		"_postman_id": "89c673c2-8396-421e-8442-feca6d2aa82c",
+		"name": "OpusMarket Routes",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Gathering Routes",
+			"item": [
+				{
+					"name": "Create Gathering",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"TestGathering1\",\r\n    \"description\": \"We are here today to test gathering 1.\",\r\n    \"link\": \"http://gatheringProvider.com/gathering1\",\r\n    \"gathering_dt\": \"2020-12-03T15:00:00Z\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/gatherings/new",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"gatherings",
+								"new"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Gathering Merchant",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"merchants\": [\r\n        {\"id\": 2},\r\n        {\"id\": 1}\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/gatherings/1/new/merchant",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"gatherings",
+								"1",
+								"new",
+								"merchant"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add Gathering Image",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"images\": [\r\n        {\r\n            \"url\": \"http://imageHost.com/gathering1img1\",\r\n            \"alt_text\": \"The First Image for Gathering 1\"\r\n        },\r\n        {\r\n            \"url\": \"http://imageHost.com/gathering1img2\",\r\n            \"alt_text\": \"The Second Image for Gathering 1\"\r\n        }\r\n    ]\r\n}\r\n\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/gatherings/1/new/img",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"gatherings",
+								"1",
+								"new",
+								"img"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Gathering Details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/gatherings/1/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"gatherings",
+								"1",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Merchant Gatherings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/gatherings/merch/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"gatherings",
+								"merch",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Gathering",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"TestGathering1Update\",\r\n    \"description\": \"We are here today to test gathering 1 updates.\",\r\n    \"link\": \"http://gatheringProvider.com/gathering1\",\r\n    \"gathering_dt\": \"2020-12-01T16:00:00Z\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/gatherings/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"gatherings",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Gathering",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/gatherings/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"gatherings",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Gathering Merchant",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/gatherings/1/merchant/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"gatherings",
+								"1",
+								"merchant",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Gathering Image",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/gatherings/1/img/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"gatherings",
+								"1",
+								"img",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Merchant Routes",
+			"item": [
+				{
+					"name": "Create Merchant",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"TestMerchant1@test.com\",\r\n    \"password\": \"passwordpassword\",\r\n    \"display_name\": \"TestMerchant1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/reg/merchant",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"reg",
+								"merchant"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login Merchant",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"TestMerchant1@test.com\",\r\n    \"password\": \"passwordpassword\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/auth/merchant",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"merchant"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Merchant Profile - Private Route",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/merchants/profile",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"merchants",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Merchant Homepage - Public Route",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/merchants/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"merchants",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Merchant Catalogue with queries",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/merchants/1/store",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"merchants",
+								"1",
+								"store"
+							],
+							"query": [
+								{
+									"key": "s",
+									"value": "Product3+product4+product1",
+									"disabled": true
+								},
+								{
+									"key": "t",
+									"value": "shirt",
+									"disabled": true
+								},
+								{
+									"key": "r",
+									"value": "2",
+									"disabled": true
+								},
+								{
+									"key": "featured",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "mid",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "site_wide",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "purchases-desc",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "2",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Merchant List with Queries",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/merchants",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"merchants"
+							],
+							"query": [
+								{
+									"key": "s",
+									"value": "merchant1+merchant2",
+									"disabled": true
+								},
+								{
+									"key": "featured",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "mid",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "2",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Merchant",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"TestMerchant1@test.com\",\r\n    \"password\": \"passwordpassword\",\r\n    \"display_name\": \"TestMerchant1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/merchants/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"merchants",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout Merchant",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/merchants/logout",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"merchants",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Merchant",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/merchants/delete",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"merchants",
+								"delete"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Order Routes",
+			"item": [
+				{
+					"name": "Create Order",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"order\": {\r\n        \"products\": [\r\n            {\r\n                \"id\": 1,\r\n                \"quantity\": 2,\r\n                \"modifier_id\": 3,\r\n                \"coupon_id\": 1\r\n            },\r\n            {\r\n                \"id\": 2,\r\n                \"quantity\": 1\r\n            },\r\n            {\r\n                \"id\": 3,\r\n                \"quantity\": 4\r\n            }\r\n        ]\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/orders/new",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"orders",
+								"new"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/orders/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"orders",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Product Routes",
+			"item": [
+				{
+					"name": "Create Product",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"products\": [\r\n        {\r\n            \"name\": \"TestProduct1_Merch1name\",\r\n            \"description\": \"Test Product 1 Description\",\r\n            \"base_price\": 2999\r\n        },\r\n        {\r\n            \"name\": \"TestProduct2_Merch1name\",\r\n            \"description\": \"Test Product 2 Description\",\r\n            \"base_price\": 3999\r\n        },\r\n        {\r\n            \"name\": \"TestProduct3_Merch1name\",\r\n            \"description\": \"Test Product 3 Description\",\r\n            \"base_price\": 4999\r\n        }\r\n    ]\r\n}\r\n\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/products/new",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"new"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product Images",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"images\": [\r\n        {\r\n            \"url\": \"https://spy.com/wp-content/uploads/2019/07/untitled-1.png\",\r\n            \"alt_text\": \"Invicta watch with a blue face\",\r\n            \"weight\": 1\r\n        },\r\n                {\r\n            \"url\": \"https://spy.com/wp-content/uploads/2019/07/mvmt-arc-automatic-watch-best-mens-watches-2020.jpg?resize=525,525\",\r\n            \"alt_text\": \"MVMT Arc Watch\",\r\n            \"weight\": 2\r\n        },\r\n                {\r\n            \"url\": \"https://spy.com/wp-content/uploads/2019/07/untitled-1-1.png\",\r\n            \"alt_text\": \"Bulova watch with a copper face\",\r\n            \"weight\": 3\r\n        },\r\n                {\r\n            \"url\": \"https://spy.com/wp-content/uploads/2020/05/hamilton-jazzmaster-open-heart-automatic-men_s-watch-h32565135.jpg?resize=525,525\",\r\n            \"alt_text\": \"Bulova watch with a copper face\",\r\n            \"weight\": 4\r\n        },\r\n                {\r\n            \"url\": \"https://spy.com/wp-content/uploads/2019/07/mvmt-black-tan-classic-watch-men.jpg?resize=525,525\",\r\n            \"alt_text\": \"MVMT watch with a black face and leather band\",\r\n            \"weight\": 5\r\n        },\r\n                {\r\n            \"url\": \"https://spy.com/wp-content/uploads/2020/05/tosss.jpg?resize=525,525\",\r\n            \"alt_text\": \"Toss watch with a black face chrome steel band\",\r\n            \"weight\": 6\r\n        }\r\n    ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/products/1/new/img",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"1",
+								"new",
+								"img"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product Metas",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"metas\": [\r\n        {\r\n            \"title\": \"shirt\",\r\n            \"description\": \"clothing type - shirt\"\r\n        },\r\n        {\r\n            \"title\": \"mens\",\r\n            \"description\": \"target gender audience\"\r\n        },\r\n        {\r\n            \"title\": \"grey\",\r\n            \"description\": \"dominant color\"\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/products/1/new/meta",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"1",
+								"new",
+								"meta"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product Promotion",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"promotion\":\r\n        {\r\n            \"promotion_price\": 1199,\r\n            \"active\": true\r\n        }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/products/1/new/promotion",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"1",
+								"new",
+								"promotion"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product Coupons",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"coupons\": [\r\n        {\r\n            \"code\": \"MEMORIALDAY\",\r\n            \"pct_discount\": 0.2,\r\n            \"active\": true\r\n        },\r\n        {\r\n            \"code\": \"BLACKFRIDAY\",\r\n            \"pct_discount\": 0.3,\r\n            \"active\": false\r\n        },\r\n                {\r\n            \"code\": \"FRNDSANDFMLY\",\r\n            \"pct_discount\": 0.25,\r\n            \"active\": false\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/products/1/new/coupon",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"1",
+								"new",
+								"coupon"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product Modifiers",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"modifiers\": [\r\n        {\r\n            \"name\": \"Small\",\r\n            \"description\": \"Size Parameter\"\r\n        },\r\n        {\r\n            \"name\": \"Medium\",\r\n            \"description\": \"Size Parameter\"\r\n        },\r\n        {\r\n            \"name\": \"Large\",\r\n            \"description\": \"Size Parameter\"\r\n        },\r\n        {\r\n            \"name\": \"Xtra-Large\",\r\n            \"description\": \"Size Parameter\"\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/products/1/new/modifier",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"1",
+								"new",
+								"modifier"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product Review",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"review\":\r\n        {\r\n            \"rating\": 5,\r\n            \"title\": \"Decent Quality\",\r\n            \"body\": \"I liked the product\"\r\n        }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/products/1/new/review",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"1",
+								"new",
+								"review"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/products/catalog/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"catalog",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product Coupon by Coupon Code",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/products/catalog/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"catalog",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product Catalogue with queries",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/products/catalog?mid=1+2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"catalog"
+							],
+							"query": [
+								{
+									"key": "s",
+									"value": "Product3+product2+product1",
+									"disabled": true
+								},
+								{
+									"key": "t",
+									"value": "grey shirt",
+									"disabled": true
+								},
+								{
+									"key": "r",
+									"value": "2",
+									"disabled": true
+								},
+								{
+									"key": "featured",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "mid",
+									"value": "1+2"
+								},
+								{
+									"key": "site_wide",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "sort",
+									"value": "purchases-desc",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "2",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"TestProduct2_name\",\r\n    \"description\": \"Test Product 2 Description\",\r\n    \"base_price\": 3199\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/products/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product Image",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"url\": \"http://imageProvider/product1img1\",\r\n    \"alt_text\": \"Image 1 of Product 1\",\r\n    \"weight\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/products/1/img/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"1",
+								"img",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product Meta",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"pants\",\r\n    \"description\": \"clothing type\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/products/1/meta/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"1",
+								"meta",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product Promotion",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"promotion_price\": 1599,\r\n    \"active\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/products/1/promotion/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"1",
+								"promotion",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product Coupon",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"code\": \"MEMORIALDAY20\",\r\n    \"pct_discount\": 0.20,\r\n    \"active\": false\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/products/1/coupon/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"1",
+								"coupon",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product Modifier",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Small\",\r\n    \"description\": \"Size Parameter\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/products/1/modifier/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"1",
+								"modifier",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product Review",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"rating\": 5,\r\n    \"title\": \"Decent Quality\",\r\n    \"body\": \"Pretty Good Stuff\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/products/1/review/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"1",
+								"review",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/products/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product Image",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/products/1/img/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"1",
+								"img",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product Meta",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/products/1/meta/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"1",
+								"meta",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product Promotion",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/products/2/promotion/2",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"2",
+								"promotion",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product Coupon",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/products/1/coupon/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"1",
+								"coupon",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product Modifier",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/products/1/modifier/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"1",
+								"modifier",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product Review",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/products/2/review/3",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"2",
+								"review",
+								"3"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "User Routes",
+			"item": [
+				{
+					"name": "Create User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"TestUser1@test.com\",\r\n    \"password\": \"password\",\r\n    \"first_name\": \"Test\",\r\n    \"last_name\": \"User1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/reg/user",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"reg",
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"TestUser1@test.com\",\r\n    \"password\": \"password\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/auth/user",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"auth",
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/users/details",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users",
+								"details"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"TestUser1@test.com\",\r\n    \"password\": \"password\",\r\n    \"first_name\": \"Test\",\r\n    \"last_name\": \"User1Update\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/users/update",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users",
+								"update"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout User",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/users/logout",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/users/delete",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"users",
+								"delete"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"protocolProfileBehavior": {}
+}
