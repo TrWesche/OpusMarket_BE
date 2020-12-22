@@ -40,6 +40,19 @@ merchantRouter.get('/', async(req, res, next) => {
     }
 })
 
+merchantRouter.get("/profile", ensureIsMerchant, async (req, res, next) => {
+    try {
+        // console.log("Hit Get Profile Route:", req.user);
+        const result = await Merchant.retrieve_merchant_profile_by_merchant_id(req.user.id);
+        if(!result) {
+            throw new ExpressError("Unable to find target merchant", 404);
+        }
+
+        return res.json({merchant: result});
+    } catch (error) {
+        return next(error);
+    }
+});
 
 merchantRouter.get('/:merchant_id', async(req, res, next) => {
     try {
@@ -71,19 +84,6 @@ merchantRouter.get('/:merchant_id/store', async(req, res, next) => {
     }
 });
 
-
-merchantRouter.get("/profile", ensureIsMerchant, async (req, res, next) => {
-    try {
-        const result = await Merchant.retrieve_merchant_profile_by_merchant_id(req.user.id);
-        if(!result) {
-            throw new ExpressError("Unable to find target merchant", 404);
-        }
-
-        return res.json({merchant: result});
-    } catch (error) {
-        return next(error);
-    }
-});
 
 // ╔╗ ╔╗╔═══╗╔═══╗╔═══╗╔════╗╔═══╗
 // ║║ ║║║╔═╗║╚╗╔╗║║╔═╗║║╔╗╔╗║║╔══╝
