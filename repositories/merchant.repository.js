@@ -138,6 +138,20 @@ async function fetch_merchant_by_merchant_id(merchantId) {
     }
 };
 
+async function fetch_merchant_about_by_merchant_id(merchantId) {
+    try {
+        const result = await db.query(`
+            SELECT headline, about, logo_wide_url, logo_narrow_url
+            FROM merchant_about
+            WHERE merchant_id = $1`,
+        [merchantId]);
+
+        return result.rows[0];
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to locate merchant about - ${error}`, 500);
+    }
+};
+
 async function fetch_merchant_public_profile_by_merchant_id(merchantId) {
     try {
         const result = await db.query(`
@@ -202,6 +216,7 @@ module.exports = {
     fetch_merchants_by_query_params,
     fetch_merchant_by_merchant_email,
     fetch_merchant_by_merchant_id,
+    fetch_merchant_about_by_merchant_id,
     fetch_merchant_public_profile_by_merchant_id,
     update_merchant_by_merchant_id,
     delete_merchant_by_merchant_id

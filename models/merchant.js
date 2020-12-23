@@ -7,6 +7,7 @@ const {
   fetch_merchants_by_query_params,
   fetch_merchant_by_merchant_email,
   fetch_merchant_by_merchant_id,
+  fetch_merchant_about_by_merchant_id,
   fetch_merchant_public_profile_by_merchant_id,
   update_merchant_by_merchant_id,
   delete_merchant_by_merchant_id,
@@ -148,6 +149,8 @@ class Merchant {
   */
   static async retrieve_merchant_profile_by_merchant_id(id) {
     const merchant = await fetch_merchant_by_merchant_id(id);
+
+    merchant.about = await fetch_merchant_about_by_merchant_id(id);
 
     if (!merchant) {
       throw new ExpressError("Unable to locate target merchant", 404);
