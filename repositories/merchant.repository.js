@@ -2,7 +2,7 @@ const db = require("../db");
 const ExpressError = require("../helpers/expressError");
 const partialUpdate = require("../helpers/partialUpdate");
 
-
+// Root Merchant Handling
 async function create_new_merchant(merchantData, hashedPassword) {
     try {
         const result = await db.query(
@@ -102,9 +102,7 @@ async function fetch_merchants_by_query_params(query) {
     } catch (error) {
         throw new ExpressError(`An Error Occured: Unable to fetch product list - ${error}`, 500);
     }
-}
-
-// TODO: Routes for creating, reading, updating, deleting entries for merchant_about and merchant_bios.
+};
 
 async function fetch_merchant_by_merchant_email(merchantEmail) {
     try {
@@ -138,20 +136,6 @@ async function fetch_merchant_by_merchant_id(merchantId) {
     }
 };
 
-async function fetch_merchant_about_by_merchant_id(merchantId) {
-    try {
-        const result = await db.query(`
-            SELECT headline, about, logo_wide_url, logo_narrow_url
-            FROM merchant_about
-            WHERE merchant_id = $1`,
-        [merchantId]);
-
-        return result.rows[0];
-    } catch (error) {
-        throw new ExpressError(`An Error Occured: Unable to locate merchant about - ${error}`, 500);
-    }
-};
-
 async function fetch_merchant_public_profile_by_merchant_id(merchantId) {
     try {
         const result = await db.query(`
@@ -176,8 +160,7 @@ async function fetch_merchant_public_profile_by_merchant_id(merchantId) {
     } catch (error) {
         throw new ExpressError(`An Error Occured: Unable to locate merchant - ${error}`, 500);
     }
-}
-
+};
 
 async function update_merchant_by_merchant_id(merchantId, data) {
     try {
@@ -211,13 +194,86 @@ async function delete_merchant_by_merchant_id(merchantId) {
 };
 
 
+// Merchant About Handling
+async function create_new_merchant_about(merchantId, data) {
+    try {
+        const result = await db.query(
+            `INSERT INTO merchant_about 
+                (merchant_id, headline, about, logo_wide_url, logo_narrow_url) 
+            VALUES ($1, $2, $3, $4, $5) 
+            RETURNING id, merchant_id, headline, about, logo_wide_url, logo_narrow_url`,
+        [
+            merchantId,
+            data.headline,
+            data.about,
+            data.logo_wide_url,
+            data.logo_narrow_url
+        ]);
+
+        return result.rows[0];
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to create new merchant about - ${error}`, 500);
+    }
+};
+
+async function fetch_merchant_about_by_merchant_id(merchantId) {
+    try {
+        const result = await db.query(`
+            SELECT headline, about, logo_wide_url, logo_narrow_url
+            FROM merchant_about
+            WHERE merchant_id = $1`,
+        [merchantId]);
+
+        return result.rows[0];
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to locate merchant about - ${error}`, 500);
+    }
+};
+
+async function update_merchant_about_by_merchant_id(merchantId, data) {
+    try {
+        // Parital Update: table name, payload data, lookup column name, lookup key
+        let {query, values} = partialUpdate(
+            "merchant_about",
+            data,
+            "merchant_id",
+            merchantId
+        );
+
+        const result = await db.query(query, values);
+        return result.rows[0];
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to update merchant about - ${error}`, 500);
+    }
+};
+
+async function delete_merchant_about_by_merchant_id(merchantId) {
+    try {
+        const result = await db.query(
+            `DELETE FROM merchant_about
+            WHERE merchant_id = $1
+            RETURNING id`,
+        [merchantId]);
+
+        return result.rows[0];
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to delete merchant about - ${error}`, 500);
+    }
+};
+
+
+
 module.exports = {
     create_new_merchant,
     fetch_merchants_by_query_params,
     fetch_merchant_by_merchant_email,
     fetch_merchant_by_merchant_id,
-    fetch_merchant_about_by_merchant_id,
     fetch_merchant_public_profile_by_merchant_id,
     update_merchant_by_merchant_id,
-    delete_merchant_by_merchant_id
+    delete_merchant_by_merchant_id,
+
+    create_new_merchant_about,
+    fetch_merchant_about_by_merchant_id,
+    update_merchant_about_by_merchant_id,
+    delete_merchant_about_by_merchant_id
 }

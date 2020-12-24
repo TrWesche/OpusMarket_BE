@@ -7,10 +7,14 @@ const {
   fetch_merchants_by_query_params,
   fetch_merchant_by_merchant_email,
   fetch_merchant_by_merchant_id,
-  fetch_merchant_about_by_merchant_id,
   fetch_merchant_public_profile_by_merchant_id,
   update_merchant_by_merchant_id,
   delete_merchant_by_merchant_id,
+
+  create_new_merchant_about,
+  fetch_merchant_about_by_merchant_id,
+  update_merchant_about_by_merchant_id,
+  delete_merchant_about_by_merchant_id
 } = require("../repositories/merchant.repository");
 
 const {
@@ -158,7 +162,6 @@ class Merchant {
     return merchant;
   }
 
-
   /** Update merchant data with `data`. */
   static async modify_merchant(id, data) {
     // Handle Password Change
@@ -186,6 +189,7 @@ class Merchant {
     return merchant;
   }
 
+
   /** Delete target merchant from database; returns undefined. */
   static async delete_merchant(id) {
     const result = await delete_merchant_by_merchant_id(id);
@@ -195,6 +199,17 @@ class Merchant {
     }
     return result;
   }
+
+
+  static async retrieve_merchant_about_by_merchant_id(id) {
+    const about = await fetch_merchant_about_by_merchant_id(id);
+
+    if (!about) {
+      throw new ExpressError("Unable to locate target merchant about", 404);
+    }
+    return about;
+  }
+
 }
   
   
