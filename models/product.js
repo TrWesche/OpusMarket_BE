@@ -376,7 +376,7 @@ class Product {
         if (!product_meta) {
             throw new ExpressError(`Unable to find the target meta data for update.`, 404);
         }
-        return result.rows[0];
+        return product_meta;
     }
 
     static async modify_product_promotion(product_id, data) {

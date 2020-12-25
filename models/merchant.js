@@ -201,14 +201,38 @@ class Merchant {
   }
 
 
+
+  /** Create new about me entry merchant with data. Returns new merchant data. */
+  static async add_merchant_about_by_merchant_id(merchant_id, data) {
+    const about = await create_new_merchant_about(merchant_id, data);
+
+    return about;
+  }
+
   static async retrieve_merchant_about_by_merchant_id(id) {
     const about = await fetch_merchant_about_by_merchant_id(id);
+
+    return about;
+  }
+
+  static async modify_merchant_about_by_merchant_id(merchant_id, data) {
+    const about = await update_merchant_about_by_merchant_id(merchant_id, data);
 
     if (!about) {
       throw new ExpressError("Unable to locate target merchant about", 404);
     }
     return about;
   }
+
+  static async remove_merchant_about_by_merchant_id(merchant_id) {
+    const result = await delete_merchant_about_by_merchant_id(merchant_id);
+    
+    if (!result.id) {
+      throw new ExpressError(`Unable to find about data for removal.`, 404);
+    }
+    return result;
+  }
+
 
 }
   

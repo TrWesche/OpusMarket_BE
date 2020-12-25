@@ -1,0 +1,63 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "http://example.com/example.json",
+    "type": "object",
+    "title": "The root schema",
+    "description": "The root schema comprises the entire JSON document.",
+    "default": {},
+    "examples": [
+        {
+            "headline": "Purveyor of the Finest Culterly Products",
+            "about": "X Company was established in 2020 with a vision to create the finest...",
+            "logo_wide_url": "http://imageprovider.com/bannerImage1234",
+            "logo_narrow_url": "http://imageprovider.com/thumbnailImage5678"
+        }
+    ],
+    "required": [
+    ],
+    "properties": {
+        "headline": {
+            "$id": "#/properties/headline",
+            "type": "string",
+            "title": "The headline schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "Purveyor of the Finest Culterly Products"
+            ]
+        },
+        "about": {
+            "$id": "#/properties/about",
+            "type": "string",
+            "title": "The about schema",
+            "description": "An explanation about the purpose of this instance.",
+            "default": "",
+            "examples": [
+                "X Company was established in 2020 with a vision to create the finest..."
+            ]
+        },
+        "logo_wide_url": {
+            "$id": "#/properties/logo_wide_url",
+            "type": "string",
+            "format": "uri",
+            "title": "The logo_wide_url schema",
+            "description": "Acts as the banner image for the merchant store page.",
+            "default": "",
+            "examples": [
+                "http://imageprovider.com/bannerImage1234"
+            ]
+        },
+        "logo_narrow_url": {
+            "$id": "#/properties/logo_narrow_url",
+            "type": "string",
+            "format": "uri",
+            "title": "The logo_narrow_url schema",
+            "description": "Acts as the thumbnail image for the merchant store page.",
+            "default": "",
+            "examples": [
+                "http://imageprovider.com/thumbnailImage5678"
+            ]
+        }
+    },
+    "additionalProperties": true
+}
