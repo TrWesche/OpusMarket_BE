@@ -200,6 +200,22 @@ productRouter.post('/:prod_id/new/review', ensureIsUser, async(req, res, next) =
     };
 });
 
+productRouter.post('/:prod_id/new/featured', ensureIsMerchant, async(req, res, next) => {
+    try {
+        // Check for incorrect merchant or product with id not in database
+        const ownerCheck = await Product.retrieve_single_product_by_product_id(+req.params.prod_id);
+        if(!ownerCheck.merchant_id || ownerCheck.merchant_id !== req.user.id) {
+            throw new ExpressError(`Unauthorized`, 401);
+        }
+        
+        const result = await Product.add_merchant_featured_product(req.user.id, +req.params.prod_id);
+
+        return res.json({"fetured_product": result})
+    } catch (error) {
+        return next(error);
+    };
+});
+
 
 // ╔═══╗╔═══╗╔═══╗╔═══╗
 // ║╔═╗║║╔══╝║╔═╗║╚╗╔╗║
@@ -734,6 +750,29 @@ productRouter.delete('/:prod_id/review/:review_id', ensureIsUser, async(req, res
         await Product.remove_product_review(req.params.review_id);
 
         return res.json({"message": "Product Review deleted"})
+    } catch (error) {
+        console.log(error.code);
+
+        return next(error);
+    }
+});
+
+
+/** Delete product featured */
+productRouter.delete('/:prod_id/featured', ensureIsMerchant, async(req, res, next) => {
+    try {
+        // Check for product with id not in database or an incorrect owner
+        const product = await Product.retrieve_single_product_by_product_id(+req.params.prod_id);
+
+        if(!product.merchant_id) {
+            throw new ExpressError("Product not found", 404);
+        } else if(product.merchant_id !== req.user.id) {
+            throw new ExpressError(`Unauthorized`, 401);
+        }
+
+        await Product.remove_merchant_featured_product(+req.params.prod_id);
+
+        return res.json({"message": "Featured Product deleted"})
     } catch (error) {
         console.log(error.code);
 

@@ -190,6 +190,25 @@ async function create_product_review(product_id, user_id, review) {
     }
 };
 
+async function create_merchant_featured_product(merchant_id, product_id, feature_set="favorites", site_wide=false) {
+    try {
+        const result = await db.query(
+            `INSERT INTO products_featured
+                (merchant_id, product_id, feature_set, site_wide)
+            VALUES ($1, $2, $3, $4)
+            RETURNING id, product_id, merchant_id, feature_set`,
+            [
+                merchant_id,
+                product_id,
+                feature_set,
+                site_wide
+            ]);
+
+        return result.rows[0];
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to create new featured product - ${error}`, 500);
+    };
+};
 
 // ╔═══╗╔═══╗╔═══╗╔═══╗
 // ║╔═╗║║╔══╝║╔═╗║╚╗╔╗║
@@ -1056,6 +1075,23 @@ async function delete_product_review(review_id) {
 };
 
 
+async function delete_merchant_featured_product_by_product_id(product_id) {
+    try {
+        const result = await db.query(
+            `DELETE FROM products_featured
+             WHERE product_id = $1
+             RETURNING id`,
+            [
+                product_id
+            ]);
+
+        return result.rows[0];
+    } catch (error) {
+        throw new ExpressError(`An Error Occured: Unable to delete featured product - ${error}`, 500);
+    };
+};
+
+
 module.exports = {
     create_master_products,
     create_product_images,
@@ -1064,6 +1100,7 @@ module.exports = {
     create_product_coupons,
     create_product_modifiers,
     create_product_review,
+    create_merchant_featured_product,
 
     fetch_product_by_product_id,
     fetch_product_images_by_product_id,
@@ -1109,5 +1146,6 @@ module.exports = {
     delete_product_promotion,
     delete_product_coupon,
     delete_product_modifier,
-    delete_product_review
+    delete_product_review,
+    delete_merchant_featured_product_by_product_id
 }

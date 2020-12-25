@@ -6,6 +6,7 @@ const {
     create_product_coupons,
     create_product_modifiers,
     create_product_review,
+    create_merchant_featured_product,
 
     fetch_product_by_product_id,
     fetch_product_images_by_product_id,
@@ -49,8 +50,8 @@ const {
     delete_product_coupon,
     delete_product_modifier,
     delete_product_review,
-    fetch_products_by_merchant_id,
-    
+    delete_merchant_featured_product_by_product_id
+
 } = require('../repositories/product.repository');
 
 const {
@@ -138,6 +139,13 @@ class Product {
             await rollback_transaction();
         }
     }
+
+    /** Creates a featured product for the merchants store page.  Returns new featured product. */
+    static async add_merchant_featured_product(merchant_id, prod_id) {
+        const result = await create_merchant_featured_product(merchant_id, prod_id);
+        return result;
+    }
+
 
     // ╔═══╗╔═══╗╔═══╗╔═══╗
     // ║╔═╗║║╔══╝║╔═╗║╚╗╔╗║
@@ -501,6 +509,15 @@ class Product {
 
         if (!result.id) {
             throw new ExpressError(`Unable to find the target product review for deletion.`, 404);
+        }
+        return result;
+    }
+
+    static async remove_merchant_featured_product(prod_id) {
+        const result = await delete_merchant_featured_product_by_product_id(prod_id);
+
+        if (!result.id) {
+            throw new ExpressError(`Unable to find the target featured product for deletion.`, 404);
         }
         return result;
     }
