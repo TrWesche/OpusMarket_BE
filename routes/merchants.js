@@ -141,7 +141,7 @@ merchantRouter.get('/:merchant_id/store', async(req, res, next) => {
 merchantRouter.patch("/update", ensureIsMerchant, async (req, res, next) => {
     try {
         // Get old user data
-        const oldData = await Merchant.retrieve_merchant_by_merchant_id(req.user.id);
+        const oldData = await Merchant.retrieve_merchant_profile_by_merchant_id(req.user.id);
         if(!oldData) {
             throw new ExpressError("Unable to find target merchant", 404);
         }
