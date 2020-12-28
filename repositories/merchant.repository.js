@@ -219,7 +219,7 @@ async function create_new_merchant_about(merchantId, data) {
 async function fetch_merchant_about_by_merchant_id(merchantId) {
     try {
         const result = await db.query(`
-            SELECT headline, about, logo_wide_url, logo_narrow_url
+            SELECT id, headline, about, logo_wide_url, logo_narrow_url
             FROM merchant_about
             WHERE merchant_id = $1`,
         [merchantId]);
