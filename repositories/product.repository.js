@@ -538,7 +538,6 @@ async function fetch_products_by_query_params(query) {
             SELECT product_promotions.product_id AS product_id, product_promotions.promotion_price AS promotion_price
             FROM product_promotions
             WHERE product_promotions.active = true
-            LIMIT 1
         ) active_promotion
         ON products.id = active_promotion.product_id
         ${tableJoins.join(" ")}
