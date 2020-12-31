@@ -34,7 +34,7 @@ paymentRouter.post('/process-payment', async (req, res) => {
     autocomplete: true,
     location_id: SQUARE_LOC_ID,
     amount_money: {
-      amount: order_details.order_total, // $10.00 charge
+      amount: order_details.order_total,
       currency: 'USD'
     },
     idempotency_key: idempotency_key
@@ -53,12 +53,24 @@ paymentRouter.post('/process-payment', async (req, res) => {
     {headers: headers}
   )
   .then((response) => {
+    // TODO: Note: Fix column name for datetime and update this variable
+    const sqOrderData = {
+      "remote_payment_id": response.data.payment.id,
+      "remote_paymaent_dt": response.data.payment.updated_at,
+      "remote_order_id": response.data.payment.id,
+      "remote_receipt_id": response.data.payment.receipt_number,
+      "remote_receipt_url": response.data.payment.receipt_url
+    }
+
+    Order.modify_order_record_payment(request_params.order_id, sqOrderData);
+    Order.add_order_status(request_params.order_id, "Paid");
     res.json({
       "type": "PAYMENT_SUCCESS",
       "data": response.data
     })
   })
   .catch((error) => {
+    Order.add_order_status(request_params.order_id, "Payment Failed");
     res.json({
       "type": "PAYMENT_FAILED",
       "data": error

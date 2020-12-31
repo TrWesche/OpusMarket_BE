@@ -106,6 +106,18 @@ class Order {
         }
     }
 
+    
+    /** Create order with data. Returns new order data. */
+    static async add_order_status(order_id, statusText) {
+        try {
+            // Create a status update on the backend noting the order was created
+            const res = await create_order_status(order_id, {status: statusText, notes: null});
+
+            return res;     
+        } catch (error) {
+            throw new ExpressError(error.message, error.status);
+        }
+    }
 
     // ╔═══╗╔═══╗╔═══╗╔═══╗
     // ║╔═╗║║╔══╝║╔═╗║╚╗╔╗║
@@ -154,10 +166,11 @@ class Order {
     static async modify_order_record_payment(id, data) {
         // TODO: Currently not updating order with payment details - Return to this once back to working with Square
         // May not be implmented here -> Look to integrations\Square\paymentRouter.js
-        const check = await validate_order_owner(id, req.user.id);
-        if (!check) {
-            throw new ExpressError(`Unauthorized`, 401)
-        }
+
+        // const check = await validate_order_owner(id, req.user.id);
+        // if (!check) {
+        //     throw new ExpressError(`Unauthorized`, 401)
+        // }
 
         const result = await update_master_order(id, data);
         return result;

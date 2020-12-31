@@ -82,19 +82,18 @@ orderRoutes.get('/:order_id', ensureIsUser, async(req, res, next) => {
 // ║╚═╝║║║   ╔╝╚╝║║╔═╗║ ╔╝╚╗ ║╚══╗
 // ╚═══╝╚╝   ╚═══╝╚╝ ╚╝ ╚══╝ ╚═══╝
 
-orderRoutes.patch('/:order_id/pay', ensureIsUser, async(req, res, next) => {
-    try {
-        // TODO: Square API integration - Need to capture the order data from the Square API in the database
-        const payment_id = 0;
+// orderRoutes.patch('/:order_id/pay', ensureIsUser, async(req, res, next) => {
+//     try {
+//         const payment_id = 0;
 
-        await Order.modify_order_record_payment(+req.params.order_id, payment_id);
+//         await Order.modify_order_record_payment(+req.params.order_id, payment_id);
 
-        return res.json({ "message": "Payment successful" })
-    } catch (error) {
-        console.log(error);
-        return next(error);
-    }  
-})
+//         return res.json({ "message": "Payment successful" })
+//     } catch (error) {
+//         console.log(error);
+//         return next(error);
+//     }  
+// })
 
 
 // ╔═══╗╔═══╗╔╗   ╔═══╗╔════╗╔═══╗
