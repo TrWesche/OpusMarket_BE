@@ -56,7 +56,7 @@ paymentRouter.post('/process-payment', async (req, res) => {
     // TODO: Note: Fix column name for datetime and update this variable
     const sqOrderData = {
       "remote_payment_id": response.data.payment.id,
-      "remote_paymaent_dt": response.data.payment.updated_at,
+      "remote_payment_dt": response.data.payment.updated_at,
       "remote_order_id": response.data.payment.id,
       "remote_receipt_id": response.data.payment.receipt_number,
       "remote_receipt_url": response.data.payment.receipt_url

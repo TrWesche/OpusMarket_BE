@@ -314,7 +314,7 @@ async function beforeEachHook(TEST_DATA) {
         // -------------------------------- Order Test Data Creation ---------------------------------
         // create order for newly created user
         const orderBase = await db.query(
-            `INSERT INTO orders (user_id, order_total, remote_payment_id, remote_paymaent_dt, remote_order_id, remote_receipt_id, remote_receipt_url)
+            `INSERT INTO orders (user_id, order_total, remote_payment_id, remote_payment_dt, remote_order_id, remote_receipt_id, remote_receipt_url)
                 VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING *`,
             [

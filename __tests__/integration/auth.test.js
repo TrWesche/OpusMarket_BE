@@ -1,5 +1,8 @@
 process.env.NODE_ENV = "test";
 
+// Supertest.agent? -> Persist cookies
+
+
 // npm packages
 const request = require("supertest");
 const jwt = require("jsonwebtoken")
