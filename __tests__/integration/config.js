@@ -1,7 +1,12 @@
+process.env.NODE_ENV = "test";
+
+// npm packages
 const request = require("supertest");
+const bcrypt = require("bcrypt");
+
+// app imports
+const app = require("../../app");
 const db = require("../../db");
-const { PRIVATE_KEY } = require("../../config");
-// const { BCRYPT_WORK_FACTOR } = require("../../config");
 
 const SOURCE_DATA_MERCHANT = {
     testMerchant: {
@@ -97,8 +102,7 @@ const SOURCE_DATA_USER = {
     }
 };
 
-
-const TEST_DATA = {}
+const TEST_DATA = {};
 
 async function beforeAllHook() {
 
@@ -114,30 +118,28 @@ async function beforeEachHook(TEST_DATA) {
     try {
         // ------------------------------ Merchant Test Data Creation ---------------------------------
         // create a merchant, log the merchant in, get verification cookies, store the merchant details & cookies
-        const hashedPassword = await bcrypt.hash(SOURCE_DATA_MERCHANT.testMerchant.password, 1);
-        await db.query(
+        const hashedPasswordMerchant = await bcrypt.hash(SOURCE_DATA_MERCHANT.testMerchant.password, 1);
+        const merchantDetails = await db.query(
             `INSERT INTO merchants (email, password, display_name)
-                        VALUES ($1, $2, $3)`,
+                VALUES ($1, $2, $3)
+            RETURNING *`,
             [
                 SOURCE_DATA_MERCHANT.testMerchant.email, 
-                hashedPassword, 
+                hashedPasswordMerchant, 
                 SOURCE_DATA_MERCHANT.testMerchant.display_name
             ]
         );
 
-        const response = await request(app)
-            .post("/auth/merchant")
+        const responseMerchant = await request(app)
+            .post("/api/auth/merchant")
             .send({
-                email: SOURCE_DATA_USER.testUser.email,
-                password: SOURCE_DATA_USER.testUser.password,
+                email: SOURCE_DATA_MERCHANT.testMerchant.email,
+                password: SOURCE_DATA_MERCHANT.testMerchant.password,
         });
 
-        TEST_DATA.merchantHTTPCookie = response.cookies._sid;
-        TEST_DATA.merchantJSCookie = response.cookies.sid;
-        TEST_DATA.merchantDetails = jwt.decode(TEST_DATA.merchantHTTPCookie, PRIVATE_KEY, {algorithms: ['RS256']});
+        TEST_DATA.merchantCookies = responseMerchant.get("Set-Cookie");
+        TEST_DATA.merchantDetails = merchantDetails.rows[0];
 
-        console.log(TEST_DATA)
-        
         // create data for merchant about page for newly created merchant
         const merchantAbout = await db.query(
             `INSERT INTO merchant_about (merchant_id, headline, about, logo_wide_url, logo_narrow_url)
@@ -156,31 +158,28 @@ async function beforeEachHook(TEST_DATA) {
 
         // ------------------------------- User Test Data Creation -----------------------------------
         // create a user, log the user in, get verification cookies, store the user details & cookies
-        const hashedPassword = await bcrypt.hash(SOURCE_DATA_USER.testUser.password, 1);
-        await db.query(
+        const hashedPasswordUser = await bcrypt.hash(SOURCE_DATA_USER.testUser.password, 1);
+        const userDetails = await db.query(
             `INSERT INTO users (email, password, first_name, last_name)
-                VALUES ($1, $2, $3, $4)`,
+                VALUES ($1, $2, $3, $4)
+            RETURNING *`,
             [
                 SOURCE_DATA_USER.testUser.email, 
-                hashedPassword, 
+                hashedPasswordUser, 
                 SOURCE_DATA_USER.testUser.first_name, 
                 SOURCE_DATA_USER.testUser.last_name
             ]
         );
 
-        const response = await request(app)
-            .post("/auth/user")
+        const responseUser = await request(app)
+            .post("/api/auth/user")
             .send({
                 email: SOURCE_DATA_USER.testUser.email,
                 password: SOURCE_DATA_USER.testUser.password,
         });
 
-        TEST_DATA.userHTTPCookie = response.cookies._sid;
-        TEST_DATA.userJSCookie = response.cookies.sid;
-        TEST_DATA.userDetails = jwt.decode(TEST_DATA.userHTTPCookie, PRIVATE_KEY, {algorithms: ['RS256']});
-
-        console.log(TEST_DATA)
-
+        TEST_DATA.userCookies = responseUser.get("Set-Cookie");
+        TEST_DATA.userDetails = userDetails.rows[0];
 
         // ------------------------------ Product Test Data Creation ---------------------------------
         // create a product for the newly created merchant
@@ -218,7 +217,7 @@ async function beforeEachHook(TEST_DATA) {
 
         // create meta tag for the newly created product
         const productMeta = await db.query(
-            `INSERT INTO product_metas (product_id, title, description)
+            `INSERT INTO product_meta (product_id, title, description)
                 VALUES ($1, $2, $3)
             RETURNING *`,
             [
@@ -350,7 +349,7 @@ async function beforeEachHook(TEST_DATA) {
         TEST_DATA.order.product = orderProduct.rows[0];
 
         // create applied coupons for newly created order
-        const orderProduct = await db.query(
+        const orderCoupon = await db.query(
             `INSERT INTO order_coupons (order_id, product_id, coupon_id, coupon_code, pct_discount)
                 VALUES ($1, $2, $3, $4, $5)
             RETURNING *`,
@@ -362,7 +361,7 @@ async function beforeEachHook(TEST_DATA) {
                 SOURCE_DATA_USER.testOrder.order_coupon.pct_discount
             ]
         );
-        TEST_DATA.order.product = orderProduct.rows[0];
+        TEST_DATA.order.coupon = orderCoupon.rows[0];
 
         // create applied coupons for newly created order
         const orderPromotions = await db.query(
@@ -385,11 +384,14 @@ async function beforeEachHook(TEST_DATA) {
 
 async function afterEachHook() {
     try {
+        await db.query("DELETE FROM gatherings");
+        await db.query("DELETE FROM order_coupons");
+        await db.query("DELETE FROM order_products");
+        await db.query("DELETE FROM order_promotions");
+        await db.query("DELETE FROM orders");
+        await db.query("DELETE FROM products");
         await db.query("DELETE FROM users");
         await db.query("DELETE FROM merchants");
-        await db.query("DELETE FROM products");
-        await db.query("DELETE FROM gatherings");
-        await db.query("DELETE FROM orders");
     } catch (error) {
         console.error(error);
     }
@@ -406,7 +408,6 @@ async function afterAllHook() {
         console.error(err);
     }
 }
-
 
 module.exports = {
     SOURCE_DATA_USER, 
