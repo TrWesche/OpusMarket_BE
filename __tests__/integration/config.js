@@ -8,11 +8,12 @@ const bcrypt = require("bcrypt");
 const app = require("../../app");
 const db = require("../../db");
 
+// Data for the main merchant
 const SOURCE_DATA_MERCHANT = {
     testMerchant: {
         email: "StaticWaterCorp@test.com",
         display_name: "Static Water Corp",
-        password: "password"
+        password: "passwordpassword"
     },
     testMerchantAbout: {
         headline: "We Make Static Water!",
@@ -60,7 +61,7 @@ const SOURCE_DATA_MERCHANT = {
     }
 };
 
-
+// Data for the main user
 const SOURCE_DATA_USER = {
     testUser: {
         email: "MrStaticShock@test.com",
@@ -100,6 +101,21 @@ const SOURCE_DATA_USER = {
             promotion_price: SOURCE_DATA_MERCHANT.testProductPromotion.promotion_price
         }
     }
+};
+
+// Data for additional users (delta checks)
+const ADDITIONAL_USERS = {
+    testMerchant2: {
+        email: "TestMerchant2@test.com",
+        display_name: "Test Merchant 2 Corp",
+        password: "passwordpassword"
+    },
+    testUser2: {
+        email: "TestUser2@test.com",
+        first_name: "Test2",
+        last_name: "User2",
+        password: "password"
+    },
 };
 
 const TEST_DATA = {};
@@ -376,6 +392,35 @@ async function beforeEachHook(TEST_DATA) {
             ]
         );
         TEST_DATA.order.promotion = orderPromotions.rows[0];
+        
+
+        // ----------------------- Additional Users/Merchants Data Inserts ---------------------------
+        const merchant2passwordhash = await bcrypt.hash(ADDITIONAL_USERS.testMerchant2.password, 1);
+        await db.query(
+            `INSERT INTO merchants (email, password, display_name)
+                VALUES ($1, $2, $3)
+            RETURNING *`,
+            [
+                ADDITIONAL_USERS.testMerchant2.email, 
+                merchant2passwordhash, 
+                ADDITIONAL_USERS.testMerchant2.display_name
+            ]
+        );
+
+        const user2passwordhash = await bcrypt.hash(ADDITIONAL_USERS.testUser2.password, 1);
+        await db.query(
+            `INSERT INTO users (email, password, first_name, last_name)
+                VALUES ($1, $2, $3, $4)
+            RETURNING *`,
+            [
+                ADDITIONAL_USERS.testUser2.email, 
+                user2passwordhash, 
+                ADDITIONAL_USERS.testUser2.first_name, 
+                ADDITIONAL_USERS.testUser2.last_name
+            ]
+        );
+
+
 
     } catch (error) {
         console.error(error);
@@ -412,6 +457,7 @@ async function afterAllHook() {
 module.exports = {
     SOURCE_DATA_USER, 
     SOURCE_DATA_MERCHANT,
+    ADDITIONAL_USERS,
     TEST_DATA,
     beforeAllHook,
     beforeEachHook,

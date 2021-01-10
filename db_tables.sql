@@ -15,7 +15,7 @@ CREATE TABLE "users" (
 
 CREATE TABLE "orders" (
   "id" SERIAL PRIMARY KEY,
-  "user_id" int NOT NULL REFERENCES "users" ("id"),
+  "user_id" int REFERENCES "users" ("id") ON DELETE SET NULL,
   "order_total" int,
   "remote_payment_id" text,
   "remote_payment_dt" TIMESTAMP WITH TIME ZONE,
