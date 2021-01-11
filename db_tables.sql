@@ -184,7 +184,7 @@ CREATE TABLE "order_products" (
 
 CREATE TABLE "order_status" (
   "id" SERIAL PRIMARY KEY,
-  "order_id" int NOT NULL REFERENCES "orders" ("id"),
+  "order_id" int NOT NULL REFERENCES "orders" ("id") ON DELETE CASCADE,
   "status" text NOT NULL,
   "status_dt" TIMESTAMP WITH TIME ZONE,
   "notes" text

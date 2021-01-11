@@ -37,8 +37,6 @@ orderRoutes.post('/new', ensureIsUser, async(req, res, next) => {
 
         return res.json({"order": result});
     } catch (error) {
-        console.log(error);
-        
         return next(error);
     }
 })
@@ -56,20 +54,17 @@ orderRoutes.get('/history', ensureIsUser, async(req, res, next) => {
 
         return res.json({"orders": orders});
     } catch (error) {
-        console.log(error);
-
         return next(error);
     }
 })
 
 orderRoutes.get('/:order_id', ensureIsUser, async(req, res, next) => {
     try {
+        console.log("Hit Route With OrderId:", req.params.order_id)
         const order = await Order.retrieve_order_by_order_id(+req.params.order_id, req.user.id);
 
         return res.json({"order": order});
     } catch (error) {
-        console.log(error);
-
         return next(error);
     }
 })
@@ -112,7 +107,6 @@ orderRoutes.delete('/:order_id/delete', ensureIsUser, async(req, res, next) => {
 
         return res.json({"message": "Order deleted"})
     } catch (error) {
-        console.log(error);
         return next(error);
     }
 })
