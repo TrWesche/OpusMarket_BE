@@ -16,7 +16,7 @@ async function create_new_master_gathering(merchantId, data) {
 
         return result.rows[0];
     } catch (error) {
-        throw new ExpressError(`An Error Occured: Unable to create new gathering - ${error}`, 500);
+        throw new ExpressError(`An Error Occured: Unable to create new gathering - ${error}`, 400);
     }
 };
 
@@ -42,7 +42,7 @@ async function create_gathering_merchants_by_gathering_id(gatheringId, merchants
         
         return result.rows;
     } catch (error) {
-        throw new ExpressError(`An Error Occured: Unable to create new gathering merchant(s) - ${error}`, 500);
+        throw new ExpressError(`An Error Occured: Unable to create new gathering merchant(s) - ${error}`, 400);
     }
 };
 
@@ -68,7 +68,7 @@ async function create_gathering_images_by_gathering_id(gatheringId, images) {
         
         return result.rows;
     } catch (error) {
-        throw new ExpressError(`An Error Occured: Unable to create new gathering image(s) - ${error}`, 500);
+        throw new ExpressError(`An Error Occured: Unable to create new gathering image(s) - ${error}`, 400);
     }
 };
 
@@ -82,7 +82,7 @@ async function fetch_gathering_by_gathering_id(gatheringId) {
 
         return result.rows[0];
     } catch (error) {
-        throw new ExpressError(`An Error Occured: Unable to fetch gathering - ${error}`, 500);
+        throw new ExpressError(`An Error Occured: Unable to fetch gathering - ${error}`, 400);
     }
 };
 
@@ -96,7 +96,7 @@ async function fetch_gathering_merchants_by_gathering_id(gatheringId) {
 
         return result.rows;
     } catch (error) {
-        throw new ExpressError(`An Error Occured: Unable to fetch gathering merchants - ${error}`, 500);
+        throw new ExpressError(`An Error Occured: Unable to fetch gathering merchants - ${error}`, 400);
     }
 };
 
@@ -110,7 +110,7 @@ async function fetch_gathering_images_by_gathering_id(gatheringId) {
 
         return result.rows;
     } catch (error) {
-        throw new ExpressError(`An Error Occured: Unable to fetch gathering images - ${error}`, 500);
+        throw new ExpressError(`An Error Occured: Unable to fetch gathering images - ${error}`, 400);
     }
 };
 
@@ -166,7 +166,7 @@ async function fetch_gatherings_by_merchant_id(merchantId) {
 
         return result.rows;
     } catch (error) {
-        throw new ExpressError(`An Error Occured: Unable to fetch merchant gatherings - ${error}`, 500);
+        throw new ExpressError(`An Error Occured: Unable to fetch merchant gatherings - ${error}`, 400);
     }
 }
 
@@ -187,7 +187,7 @@ async function fetch_gathering_merchant_by_participant_id(participantId) {
 
         return result.rows[0];
     } catch (error) {
-        throw new ExpressError(`An Error Occured: Unable to fetch gathering merchant - ${error}`, 500);
+        throw new ExpressError(`An Error Occured: Unable to fetch gathering merchant - ${error}`, 400);
     }
 };
 
@@ -208,7 +208,7 @@ async function fetch_gathering_image_by_image_id(imageId) {
 
         return result.rows[0];
     } catch (error) {
-        throw new ExpressError(`An Error Occured: Unable to fetch gathering image - ${error}`, 500);
+        throw new ExpressError(`An Error Occured: Unable to fetch gathering image - ${error}`, 400);
     }
 };
 
@@ -229,7 +229,7 @@ async function update_gathering_by_gathering_id(gatheringId, data) {
         const result = await db.query(query, values);
         return result.rows[0];    
     } catch (error) {
-        throw new ExpressError(`An Error Occured: Unable to update gathering - ${error}`, 500);
+        throw new ExpressError(`An Error Occured: Unable to update gathering - ${error}`, 400);
     }
 };
 
@@ -243,7 +243,7 @@ async function delete_gathering_by_id(gatheringId) {
 
         return result.rows[0];
     } catch (error) {
-        throw new ExpressError(`An Error Occured: Unable to delete gathering - ${error}`, 500);
+        throw new ExpressError(`An Error Occured: Unable to delete gathering - ${error}`, 400);
     }
 };
 
@@ -257,7 +257,7 @@ async function delete_gathering_merchant_by_participant_id(gatheringId, particip
 
         return result.rows[0];
     } catch (error) {
-        throw new ExpressError(`An Error Occured: Unable to delete gathering merchant - ${error}`, 500);
+        throw new ExpressError(`An Error Occured: Unable to delete gathering merchant - ${error}`, 400);
     }
 };
 
@@ -271,7 +271,7 @@ async function delete_gathering_image_by_image_id(gatheringId, imageId) {
 
         return result.rows[0];
     } catch (error) {
-        throw new ExpressError(`An Error Occured: Unable to delete gathering image - ${error}`, 500);
+        throw new ExpressError(`An Error Occured: Unable to delete gathering image - ${error}`, 400);
     }
 };
 

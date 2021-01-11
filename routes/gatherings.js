@@ -48,8 +48,6 @@ gatheringRouter.post('/new', ensureIsMerchant, async(req, res, next) => {
 
         return res.json({ "gathering": gathering })
     } catch (error) {
-        console.log(error.code);
-
         return next(error);
     };
 });
@@ -80,8 +78,6 @@ gatheringRouter.post('/:gathering_id/new/merchant', ensureIsMerchant, async(req,
 
         return res.json({ "gathering_merchants": merchants })
     } catch (error) {
-        console.log(error.code);
-
         return next(error);
     };
 });
@@ -107,8 +103,6 @@ gatheringRouter.post('/:gathering_id/new/img', ensureIsMerchant, async(req, res,
 
         return res.json({ "gathering_images": images })
     } catch (error) {
-        console.log(error.code);
-
         return next(error);
     };
 });
@@ -195,8 +189,6 @@ gatheringRouter.patch('/:gathering_id', ensureIsMerchant, async(req, res, next) 
         return res.json({ "gathering": result })
 
     } catch (error) {
-        console.log(error.code);
-
         return next(error);
     }
 });
@@ -224,7 +216,6 @@ gatheringRouter.delete('/:gathering_id', ensureIsMerchant, async(req, res, next)
         return res.json({ "message": `Gathering removed.` })
 
     } catch (error) {
-        console.log(error.code);
         return next(error);
     }
 });
@@ -235,7 +226,7 @@ gatheringRouter.delete('/:gathering_id/merchant/:participant_id', ensureIsMercha
         // Check for incorrect organizer, a gathering mismatch, or gathering with id not in database
         const gathering = await Gathering.retrieve_gathering_participant(req.params.participant_id);
         if(!gathering.organizer_id) {
-            throw new ExpressError("Gathering not found", 404);
+            throw new ExpressError("Gathering Participant not found", 404);
         } else if(gathering.organizer_id !== req.user.id || gathering.gathering_id !== +req.params.gathering_id) {
             throw new ExpressError(`Unauthorized`, 401);
         }
@@ -244,7 +235,6 @@ gatheringRouter.delete('/:gathering_id/merchant/:participant_id', ensureIsMercha
         return res.json({ "message": `Gathering Participant removed.` })
 
     } catch (error) {
-        console.log(error.code);
         return next(error);
     }
 });
@@ -264,7 +254,6 @@ gatheringRouter.delete('/:gathering_id/img/:img_id', ensureIsMerchant, async(req
         return res.json({ "message": `Gathering Image removed.` })
 
     } catch (error) {
-        console.log(error.code);
         return next(error);
     }
 });

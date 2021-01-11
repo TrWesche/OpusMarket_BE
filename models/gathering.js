@@ -30,7 +30,7 @@ class Gathering {
     /** Create gathering with data. Returns new gathering data. */
 
     static async add_gathering(merchant_id, data) {
-        const gathering = create_new_master_gathering(merchant_id, data);
+        const gathering = await create_new_master_gathering(merchant_id, data);
         return gathering;
     }
 
@@ -39,7 +39,7 @@ class Gathering {
             throw new ExpressError(`Unable to process request: No merchants selected to add to the gathering`, 400);
         }       
 
-        const addedMerchants = create_gathering_merchants_by_gathering_id(id, data.merchants);
+        const addedMerchants = await create_gathering_merchants_by_gathering_id(id, data.merchants);
         return addedMerchants;
     }
 
@@ -48,7 +48,7 @@ class Gathering {
             throw new ExpressError(`Unable to process request: No images selected to add to the gathering`, 400);
         }
     
-        const addedImages = create_gathering_images_by_gathering_id(id, data.images);
+        const addedImages = await create_gathering_images_by_gathering_id(id, data.images);
         return addedImages;
     }
 
@@ -61,46 +61,52 @@ class Gathering {
     // ╚╝╚═╝╚═══╝╚╝ ╚╝╚═══╝  
 
     static async retrieve_single_gathering(id) {
-        const gathering = fetch_gathering_by_gathering_id(id);
+        const gathering = await fetch_gathering_by_gathering_id(id);
 
-        if (!gathering) {
-            throw new ExpressError(`Unable to find target gathering`, 404);
+        if (gathering) {
+            return gathering;    
         }
-        return gathering;
+        
+        throw new ExpressError(`Unable to find target gathering`, 404);
     }
 
     static async retrieve_gathering_details(id) {
-        const gathering = fetch_gathering_by_gathering_id(id);
+        const gathering = await fetch_gathering_by_gathering_id(id);
 
-        if (!gathering) {
-            throw new ExpressError(`Unable to find target gathering`, 404);
+        if (gathering) {
+            gathering.merchants = await fetch_gathering_merchants_by_gathering_id(id);
+            gathering.images = await fetch_gathering_images_by_gathering_id(id);
+            return gathering;
         }
-        gathering.merchants = await fetch_gathering_merchants_by_gathering_id(id);
-        gathering.images = await fetch_gathering_images_by_gathering_id(id);
-        return gathering;
+
+        throw new ExpressError(`Unable to find target gathering`, 404);
     }
 
     static async retrieve_merchant_gatherings(merchant_id){
-        const gatherings = fetch_gatherings_by_merchant_id(merchant_id);
+        const gatherings = await fetch_gatherings_by_merchant_id(merchant_id);
         return gatherings;
     }
     
     static async retrieve_gathering_participant(participant_id) {
-        const participant = fetch_gathering_merchant_by_participant_id(participant_id);
+        const participant = await fetch_gathering_merchant_by_participant_id(participant_id);
 
-        if (!participant) {
-            throw new ExpressError(`Unable to find target gathering participant`, 404);
+        console.log("Participant:", participant)
+
+        if (participant) {
+            return participant;
         }
-        return participant;
+
+        throw new ExpressError(`Unable to find target gathering participant`, 404);
     }
 
     static async retrieve_gathering_image(img_id) {
-        const image = fetch_gathering_image_by_image_id(img_id);
+        const image = await fetch_gathering_image_by_image_id(img_id);
 
-        if (!image) {
-            throw new ExpressError(`Unable to find target gathering image`, 404);
+        if (image) {
+            return image;
         }
-        return image;
+
+        throw new ExpressError(`Unable to find target gathering image`, 404);
     }
 
     // ╔╗ ╔╗╔═══╗╔═══╗╔═══╗╔════╗╔═══╗
