@@ -27,28 +27,47 @@ const merchantRouter = new express.Router();
 merchantRouter.post('/about', ensureIsMerchant, async (req, res, next) => {
     try {
         // TODO: When database is regenerated set the merchant_id column to be unique and remove this
-        const preCheckAboutData = await Merchant.retrieve_merchant_about_by_merchant_id(req.user.id);
-        if (preCheckAboutData) {
-            throw new ExpressError(`An about record already exists for this merchant.  Please update the current record`, 400);
-        }
+        // const preCheckAboutData = await Merchant.retrieve_merchant_about_by_merchant_id(req.user.id);
+        // if (preCheckAboutData) {
+        //     throw new ExpressError(`An about record already exists for this merchant.  Please update the current record`, 400);
+        // }
 
         // Validate request data
         const validate = jsonschema.validate(req.body, merchantAboutSchema);
         if (!validate.valid) {
             const listOfErrors = validate.errors.map(e => e.stack);
-            throw new ExpressError(`Unable to update Merchant About: ${listOfErrors}`, 400)
+            throw new ExpressError(`Unable to create Merchant About: ${listOfErrors}`, 400)
         }
 
         const result = await Merchant.add_merchant_about_by_merchant_id(req.user.id, req.body);
 
         return res.json({ "about": result })
     } catch (error) {
-        console.log(error.code);
-
         return next(error);
     };
 });
 
+
+// ╔╗   ╔═══╗╔═══╗╔═══╗╔╗ ╔╗╔════╗
+// ║║   ║╔═╗║║╔═╗║║╔═╗║║║ ║║║╔╗╔╗║
+// ║║   ║║ ║║║║ ╚╝║║ ║║║║ ║║╚╝║║╚╝
+// ║║ ╔╗║║ ║║║║╔═╗║║ ║║║║ ║║  ║║  
+// ║╚═╝║║╚═╝║║╚╩═║║╚═╝║║╚═╝║ ╔╝╚╗ 
+// ╚═══╝╚═══╝╚═══╝╚═══╝╚═══╝ ╚══╝ 
+        
+merchantRouter.get("/logout", async (req, res, next) => {
+    try {
+        res.clearCookie('sid');
+        res.clearCookie('_sid');
+
+        return res.json({"message": "Logout successful."})    
+    } catch (error) {
+        return next(error);
+    }
+})
+
+
+module.exports = merchantRouter;
 
 
 // ╔═══╗╔═══╗╔═══╗╔═══╗
@@ -180,7 +199,7 @@ merchantRouter.patch("/update", ensureIsMerchant, async (req, res, next) => {
     } catch (error) {
         return next(error);
     }
-})
+});
 
 
 merchantRouter.patch('/about', ensureIsMerchant, async (req, res, next) => {
@@ -201,8 +220,6 @@ merchantRouter.patch('/about', ensureIsMerchant, async (req, res, next) => {
 
         return res.json({ "about": result })
     } catch (error) {
-        console.log(error.code);
-
         return next(error);
     };
 });
@@ -228,7 +245,7 @@ merchantRouter.delete("/delete", ensureIsMerchant, async (req, res, next) => {
     } catch (error) {
         return next(error);
     }
-})
+});
 
 merchantRouter.delete("/about", ensureIsMerchant, async (req, res, next) => {
     try {
@@ -241,25 +258,5 @@ merchantRouter.delete("/about", ensureIsMerchant, async (req, res, next) => {
     } catch (error) {
         return next(error);
     }
-})
+});
 
-// ╔╗   ╔═══╗╔═══╗╔═══╗╔╗ ╔╗╔════╗
-// ║║   ║╔═╗║║╔═╗║║╔═╗║║║ ║║║╔╗╔╗║
-// ║║   ║║ ║║║║ ╚╝║║ ║║║║ ║║╚╝║║╚╝
-// ║║ ╔╗║║ ║║║║╔═╗║║ ║║║║ ║║  ║║  
-// ║╚═╝║║╚═╝║║╚╩═║║╚═╝║║╚═╝║ ╔╝╚╗ 
-// ╚═══╝╚═══╝╚═══╝╚═══╝╚═══╝ ╚══╝ 
-        
-merchantRouter.get("/logout", async (req, res, next) => {
-    try {
-        res.clearCookie('sid');
-        res.clearCookie('_sid');
-
-        return res.json({"message": "Logout successful."})    
-    } catch (error) {
-        return next(error);
-    }
-})
-
-
-module.exports = merchantRouter;

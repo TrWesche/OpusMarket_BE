@@ -59,7 +59,7 @@ CREATE TABLE "gatherings" (
 -- Data Insert Complete - 20 Merchant Abouts
 CREATE TABLE "merchant_about" (
   "id" SERIAL PRIMARY KEY,
-  "merchant_id" int NOT NULL REFERENCES "merchants" ("id") ON DELETE CASCADE,
+  "merchant_id" int UNIQUE NOT NULL REFERENCES "merchants" ("id") ON DELETE CASCADE,
   "headline" text,
   "about" text,
   "logo_wide_url" text,
@@ -201,7 +201,7 @@ CREATE TABLE "order_promotions" (
 CREATE TABLE "order_coupons" (
   "id" SERIAL PRIMARY KEY,
   "order_id" int NOT NULL REFERENCES "orders" ("id"),
-  "product_id" int NOT NULL REFERENCES "products" ("id") ON DELETE SET NULL,
+  "product_id" int REFERENCES "products" ("id") ON DELETE SET NULL,
   "coupon_id" int REFERENCES "product_coupons" ("id") ON DELETE SET NULL,
   "coupon_code" text NOT NULL,
   "pct_discount" decimal NOT NULL

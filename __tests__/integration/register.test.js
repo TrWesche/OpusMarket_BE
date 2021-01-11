@@ -1,5 +1,3 @@
-// Supertest.agent? -> Persist cookies
-
 // npm packages
 const request = require("supertest");
 const jwt = require("jsonwebtoken")
@@ -23,7 +21,6 @@ const {
     TEST_DATA,
     ADDITIONAL_USERS
 } = require("./config");
-const { patch } = require("../../app");
 
 beforeAll(async function () {
     await beforeAllHook();
@@ -143,10 +140,6 @@ describe("POST /api/reg/user", () => {
         expect(res.body.message).toContain("email")
     });
 });
-
-
-
-
 
 
 // Merchant Registration

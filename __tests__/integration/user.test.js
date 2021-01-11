@@ -1,5 +1,3 @@
-// Supertest.agent? -> Persist cookies
-
 // npm packages
 const request = require("supertest");
 const jwt = require("jsonwebtoken")
@@ -152,6 +150,8 @@ describe("PATCH /api/users/update", () => {
             .send({password: "short"});
 
         expect(res.statusCode).toBe(400);
+        expect(res.body.message).toContain("Unable to update");
+        expect(res.body.message).toContain("password");
     });
 
     // Test 6: Rejection - First Name to Short (2char min) - Checked by Schema
@@ -163,6 +163,8 @@ describe("PATCH /api/users/update", () => {
             .send({first_name: "a"});
 
         expect(res.statusCode).toBe(400);
+        expect(res.body.message).toContain("Unable to update");
+        expect(res.body.message).toContain("first_name");
     });
 
     // Test 7: Rejection - Last Name to Short (2char min) - Checked by Schema
@@ -174,6 +176,8 @@ describe("PATCH /api/users/update", () => {
             .send({last_name: "a"});
 
         expect(res.statusCode).toBe(400);
+        expect(res.body.message).toContain("Unable to update");
+        expect(res.body.message).toContain("last_name");
     });
 
     // Test 8: Rejection - Email address not of email format - Checked by Schema
@@ -185,6 +189,8 @@ describe("PATCH /api/users/update", () => {
             .send({email: "thisisnotanemailaddress"});
 
         expect(res.statusCode).toBe(400);
+        expect(res.body.message).toContain("Unable to update");
+        expect(res.body.message).toContain("email");
     });
 });
 
@@ -212,7 +218,7 @@ describe("DELETE /api/users/delete", () => {
 
 
 // Logout Route
-describe("Logout /api/users/logout", () => {
+describe("GET /api/users/logout", () => {
 
     // Test 1 - Successfully removes cookie
     // Manual Test Success 11/10/2020
