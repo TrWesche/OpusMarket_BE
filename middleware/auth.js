@@ -7,7 +7,6 @@ function authenticateJWT(req, res, next) {
   try {
     const payload = AuthHandling.validateCookies(req);
     req.user = payload; // create a current user
-    // console.log("Token Authenticated", req.user)
     return next();
   } catch (err) {
     return next();
@@ -77,7 +76,6 @@ function ensureCorrectMerchant(req, res, next) {
 
 function ensureIsMerchant(req, res, next) {
   try {
-    // console.log("Hit Ensure is Merchant", req.user)
     if (req.user.type === "merchant") {
       return next();
     }

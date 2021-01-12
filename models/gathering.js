@@ -90,8 +90,6 @@ class Gathering {
     static async retrieve_gathering_participant(participant_id) {
         const participant = await fetch_gathering_merchant_by_participant_id(participant_id);
 
-        console.log("Participant:", participant)
-
         if (participant) {
             return participant;
         }

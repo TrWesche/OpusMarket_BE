@@ -60,7 +60,6 @@ orderRoutes.get('/history', ensureIsUser, async(req, res, next) => {
 
 orderRoutes.get('/:order_id', ensureIsUser, async(req, res, next) => {
     try {
-        console.log("Hit Route With OrderId:", req.params.order_id)
         const order = await Order.retrieve_order_by_order_id(+req.params.order_id, req.user.id);
 
         return res.json({"order": order});

@@ -1,7 +1,7 @@
 /** Express app for jobly. */
 const express = require("express");
 const path = require("path");
-const morgan = require("morgan");
+// const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const bodyParser = require('body-parser');
 const cors = require("cors");
@@ -31,11 +31,11 @@ app.use(authenticateJWT);
 
 
 // add logging system
-app.use(morgan("tiny"));
+// app.use(morgan("tiny"));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'pug');
+// app.set('view engine', 'pug');
 
 // Serve up square form Javascript
 app.use(express.static(path.join(__dirname, 'public')))

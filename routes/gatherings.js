@@ -32,14 +32,12 @@ const gatheringRouter = new express.Router();
  */
 gatheringRouter.post('/new', ensureIsMerchant, async(req, res, next) => {
     try {
-        // console.log("Post Started", req.body);
         const validate = jsonschema.validate(req.body, gatheringSchema);
         if(!validate.valid) {
             //Collect all the errors in an array and throw
             const listOfErrors = validate.errors.map(e => e.stack);
             throw new ExpressError(`Unable to create a new Gathering: ${listOfErrors}`, 400);
         }
-        // console.log("Schema Passed"); 
 
         const gathering = await Gathering.add_gathering(req.user.id, req.body);
         const merchants = await Gathering.add_gathering_merchants(gathering.id, {"merchants": [{"id": req.user.id}]})

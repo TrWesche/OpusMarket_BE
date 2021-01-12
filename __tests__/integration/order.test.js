@@ -60,7 +60,6 @@ describe("POST /api/orders/new", () => {
             })
 
         expect(res.statusCode).toBe(200);
-        // console.log(res.body.order.products);
         expect(res.body).toHaveProperty("order");
         expect(res.body.order).toHaveProperty("id");
         expect(res.body.order).toHaveProperty("order_total");

@@ -512,8 +512,6 @@ async function fetch_products_by_query_params(query) {
         }
     }
 
-    console.log(query);
-
     // If custom limit is imposed return data with requested limit otherwise default limit
     if (query.limit) {
         queryValues.push(query.limit);
