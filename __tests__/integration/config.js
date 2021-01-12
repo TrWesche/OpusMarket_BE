@@ -25,7 +25,7 @@ const SOURCE_DATA_MERCHANT = {
         name: "StaticWater",
         description: "StaticWater_Description",
         base_price: 9999,
-        avg_rating: 5,
+        avg_rating: 3,
         qty_ratings: 1,
         qty_views: 10,
         qty_purchases: 5,

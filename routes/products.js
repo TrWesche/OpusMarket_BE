@@ -455,11 +455,9 @@ productRouter.patch('/:prod_id/promotion/:promotion_id', ensureIsMerchant, async
         }
 
         // If changes update product and return updated data
-        const result = await Product.modify_product_promotion(req.params.promotion_id, itemsList);
+        const result = await Product.modify_product_promotion(req.params.prod_id, req.params.promotion_id, itemsList);
         return res.json({ "product_promotion": result })
     } catch (error) {
-        console.log(error.code);
-
         return next(error);
     };
 });

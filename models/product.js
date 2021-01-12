@@ -96,7 +96,7 @@ class Product {
             // Check promotion price does not exceed the current product base price
             const product = await fetch_product_by_product_id(prod_id);
             if (promotion.promotion_price >= product.base_price) {
-                throw new ExpressError(`Cannot create a promotion with price >= the base price`);
+                throw new ExpressError(`Cannot create a promotion with price >= the base price`, 400);
             }
             
             // If updated promotion is active set all other promotions to inactive
@@ -110,6 +110,7 @@ class Product {
             return new_promotion;
         } catch (error) {
             await rollback_transaction();
+            throw new ExpressError(error.message, error.status);
         }
     }
 
@@ -366,7 +367,7 @@ class Product {
         if (!product) {
             throw new ExpressError(`Unable to find the target product for update.`, 404);
         }
-        return result.rows[0];
+        return product;
     }
   
     static async modify_product_image(image_id, data) {
@@ -387,7 +388,7 @@ class Product {
         return product_meta;
     }
 
-    static async modify_product_promotion(product_id, data) {
+    static async modify_product_promotion(product_id, promotion_id, data) {
         try {
             await begin_transaction();
             // Check promotion price does not exceed the current product base price
@@ -401,7 +402,7 @@ class Product {
                 await update_promotion_active_status(product_id);
             }
                     
-            const updated_promotion = await update_product_promotion(product_id, data);
+            const updated_promotion = await update_product_promotion(promotion_id, data);
     
             if (!updated_promotion) {
                 throw new ExpressError(`Unable to find the target promotion for update.`, 404);
@@ -411,6 +412,7 @@ class Product {
             return updated_promotion;
         } catch (error) {
             await rollback_transaction();
+            throw new ExpressError(error.message, error.status);
         }
     }
 
