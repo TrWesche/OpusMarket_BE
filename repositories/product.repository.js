@@ -512,12 +512,14 @@ async function fetch_products_by_query_params(query) {
         }
     }
 
+    console.log(query);
+
     // If custom limit is imposed return data with requested limit otherwise default limit
     if (query.limit) {
         queryValues.push(query.limit);
         rowLimit.push(`LIMIT $${queryValues.length}`);
     } else {
-        rowLimit.push(`LIMIT 10`);
+        rowLimit.push(`LIMIT 30`);
     }
 
     const executeQuery = `
