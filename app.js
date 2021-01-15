@@ -20,6 +20,7 @@ const corsOptions = {
 }
 
 app.use(express.json());
+app.set('trust proxy', 1);
 app.use(cors(corsOptions));
 // app.use(cookieParser(COOKIE_SIG));
 app.use(cookieParser());
@@ -34,11 +35,11 @@ app.use(authenticateJWT);
 // app.use(morgan("tiny"));
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
+// app.set('views', path.join(__dirname, 'views'));
 // app.set('view engine', 'pug');
 
 // Serve up square form Javascript
-app.use(express.static(path.join(__dirname, 'public')))
+// app.use(express.static(path.join(__dirname, 'public')))
 
 /** API Routes */
 const regRouter = require("./routes/register");
