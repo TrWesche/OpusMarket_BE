@@ -18,7 +18,7 @@ const {
     afterEachHook,
     afterAllHook,
     SOURCE_DATA_MERCHANT
-} = require("./config")
+} = require("../config/config");
 
 
 

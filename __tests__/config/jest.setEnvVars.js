@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 process.env.DATABASE_URL = "opus-core-test";
 process.env.COOKIE_SIG = "adf269e1a5c8a89b26a0194f183c0b26"
 process.env.PORT = 5000

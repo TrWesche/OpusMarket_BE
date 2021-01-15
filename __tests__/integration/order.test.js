@@ -20,8 +20,7 @@ const {
     SOURCE_DATA_MERCHANT,
     TEST_DATA,
     ADDITIONAL_USERS
-} = require("./config");
-const { patch } = require("../../app");
+} = require("../config/config");
 
 beforeAll(async function () {
     await beforeAllHook();

@@ -24,7 +24,9 @@ const SQUARE_PAYMENTS_PATH = process.env.SQUARE_PAYMENTS_PATH;
 
 const ORIGIN_FRONTEND = process.env.ORIGIN_FRONTEND;
 
-const PRIVATE_KEY = process.env.PRIVATE_KEY.replace(/\\n/g, '\n');
+const PRIVATE_KEY = process.env.PRIVATE_KEY.replace(/\\n/gm, '\n');
+
+const NODE_ENV = process.env.NODE_ENV;
 
 // database is:
 //
@@ -34,13 +36,14 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY.replace(/\\n/g, '\n');
 
 let DB_URI;
 
-if (process.env.NODE_ENV === "test") {
+if (NODE_ENV === "test") {
   DB_URI = "opus-core-test";
 } else {
   DB_URI = process.env.DATABASE_URL || "opus-core";
 }
 
 module.exports = {
+  NODE_ENV,
   COOKIE_SIG,
   PORT,
   DB_URI,

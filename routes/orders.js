@@ -84,7 +84,6 @@ orderRoutes.get('/:order_id', ensureIsUser, async(req, res, next) => {
 
 //         return res.json({ "message": "Payment successful" })
 //     } catch (error) {
-//         console.log(error);
 //         return next(error);
 //     }  
 // })
@@ -97,17 +96,14 @@ orderRoutes.get('/:order_id', ensureIsUser, async(req, res, next) => {
 // ╔╝╚╝║║╚══╗║╚═╝║║╚══╗ ╔╝╚╗ ║╚══╗
 // ╚═══╝╚═══╝╚═══╝╚═══╝ ╚══╝ ╚═══╝
 
-orderRoutes.delete('/:order_id/delete', ensureIsUser, async(req, res, next) => {
-    try {
-        // TODO: This may be better served by a process completely separate from the normal flow which performs
-        // an asynchronous data cleansing operation which will remove abandoned orders from the database.
-        // Need to think more on how to implement
-        const result = Order.remove_order(+req.params.order_id);
+// orderRoutes.delete('/:order_id/delete', ensureIsUser, async(req, res, next) => {
+//     try {
+//         const result = Order.remove_order(+req.params.order_id);
 
-        return res.json({"message": "Order deleted"})
-    } catch (error) {
-        return next(error);
-    }
-})
+//         return res.json({"message": "Order deleted"})
+//     } catch (error) {
+//         return next(error);
+//     }
+// })
 
 module.exports = orderRoutes;

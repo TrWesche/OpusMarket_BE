@@ -20,7 +20,7 @@ const {
     SOURCE_DATA_MERCHANT,
     TEST_DATA,
     ADDITIONAL_USERS
-} = require("./config");
+} = require("../config/config");
 
 
 beforeAll(async function () {

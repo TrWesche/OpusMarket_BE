@@ -1,14 +1,21 @@
 /** Database setup for jobly. */
 
 const { Client } = require("pg");
-const { DB_URI } = require("./config");
+const { 
+  NODE_ENV,
+  DB_URI } = require("./config");
 
-const db = new Client({
-  connectionString: DB_URI,
-  ssl: {
-    rejectUnauthorized: false
-  }
-});
+const db = (NODE_ENV === "test") ? 
+  new Client({
+    connectionString: DB_URI
+  })
+  :
+  new Client({
+    connectionString: DB_URI,
+    ssl: {
+      rejectUnauthorized: false
+    }
+  });
 
 db.connect();
 

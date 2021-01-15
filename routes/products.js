@@ -56,8 +56,6 @@ productRouter.post('/new', ensureLoggedIn, ensureIsMerchant, async(req, res, nex
 
         return res.json({ "product": result })
     } catch (error) {
-        console.log(error.code);
-
         return next(error);
     };
 });
@@ -266,8 +264,6 @@ productRouter.get('/:prod_id/coupon/:coupon_code', async(req, res, next) => {
 
         return res.json({"product_coupon": couponDetails});
     } catch (error) {
-        console.log(error.code);
-
         return next(error);
     };
 });
@@ -320,8 +316,6 @@ productRouter.patch('/:prod_id', ensureIsMerchant, async(req, res, next) => {
         const result = await Product.modify_product(req.params.prod_id, itemsList);
         return res.json({ "product": result })
     } catch (error) {
-        console.log(error.code);
-
         return next(error);
     };
 })
@@ -366,8 +360,6 @@ productRouter.patch('/:prod_id/img/:img_id', ensureIsMerchant, async(req, res, n
         const result = await Product.modify_product_image(req.params.img_id, itemsList);
         return res.json({ "product_image": result })
     } catch (error) {
-        console.log(error.code);
-
         return next(error);
     };
 });
@@ -412,8 +404,6 @@ productRouter.patch('/:prod_id/meta/:meta_id', ensureIsMerchant, async(req, res,
         const result = await Product.modify_product_meta(req.params.meta_id, itemsList);
         return res.json({ "product_meta": result })
     } catch (error) {
-        console.log(error.code);
-
         return next(error);
     };
 })
@@ -502,8 +492,6 @@ productRouter.patch('/:prod_id/coupon/:coupon_id', ensureIsMerchant, async(req, 
         const result = await Product.modify_product_coupon(req.params.coupon_id, itemsList);
         return res.json({ "product_coupon": result })
     } catch (error) {
-        console.log(error.code);
-
         return next(error);
     };
 });
@@ -548,8 +536,6 @@ productRouter.patch('/:prod_id/modifier/:modifier_id', ensureIsMerchant, async(r
         const result = await Product.modify_product_modifier(req.params.modifier_id, itemsList);
         return res.json({ "product_modifier": result })
     } catch (error) {
-        console.log(error.code);
-
         return next(error);
     };
 });
@@ -594,8 +580,6 @@ productRouter.patch('/:prod_id/review/:review_id', ensureIsUser, async(req, res,
         const result = await Product.modify_product_review(req.params.review_id, itemsList);
         return res.json({ "product_review": result })
     } catch (error) {
-        console.log(error.code);
-
         return next(error);
     };
 });
@@ -623,8 +607,6 @@ productRouter.delete("/:prod_id", ensureIsMerchant, async(req, res, next) => {
 
         return res.json({"message": "Product deleted"})
     } catch (error) {
-        console.log(error.code);
-
         return next(error);
     }
 })
@@ -644,8 +626,6 @@ productRouter.delete("/:prod_id/img/:img_id", ensureIsMerchant, async(req, res, 
 
         return res.json({"message": "Product Image deleted"})
     } catch (error) {
-        console.log(error.code);
-
         return next(error);
     }
 });
@@ -665,8 +645,6 @@ productRouter.delete('/:prod_id/meta/:meta_id', ensureIsMerchant, async(req, res
 
         return res.json({"message": "Product Meta deleted"})
     } catch (error) {
-        console.log(error.code);
-
         return next(error);
     }
 });
@@ -686,8 +664,6 @@ productRouter.delete('/:prod_id/promotion/:promotion_id', ensureIsMerchant, asyn
 
         return res.json({"message": "Product Promotion deleted"})
     } catch (error) {
-        console.log(error.code);
-
         return next(error);
     }
 });
@@ -707,8 +683,6 @@ productRouter.delete('/:prod_id/coupon/:coupon_id', ensureIsMerchant, async(req,
 
         return res.json({"message": "Product Coupon deleted"})
     } catch (error) {
-        console.log(error.code);
-
         return next(error);
     }
 });
@@ -728,8 +702,6 @@ productRouter.delete('/:prod_id/modifier/:modifier_id', ensureIsMerchant, async(
 
         return res.json({"message": "Product Modifier deleted"})
     } catch (error) {
-        console.log(error.code);
-
         return next(error);
     }
 });
@@ -749,8 +721,6 @@ productRouter.delete('/:prod_id/review/:review_id', ensureIsUser, async(req, res
 
         return res.json({"message": "Product Review deleted"})
     } catch (error) {
-        console.log(error.code);
-
         return next(error);
     }
 });
@@ -772,8 +742,6 @@ productRouter.delete('/:prod_id/featured', ensureIsMerchant, async(req, res, nex
 
         return res.json({"message": "Featured Product deleted"})
     } catch (error) {
-        console.log(error.code);
-
         return next(error);
     }
 });
