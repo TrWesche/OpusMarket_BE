@@ -36,7 +36,6 @@ function ensureCorrectUser(req, res, next) {
 
     return next({ status: 401, message: "Unauthorized" });
   } catch (err) {
-    // errors would happen here if we made a request and req.user is undefined
     return next({ status: 401, message: "Unauthorized" });
   }
 }
@@ -67,7 +66,6 @@ function ensureCorrectMerchant(req, res, next) {
 
     return next({ status: 401, message: "Unauthorized" });
   } catch (err) {
-    // errors would happen here if we made a request and req.user is undefined
     return next({ status: 401, message: "Unauthorized" });
   }
 }
@@ -87,26 +85,11 @@ function ensureIsMerchant(req, res, next) {
   }
 }
 
-
-function ensureIsAdmin(req, res, next) {
-  try {
-    if (req.user.is_admin) {
-      return next();
-    }
-
-    return next({ status: 401, message: "Unauthorized" });
-  } catch (err) {
-    // errors would happen here if we made a request and req.user is undefined
-    return next({ status: 401, message: "Unauthorized" });
-  }
-}
-
 module.exports = {
   authenticateJWT,
   ensureLoggedIn,
   ensureCorrectUser,
   ensureIsUser,
   ensureCorrectMerchant,
-  ensureIsMerchant,
-  ensureIsAdmin
+  ensureIsMerchant
 };

@@ -1,67 +1,238 @@
-// npm packages
-const request = require("supertest");
-const jwt = require("jsonwebtoken")
-
-// app imports
-const app = require("../../app");
-const db = require("../../db");
-
-// model imports
-const User = require("../../models/user");
-
-// config imports
 const {
-    SOURCE_DATA_USER,
-    // TEST_DATA,
-    beforeAllHook,
-    beforeEachHook,
-    afterEachHook,
-    afterAllHook,
-    SOURCE_DATA_MERCHANT,
-    TEST_DATA,
-    ADDITIONAL_USERS
-} = require("../config/config");
+    ensureLoggedIn,
+    ensureCorrectUser,
+    ensureIsUser,
+    ensureCorrectMerchant,
+    ensureIsMerchant
+} = require("../../middleware/auth");
 
-beforeAll(async function () {
-    await beforeAllHook();
+
+// Login Check
+describe("Check function ensureLoggedIn", () => {
+    const validUser = {
+        id: 1,
+        type: "user",
+        first_name: "userFirstName1",
+        last_name: "userLastName1"
+    };
+
+    const validMerchant = {
+        id: 1,
+        type: "merchant",
+        display_name: "merchantDisplayName1"
+    };
+
+    const mockNext = (status = {status: 200, message: "Passed"}) => {
+        return (status);
+    };
+
+    // Test 1 - Returns 'ok' status when a valid user is provided
+    test("Returns 'ok' status when a valid user/merchant is provided", async () => {
+        const res = ensureLoggedIn({user: validUser}, {}, mockNext);
+
+        expect(res.status).toBe(200);
+        expect(res.message).toBe("Passed");
+    });
+    
+    // Test 2 - Returns 'Unauthorized' status when there is no valid user
+    test("Returns 'Unauthorized' status when there is no valid user", async () => {
+        const res = ensureLoggedIn({}, {}, mockNext);
+
+        expect(res.status).toBe(401);
+        expect(res.message).toBe("Unauthorized");
+    });
 });
 
-beforeEach(async function () {
-    await beforeEachHook(TEST_DATA);
+// Check Correct User
+describe("Check function ensureCorrectUser", () => {
+    const validUser = {
+        id: 1,
+        type: "user",
+        first_name: "userFirstName1",
+        last_name: "userLastName1"
+    };
+
+    const validMerchant = {
+        id: 1,
+        type: "merchant",
+        display_name: "merchantDisplayName1"
+    };
+
+    const mockNext = (status = {status: 200, message: "Passed"}) => {
+        return (status);
+    };
+
+    // Test 1 - Returns 'ok' status when a valid user is provided
+    test("Returns 'ok' status when a valid user is provided", async () => {
+        const res = ensureCorrectUser({user: validUser, params: {id: validUser.id}}, {}, mockNext);
+
+        expect(res.status).toBe(200);
+        expect(res.message).toBe("Passed");
+    });
+    
+    // Test 2 - Returns 'Unauthorized' status when there is no valid user
+    test("Returns 'Unauthorized' status when there is no valid user", async () => {
+        const res = ensureCorrectUser({}, {}, mockNext);
+
+        expect(res.status).toBe(401);
+        expect(res.message).toBe("Unauthorized");
+    });
+
+    // Test 3 - Returns 'Unauthorized' status on a user mismatch
+    test("Returns 'Unauthorized' status on a user mismatch", async () => {
+        const res = ensureCorrectUser({user: validUser, params: {id: 2}}, {}, mockNext);
+
+        expect(res.status).toBe(401);
+        expect(res.message).toBe("Unauthorized");
+    });
+
+    // Test 4 - Returns 'Unauthorized' status on a merchant trying to access a user route
+    test("Returns 'Unauthorized' status on a merchant trying to access a user route", async () => {
+        const res = ensureCorrectUser({user: validMerchant, params: {id: validMerchant.id}}, {}, mockNext);
+
+        expect(res.status).toBe(401);
+        expect(res.message).toBe("Unauthorized");
+    });
 });
 
-afterEach(async function () {
-    await afterEachHook();
-})
+// Check Is a User
+describe("Check function ensureIsUser", () => {
+    const validUser = {
+        id: 1,
+        type: "user",
+        first_name: "userFirstName1",
+        last_name: "userLastName1"
+    };
 
-afterAll(async function() {
-    await afterAllHook();
+    const validMerchant = {
+        id: 1,
+        type: "merchant",
+        display_name: "merchantDisplayName1"
+    };
+
+    const mockNext = (status = {status: 200, message: "Passed"}) => {
+        return (status);
+    };
+
+    // Test 1 - Returns 'ok' status when a valid user is provided
+    test("Returns 'ok' status when is of type user", async () => {
+        const res = ensureIsUser({user: validUser}, {}, mockNext);
+
+        expect(res.status).toBe(200);
+        expect(res.message).toBe("Passed");
+    });
+    
+    // Test 2 - Returns 'Unauthorized' status when there is no valid user
+    test("Returns 'Unauthorized' status when there is no valid user", async () => {
+        const res = ensureIsUser({}, {}, mockNext);
+
+        expect(res.status).toBe(401);
+        expect(res.message).toBe("Unauthorized");
+    });
+
+    // Test 3 - Returns 'Unauthorized' status when is not of type user
+    test("Returns 'Unauthorized' status when is not of type user", async () => {
+        const res = ensureIsUser({user: validMerchant}, {}, mockNext);
+
+        expect(res.status).toBe(401);
+        expect(res.message).toBe("Unauthorized");
+    });
 });
 
-// Create Order
-describe("POST /api/orders/new", () => {
-    // Test 1 - Successful Creation
-    // Manual Test Successful 11/15/2020
-    test("Can Successfully create a new order", async () => {
-        const res = await request(app)
-            .post('/api/orders/new')
-            .set("Cookie", TEST_DATA.userCookies)
-            .send({
-                order: {
-                    products: [ {
-                        "id": TEST_DATA.product.id,
-                        "quantity": 3,
-                        "modifier_id": TEST_DATA.product.modifier.id,
-                        "coupon_id": TEST_DATA.product.coupon.id    
-                    }
-                    ]
-                }
-            })
 
-        expect(res.statusCode).toBe(200);
-        expect(res.body).toHaveProperty("order");
-        expect(res.body.order).toHaveProperty("id");
-        expect(res.body.order).toHaveProperty("order_total");
-        expect(res.body.order).toHaveProperty("products");
+
+// Check Correct User
+describe("Check function ensureCorrectMerchant", () => {
+    const validUser = {
+        id: 1,
+        type: "user",
+        first_name: "userFirstName1",
+        last_name: "userLastName1"
+    };
+
+    const validMerchant = {
+        id: 1,
+        type: "merchant",
+        display_name: "merchantDisplayName1"
+    };
+
+    const mockNext = (status = {status: 200, message: "Passed"}) => {
+        return (status);
+    };
+
+    // Test 1 - Returns 'ok' status when a valid user is provided
+    test("Returns 'ok' status when a valid merchant is provided", async () => {
+        const res = ensureCorrectMerchant({user: validMerchant, params: {id: validMerchant.id}}, {}, mockNext);
+
+        expect(res.status).toBe(200);
+        expect(res.message).toBe("Passed");
+    });
+    
+    // Test 2 - Returns 'Unauthorized' status when there is no valid merchant
+    test("Returns 'Unauthorized' status when there is no valid merchant", async () => {
+        const res = ensureCorrectMerchant({}, {}, mockNext);
+
+        expect(res.status).toBe(401);
+        expect(res.message).toBe("Unauthorized");
+    });
+
+    // Test 3 - Returns 'Unauthorized' status on a merchant mismatch
+    test("Returns 'Unauthorized' status on a merchant mismatch", async () => {
+        const res = ensureCorrectMerchant({user: validMerchant, params: {id: 2}}, {}, mockNext);
+
+        expect(res.status).toBe(401);
+        expect(res.message).toBe("Unauthorized");
+    });
+
+    // Test 4 - Returns 'Unauthorized' status on a user trying to access a merchant route
+    test("Returns 'Unauthorized' status on a user trying to access a merchant route", async () => {
+        const res = ensureCorrectMerchant({user: validUser, params: {id: validUser.id}}, {}, mockNext);
+
+        expect(res.status).toBe(401);
+        expect(res.message).toBe("Unauthorized");
+    });
+});
+
+// Check Is a User
+describe("Check function ensureIsMerchant", () => {
+    const validUser = {
+        id: 1,
+        type: "user",
+        first_name: "userFirstName1",
+        last_name: "userLastName1"
+    };
+
+    const validMerchant = {
+        id: 1,
+        type: "merchant",
+        display_name: "merchantDisplayName1"
+    };
+
+    const mockNext = (status = {status: 200, message: "Passed"}) => {
+        return (status);
+    };
+
+    // Test 1 - Returns 'ok' status when a valid merchant is provided
+    test("Returns 'ok' status when is of type merchant", async () => {
+        const res = ensureIsMerchant({user: validMerchant}, {}, mockNext);
+
+        expect(res.status).toBe(200);
+        expect(res.message).toBe("Passed");
+    });
+    
+    // Test 2 - Returns 'Unauthorized' status when there is no valid merchant
+    test("Returns 'Unauthorized' status when there is no valid merchant", async () => {
+        const res = ensureIsMerchant({}, {}, mockNext);
+
+        expect(res.status).toBe(401);
+        expect(res.message).toBe("Unauthorized");
+    });
+
+    // Test 3 - Returns 'Unauthorized' status when is not of type merchant
+    test("Returns 'Unauthorized' status when is not of type merchant", async () => {
+        const res = ensureIsMerchant({user: validUser}, {}, mockNext);
+
+        expect(res.status).toBe(401);
+        expect(res.message).toBe("Unauthorized");
     });
 });
