@@ -14,7 +14,7 @@ const { authenticateJWT } = require("./middleware/auth");
 const corsOptions = {
   origin: ORIGIN_FRONTEND,
   optionsSuccessStatus: 200,
-  methods: ['GET', 'PATCH', 'POST', 'DELETE'],
+  methods: ['GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'DELETE'],
   preflightContinue: true,
   credentials: true,
   allowedHeaders: 'Content-Type,Authorization,Set-Cookie,X-Requested-With,Accept'
