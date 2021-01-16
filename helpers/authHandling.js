@@ -1,6 +1,6 @@
 // See user/merchant routes.
 const jwt = require("jsonwebtoken");
-const { PRIVATE_KEY } = require("../config");
+const { PRIVATE_KEY, ORIGIN_FRONTEND } = require("../config");
 
 
 class AuthHandling {
@@ -12,11 +12,11 @@ class AuthHandling {
         // HTTP Only Cookie - JWT Signature Only
         // queryRes.cookie("_sid", split_token[2], {httpOnly: true, signed: true, maxAge: 86400000});
 
-        queryRes.cookie("_sid", split_token[2], {httpOnly: true, maxAge: 86400000, secure: true, sameSite: "None"});
+        queryRes.cookie("_sid", split_token[2], {httpOnly: true, maxAge: 86400000, secure: true, sameSite: "None", domain: ORIGIN_FRONTEND});
 
         // Javascript Enabled Cookie - Full JWT
         // queryRes.cookie("sid", token, {signed: true, maxAge: 86400000});
-        queryRes.cookie("sid", token, {httpOnly: false, maxAge: 86400000, secure: true, sameSite: "None"});
+        queryRes.cookie("sid", token, {httpOnly: false, maxAge: 86400000, secure: true, sameSite: "None", domain: ORIGIN_FRONTEND});
     }
 
     static validateCookies(queryReq) {
