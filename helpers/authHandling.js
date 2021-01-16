@@ -4,25 +4,18 @@ const { PRIVATE_KEY } = require("../config");
 
 
 class AuthHandling {
-
     static generateCookies(queryRes, queryData) {
         const token = jwt.sign(queryData, PRIVATE_KEY, { algorithm: 'RS256'});
         const split_token = token.split(".");
 
         // HTTP Only Cookie - JWT Signature Only
-        // queryRes.cookie("_sid", split_token[2], {httpOnly: true, maxAge: 86400000, secure: true, sameSite: "None", path: '/'});
-        queryRes.cookie("_sid", split_token[2], {httpOnly: true, maxAge: 86400000, sameSite: "None", path: '/'});
+        queryRes.cookie("_sid", split_token[2], {httpOnly: true, maxAge: 86400000, secure: true, sameSite: "None", path: '/'});
 
         // Javascript Enabled Cookie - Full JWT
-        // queryRes.cookie("sid", token, {httpOnly: false, maxAge: 86400000, secure: true, sameSite: "None", path: '/'});
-
-        queryRes.cookie("sid", token, {httpOnly: false, maxAge: 86400000, sameSite: "None", path: '/'});
+        queryRes.cookie("sid", token, {httpOnly: true, maxAge: 86400000, secure: true, sameSite: "None", path: '/'});
     }
 
     static validateCookies(queryReq) {
-        // const privateToken = queryReq.signedCookies._sid;
-        // const split_publicToken = queryReq.signedCookies.sid.split(".");
-
         const privateToken = queryReq.cookies._sid;
         const split_publicToken = queryReq.cookies.sid.split(".");
 
