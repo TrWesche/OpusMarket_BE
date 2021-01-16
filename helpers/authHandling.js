@@ -16,7 +16,7 @@ class AuthHandling {
 
         // Javascript Enabled Cookie - Full JWT
         // queryRes.cookie("sid", token, {signed: true, maxAge: 86400000});
-        queryRes.cookie("sid", token, {httpOnly: false, maxAge: 86400000, secure: true, sameSite: "None", domain: "herokuapp.com"});
+        queryRes.cookie("sid", token, {httpOnly: false, maxAge: 86400000, secure: true, sameSite: "None"});
     }
 
     static validateCookies(queryReq) {
