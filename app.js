@@ -16,7 +16,8 @@ const corsOptions = {
   optionsSuccessStatus: 200,
   methods: ['GET', 'PATCH', 'POST', 'DELETE'],
   preflightContinue: true,
-  credentials: true
+  credentials: true,
+  allowedHeaders: 'Content-Type,Authorization'
 }
 
 app.use(express.json());
