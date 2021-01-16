@@ -17,7 +17,7 @@ const corsOptions = {
   methods: ['GET', 'PATCH', 'POST', 'DELETE'],
   preflightContinue: true,
   credentials: true,
-  allowedHeaders: 'Content-Type,Authorization,Set-Cookie'
+  allowedHeaders: 'Content-Type,Authorization,Set-Cookie,X-Requested-With,Accept'
 }
 
 app.use(express.json());
