@@ -12,7 +12,8 @@ const app = express();
 const { COOKIE_SIG, ORIGIN_FRONTEND } = require("./config");
 const { authenticateJWT } = require("./middleware/auth");
 const corsOptions = {
-  origin: ORIGIN_FRONTEND,
+  // origin: ORIGIN_FRONTEND,
+  origin: true,
   optionsSuccessStatus: 200,
   methods: ['GET', 'HEAD', 'OPTIONS', 'PATCH', 'POST', 'DELETE'],
   preflightContinue: true,
