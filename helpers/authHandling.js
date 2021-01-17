@@ -10,9 +10,11 @@ class AuthHandling {
 
         // Javascript Enabled Cookie - Full JWT
         queryRes.cookie("sid", token, {httpOnly: false, maxAge: 86400000, secure: true, sameSite: "None", path: '/'});
+        // queryRes.cookie("sid", token, {httpOnly: false, maxAge: 86400000, path: '/'});
 
         // HTTP Only Cookie - JWT Signature Only
         queryRes.cookie("_sid", split_token[2], {httpOnly: true, maxAge: 86400000, secure: true, sameSite: "None", path: '/'});
+        // queryRes.cookie("_sid", split_token[2], {httpOnly: true, maxAge: 86400000, path: '/'});
     }
 
     static validateCookies(queryReq) {
