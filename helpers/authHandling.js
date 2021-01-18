@@ -9,11 +9,11 @@ class AuthHandling {
         const split_token = token.split(".");
 
         // Javascript Enabled Cookie - Full JWT
-        queryRes.cookie("sid", token, {httpOnly: false, maxAge: 86400000, secure: true, sameSite: "None", path: '/', domain: "twesche.com"});
+        queryRes.cookie("sid", token, {httpOnly: false, maxAge: 86400000, secure: true, sameSite: "None", path: '/', domain: ".twesche.com"});
         // queryRes.cookie("sid", token, {httpOnly: false, maxAge: 86400000, path: '/', domain: "twesche.com"});
 
         // HTTP Only Cookie - JWT Signature Only
-        queryRes.cookie("_sid", split_token[2], {httpOnly: true, maxAge: 86400000, secure: true, sameSite: "None", path: '/', domain: "twesche.com"});
+        queryRes.cookie("_sid", split_token[2], {httpOnly: true, maxAge: 86400000, secure: true, sameSite: "None", path: '/', domain: ".twesche.com"});
         // queryRes.cookie("_sid", split_token[2], {httpOnly: true, maxAge: 86400000, path: '/', domain: "twesche.com"});
     }
 

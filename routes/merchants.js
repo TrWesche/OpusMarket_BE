@@ -57,8 +57,8 @@ merchantRouter.post('/about', ensureIsMerchant, async (req, res, next) => {
         
 merchantRouter.get("/logout", async (req, res, next) => {
     try {
-        res.clearCookie('sid');
-        res.clearCookie('_sid');
+        res.clearCookie('sid', {domain: '.twesche.com'});
+        res.clearCookie('_sid', {domain: '.twesche.com'});
 
         return res.json({"message": "Logout successful."})    
     } catch (error) {
@@ -239,8 +239,8 @@ merchantRouter.delete("/delete", ensureIsMerchant, async (req, res, next) => {
             throw new ExpressError("Unable to delete target user account", 404);
         }
 
-        res.clearCookie('sid');
-        res.clearCookie('_sid');
+        res.clearCookie('sid', {domain: '.twesche.com'});
+        res.clearCookie('_sid', {domain: '.twesche.com'});
         return res.json({message: "Your account has been deleted."})
     } catch (error) {
         return next(error);
