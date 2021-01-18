@@ -102,8 +102,8 @@ userRouter.delete("/delete", ensureIsUser, async (req, res, next) => {
             throw new ExpressError("Unable to delete target user account", 404);
         }
 
-        res.clearCookie('sid');
-        res.clearCookie('_sid');
+        res.clearCookie('sid', {domain: 'twesche.com'});
+        res.clearCookie('_sid', {domain: 'twesche.com'});
         return res.json({message: "Your account has been deleted."})
     } catch (error) {
         return next(error);
@@ -119,8 +119,8 @@ userRouter.delete("/delete", ensureIsUser, async (req, res, next) => {
 
 userRouter.get("/logout", async (req, res, next) => {
     try {
-        res.clearCookie('sid');
-        res.clearCookie('_sid');
+        res.clearCookie('sid', {domain: 'twesche.com'});
+        res.clearCookie('_sid', {domain: 'twesche.com'});
 
         return res.json({"message": "Logout successful."})
     } catch (error) {
